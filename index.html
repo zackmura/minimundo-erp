@@ -11,14 +11,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="logo.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     
     <style>
         .app-version { position: absolute; bottom: 15px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; pointer-events: none;}
         .badge-versao { font-size: 0.65rem; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 6px; vertical-align: middle; margin-left: 4px; font-weight: 800;}
     </style>
 
-    <link rel="stylesheet" href="style.css?v=2.0.0">
+    <link rel="stylesheet" href="style.css?v=4.0.0">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
     <div class="login-box">
         <img src="logo.png" alt="Mini Mundo" onerror="this.src='logo.jpg'; this.onerror=null;">
         <h2>Acesso Restrito</h2>
-        <p>Área exclusiva da Diretoria</p>
+        <p>Diretoria e Vendedores</p>
         
         <input type="text" id="input-usuario" class="login-input" placeholder="Usuário" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-bottom:10px;">
         <input type="password" id="input-senha" class="login-input" placeholder="••••••••" autocomplete="off" onkeyup="verificarEnter(event)">
@@ -40,8 +40,8 @@
         
         <div class="brand-header">
             <img src="logo.png" alt="Mini Mundo 3D" onerror="this.src='logo.jpg'; this.onerror=null;">
-            <h1>Central de Automação</h1>
-            <p>IA, CRM & ERP <span id="versao-header" class="badge-versao">v2.0.0</span></p>
+            <h1 id="titulo-app">Central de Automação</h1>
+            <p><span id="subtitulo-app">IA, CRM & ERP</span> <span id="versao-header" class="badge-versao">v2.0.0</span></p>
             <p style="font-size: 0.75rem; margin-top: 5px; color: var(--primary);">Olá, <b id="nome-usuario-logado">Fernando</b>!</p>
             <button class="btn-logout" onclick="fazerLogout()">Sair</button>
         </div>
@@ -61,6 +61,18 @@
             <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos', '📋 Modelos')">📋 Modelos</button>
             <button id="btn-custos" class="tab-btn" onclick="switchTab('custos', '💳 Custos')">💳 Custos</button>
             <button id="btn-dashboard_erp" class="tab-btn" onclick="switchTab('dashboard_erp', '📊 Dashboard')">📊 Dashboard</button>
+
+            <div class="divisor-erp">Consignado & Vendedores</div>
+
+            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque', '📦 Estoque')">📦 Estoque</button>
+            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores', '🤝 Vendedores')">🤝 Vendedores</button>
+        </div>
+
+        <!-- MENU DO VENDEDOR (só aparece no login de vendedor) -->
+        <div class="tabs-container" id="menu-abas-vendedor">
+            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque', '📦 Meu Estoque')">📦 Meu Estoque</button>
+            <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')">💸 Meu Acerto</button>
+            <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')">🎁 Encomendas</button>
         </div>
 
         <div class="titulo-wrapper"><span id="titulo-modulo-ativo">📈 ANALYTICS</span></div>
@@ -76,6 +88,8 @@
                 <button onclick="switchTab('precificar', '➕ Precificar')"><span class="icon">➕</span> Precificar</button>
                 <button onclick="switchTab('modelos', '📋 Modelos')"><span class="icon">📋</span> Modelos</button>
                 <button onclick="switchTab('custos', '💳 Custos')"><span class="icon">💳</span> Custos</button>
+                <button onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span> Estoque</button>
+                <button onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span> Vendedores</button>
             </div>
         </div>
 
@@ -168,9 +182,27 @@
                 <button class="btn-magic btn-global" style="margin-top:0; padding:10px;" onclick="salvarPlataforma()">➕ Adicionar</button>
             </div>
             <div id="lista-plataformas" style="margin-bottom:25px;"></div>
+            <div class="section-title">🤝 Consignado (Vendedores)</div>
+            <div style="background:#fff; border:1px solid var(--border-color); padding:15px; border-radius:12px; margin-bottom:20px;">
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Markup do repasse sobre o custo (%)</label><input type="number" id="cfg-markup-repasse" placeholder="100"></div></div>
+                    <div class="col"><div class="input-group"><label>Margem sugerida ao vendedor (%)</label><input type="number" id="cfg-margem-vendedor" placeholder="50"></div></div>
+                </div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Alerta de estoque baixo (un)</label><input type="number" id="cfg-estoque-minimo" placeholder="2"></div></div>
+                    <div class="col"><div class="input-group"><label>Seu WhatsApp (avisos de pagamento)</label><input type="text" id="cfg-telefone-admin" placeholder="11999998888"></div></div>
+                </div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 10px; font-weight:600;">Ex.: custo R$ 10 com markup 100% → repasse sugerido R$ 20. Com margem 50% → preço sugerido ao vendedor R$ 30 (ele vende pelo preço que quiser).</p>
+                <button class="btn-magic btn-global" style="margin-top:0; padding:10px;" onclick="salvarConfigMM()">💾 Salvar Parâmetros</button>
+            </div>
             <div class="section-title">🔑 Chaves de Integração</div>
             <div class="input-group"><label>🧠 Chave Privada (Gemini):</label><input type="password" id="api-key" onchange="salvarChaves()"></div>
-            <div class="input-group"><label>📸 Chave de Backup (ImgBB):</label><input type="password" id="imgbb-key" onchange="salvarChaves()"></div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-5px; font-weight:600;">📸 O envio de fotos (OnionSys + backup ImgBB) agora usa as chaves guardadas no servidor.</p>
+            <div class="section-title">🔒 Segurança</div>
+            <div class="row" style="margin-bottom:20px;">
+                <div class="col"><button class="btn-limpar" style="width:100%; padding:12px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button></div>
+                <div class="col"><button class="btn-limpar" style="width:100%; padding:12px;" onclick="abrirLogs()">📜 Ver registro de atividades</button></div>
+            </div>
         </div>
 
         <div class="log-container" id="terminal">
@@ -201,6 +233,12 @@
             <div class="section-title">💰 Margens Sugeridas</div>
             <div class="markup-box"><p class="markup-title">Peças Simples / Reposição (2x a 3x)</p><p class="markup-preco" id="m-simples-preco">R$ 0,00 a R$ 0,00</p><p class="markup-lucro" id="m-simples-lucro">Lucro: R$ 0,00 a R$ 0,00</p></div>
             <div class="markup-box" style="background:#fffbeb; border-color:#fde68a;"><p class="markup-title" style="color:#b45309;">Decorativos / Colecionáveis (4x a 6x)</p><p class="markup-preco" id="m-decor-preco">R$ 0,00 a R$ 0,00</p><p class="markup-lucro" id="m-decor-lucro">Lucro: R$ 0,00 a R$ 0,00</p></div>
+            <div class="markup-box" style="background:#eff6ff; border-color:#bfdbfe;">
+                <p class="markup-title" style="color:#1d4ed8;">🤝 Preço de Repasse (Vendedores)</p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 8px; font-weight:600;">Sugestão: custo × <b id="m-repasse-fator">2,00</b> (ajuste o % em Ajustes). Pode digitar outro valor.</p>
+                <input type="text" id="v-repasse" class="mask-money" placeholder="R$ 0,00" style="font-size:1.2rem; font-weight:900; color:#1d4ed8;">
+                <p class="markup-lucro" id="m-repasse-lucro">Seu lucro por peça vendida pelo vendedor: R$ 0,00</p>
+            </div>
             <button id="btn-salvar-custo" class="btn-magic btn-global" onclick="salvarBancoModelos()">💾 Salvar Modelo no Banco</button>
         </div>
 
@@ -226,6 +264,7 @@
                 <div class="row"><div class="col"><label>Data da Venda</label><input type="date" id="venda-data"></div><div class="col"><label>Status</label><select id="venda-status" class="input-var" style="border-color:#bbf7d0 !important; background-color:#fff !important;"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div></div>
                 <div class="input-group"><label>Cliente</label><input type="text" id="venda-cliente" class="input-var" list="lista-clientes-venda" placeholder="Ex: João Silva" autocomplete="off" style="border-color:#bbf7d0 !important; background-color:#fff !important;"><datalist id="lista-clientes-venda"></datalist></div>
                 <div class="input-group"><label>Produto Vendido (Custo Automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Ex: Placa profissões" autocomplete="off" style="border-color:#bbf7d0 !important; background-color:#fff !important;" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist></div>
+                <label id="box-baixa-atelie" class="check-estoque" style="display:none;"><input type="checkbox" id="venda-baixa-atelie"> 📦 Tirar do estoque do Ateliê (<span id="venda-atelie-qtd">0</span> disponíveis) — desmarque se for sob encomenda</label>
                 <div class="row">
                     <div class="col">
                         <label>Plataforma</label>
@@ -303,6 +342,7 @@
             <div class="resumo-box" style="background:#1e293b; padding:25px 15px;">
                 <div style="text-align:center; margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;"><h3 style="color:#94a3b8; font-size:0.9rem; margin-bottom:5px;">BALANÇO DO CAIXA REAL</h3><p style="color:#64748b; font-size:0.7rem; margin-top:0;">Receitas Pagas menos Despesas Pagas</p><span id="dash-balanco-valor" style="font-size:2.4rem; color:#10b981; font-weight:900;">R$ 0,00</span></div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Entradas (Receitas)</h3><span id="dash-receita-valor" style="font-size:1.2rem; color:#38bdf8; font-weight:900;">R$ 0,00</span></div><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Saídas (Despesas)</h3><span id="dash-despesa-valor" style="font-size:1.2rem; color:#ef4444; font-weight:900;">R$ 0,00</span></div></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">🤝 Repasses Recebidos</h3><p style="color:#64748b; font-size:0.65rem; margin:0 0 4px;">(já somados nas entradas)</p><span id="dash-repasses-valor" style="font-size:1.2rem; color:#a78bfa; font-weight:900;">R$ 0,00</span></div><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">⏳ A Receber de Vendedores</h3><p style="color:#64748b; font-size:0.65rem; margin:0 0 4px;">(total em aberto hoje)</p><span id="dash-areceber-vend-valor" style="font-size:1.2rem; color:#f59e0b; font-weight:900;">R$ 0,00</span></div></div>
             </div>
             <div class="filtros-box" style="margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><label style="margin:0; color:var(--brand-dark);">Filtros do Dashboard:</label><button class="btn-limpar" onclick="limparFiltrosDashboardERP()">🧹 Limpar Tudo</button></div>
@@ -315,12 +355,87 @@
                 <div class="filtros-box" style="margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05);"><div class="section-title" style="margin-top:0; color:#1e3a8a; border-left-color:#3b82f6;">📱 Plataformas</div><canvas id="chartPlataformas"></canvas></div>
             </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- 📦 ESTOQUE DO ATELIÊ + PEÇAS COM VENDEDORES -->
+        <!-- ========================================== -->
+        <div id="tab-estoque" class="tab-content">
+            <div id="estoque-resumo"></div>
+            <div class="row" style="margin-bottom:12px;">
+                <div class="col"><button class="btn-magic btn-global" style="margin-top:0;" onclick="abrirProducao()">🖨️ Registrar Produção</button></div>
+                <div class="col"><button class="btn-magic" style="margin-top:0;" onclick="abrirMala()">🧳 Enviar Mala</button></div>
+            </div>
+            <button class="btn-limpar" style="width:100%; margin-bottom:15px; padding:12px;" onclick="abrirMovimentos()">📜 Histórico de movimentações</button>
+            <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
+            <label class="check-estoque" style="margin-bottom:12px;"><input type="checkbox" id="estoque-so-com-pecas" onchange="renderizarEstoque()"> Mostrar só produtos com peças</label>
+            <div id="loading-estoque" class="loading-mm">⏳ Carregando estoque...</div>
+            <div id="lista-estoque"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 🤝 VENDEDORES, ACERTOS E ENCOMENDAS         -->
+        <!-- ========================================== -->
+        <div id="tab-vendedores" class="tab-content">
+            <div id="vendedores-resumo"></div>
+            <details class="box-novo">
+                <summary>➕ Cadastrar novo vendedor</summary>
+                <div class="row" style="margin-top:12px;">
+                    <div class="col"><div class="input-group"><label>Usuário (login)</label><input type="text" id="nv-usuario" placeholder="Ex: Kamila" autocomplete="off"></div></div>
+                    <div class="col"><div class="input-group"><label>Senha inicial</label><input type="text" id="nv-senha" placeholder="Mín. 4 caracteres" autocomplete="off"></div></div>
+                </div>
+                <div class="input-group"><label>WhatsApp</label><input type="text" id="nv-telefone" placeholder="11999998888"></div>
+                <button class="btn-magic btn-global" style="margin-top:0; padding:12px;" onclick="salvarNovoVendedor()">🤝 Cadastrar Vendedor</button>
+            </details>
+            <div class="section-title">👥 Equipe</div>
+            <div id="loading-vendedores" class="loading-mm">⏳ Carregando equipe...</div>
+            <div id="lista-vendedores"></div>
+            <div class="section-title">🎁 Encomendas dos Vendedores</div>
+            <div id="lista-encomendas-admin"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 🧑‍💼 TELAS DO VENDEDOR                         -->
+        <!-- ========================================== -->
+        <div id="tab-v_estoque" class="tab-content">
+            <div id="v-resumo"></div>
+            <input type="text" id="v-busca-estoque" class="search-bar" placeholder="🔍 Buscar peça..." onkeyup="renderizarVendedorEstoque()">
+            <div id="loading-v" class="loading-mm">⏳ Carregando suas peças...</div>
+            <div id="v-lista-estoque"></div>
+            <div id="v-vitrine"></div>
+            <button class="btn-limpar" style="width:100%; margin-top:20px; padding:12px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
+        </div>
+        <div id="tab-v_acerto" class="tab-content">
+            <div id="v-acerto"></div>
+        </div>
+        <div id="tab-v_encomendas" class="tab-content">
+            <div style="background:#f0fdf4; padding:20px; border-radius:16px; border:2px solid #bbf7d0; margin-bottom:25px;">
+                <div class="section-title" style="margin-top:0; color:#047857; border-left-color:#10b981;">🎁 Pedir Peça para a Fábrica</div>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin:-5px 0 12px; font-weight:600;">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
+                <div class="input-group"><label>Produto (opcional)</label><select id="ve-produto"></select></div>
+                <div class="input-group"><label>Descrição / Personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="ve-qtd" value="1" min="1"></div></div>
+                    <div class="col"><div class="input-group"><label>Para quando? (opcional)</label><input type="date" id="ve-prazo"></div></div>
+                </div>
+                <button class="btn-magic btn-global" id="btn-ve-salvar" style="margin-top:0;" onclick="salvarEncomendaVendedor()">📨 Enviar Pedido</button>
+            </div>
+            <div class="section-title">📋 Meus Pedidos</div>
+            <div id="v-lista-encomendas"></div>
+        </div>
     </div>
 </div>
 
 <!-- ========================================== -->
 <!-- TODOS OS MODAIS DO SISTEMA BLINDADOS       -->
 <!-- ========================================== -->
+
+<!-- MODAL GENÉRICO DO CONSIGNADO (conteúdo montado pelo consignado.js) -->
+<div id="modal-mm" class="modal-overlay">
+    <div class="modal-box" id="modal-mm-box">
+        <button class="btn-fechar-modal" onclick="fecharModalMM()">×</button>
+        <div id="modal-mm-conteudo"></div>
+    </div>
+</div>
 
 <!-- MODAL ALERTA GERAL -->
 <div id="custom-modal" class="modal-overlay-alert">
@@ -497,7 +612,7 @@
 
 <button class="fab-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Voltar ao Topo">⬆️</button>
 
-<div class="bottom-nav">
+<div class="bottom-nav" id="bottom-nav-admin">
     <button id="nav-dashboard_erp" class="bottom-nav-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span> Dashboard</button>
     <button id="nav-vendas" class="bottom-nav-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span> Vendas</button>
     <button id="nav-imas" class="bottom-nav-btn" onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="icon">🧲</span> Ímãs</button>
@@ -505,7 +620,15 @@
     <button id="nav-menu_mobile" class="bottom-nav-btn" onclick="switchTab('menu_mobile', 'Navegação')"><span class="icon">☰</span> Menu</button>
 </div>
 
+<div class="bottom-nav" id="bottom-nav-vendedor">
+    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="icon">📦</span> Estoque</button>
+    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="icon">💸</span> Acerto</button>
+    <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="icon">🎁</span> Pedidos</button>
+</div>
+
 <!-- PUXANDO O ARQUIVO NOVO PARA FUGIR DO CACHE -->
-<script src="app.js"></script>
+<script src="app.js?v=4.0.0"></script>
+<script src="consignado.js?v=4.0.0"></script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
