@@ -79,7 +79,7 @@
 
         <div class="sb-rodape">
             <div class="sb-user"><span class="avatar" id="avatar-usuario">?</span><div><b id="nome-usuario-logado">—</b><small id="cargo-usuario">Diretoria</small></div></div>
-            <div class="sb-acoes"><span id="versao-header" class="badge-versao">v4</span><button class="btn-sair" onclick="fazerLogout()">Sair</button></div>
+            <div class="sb-acoes"><span id="versao-header" class="badge-versao">v4</span><button class="btn-sair" onclick="fazerLogout()">Sair</button><button class="btn-voltar" onclick="sairVisaoVendedor()">⬅️ Voltar</button></div>
         </div>
     </aside>
 
@@ -94,6 +94,13 @@
         </header>
 
         <div class="area">
+
+        <!-- 👀 Faixa do modo "ver como o vendedor" (só aparece pro Admin) -->
+        <div class="faixa-ver-como">
+            <span class="fvc-icone">👀</span>
+            <div class="fvc-texto"><b>Você está vendo o painel de <span id="ver-como-nome">—</span></b><small>É exatamente o que ele(a) vê. O que você fizer aqui fica registrado como lançado por você.</small></div>
+            <button class="btn-voltar" onclick="sairVisaoVendedor()">⬅️ Voltar ao meu painel</button>
+        </div>
 
         <!-- ABA MENU (celular) -->
         <div id="tab-menu_mobile" class="tab-content">
@@ -174,7 +181,8 @@
                     <div class="col"><label>Status</label><select id="venda-status" class="input-var"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div>
                 </div>
                 <div class="input-group"><label>Cliente</label><input type="text" id="venda-cliente" class="input-var" list="lista-clientes-venda" placeholder="Ex: João Silva" autocomplete="off"><datalist id="lista-clientes-venda"></datalist></div>
-                <div class="input-group"><label>Produto vendido (custo automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Ex: Placa profissões" autocomplete="off" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist></div>
+                <div class="input-group"><label>Produto vendido (custo automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Toque para ver os produtos com estoque" autocomplete="off" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist><datalist id="lista-produtos-todos"></datalist>
+                    <div class="linha-opcao"><label class="chave"><input type="checkbox" id="venda-mostrar-sem-estoque" onchange="montarListaProdutosVenda()"> Mostrar também produtos sem estoque</label><span id="venda-info-lista" class="info-lista"></span></div></div>
                 <label id="box-baixa-atelie" class="check-estoque" style="display:none;"><input type="checkbox" id="venda-baixa-atelie"> 📦 Tirar do estoque do Ateliê (<span id="venda-atelie-qtd">0</span> disponíveis) — desmarque se for sob encomenda</label>
                 <div class="row">
                     <div class="col"><label>Plataforma</label><select id="venda-plataforma" class="input-var" onchange="calcularSugestao()"></select></div>
@@ -310,7 +318,7 @@
             </div>
             <div class="filtros-box" style="padding:14px;">
                 <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
-                <label class="check-estoque" style="margin:0;"><input type="checkbox" id="estoque-so-com-pecas" onchange="renderizarEstoque()"> Mostrar só produtos com peças</label>
+                <div class="linha-opcao" style="margin:0;"><label class="chave"><input type="checkbox" id="estoque-mostrar-sem" onchange="renderizarEstoque()"> Mostrar também produtos sem estoque</label><span id="estoque-info-lista" class="info-lista"></span></div>
             </div>
             <div id="loading-estoque" class="loading-mm">⏳ Carregando estoque...</div>
             <div id="lista-estoque"></div>
@@ -500,7 +508,7 @@
             <div id="loading-v" class="loading-mm">⏳ Carregando suas peças...</div>
             <div id="v-lista-estoque"></div>
             <div id="v-vitrine"></div>
-            <button class="btn-magic btn-secundario" style="margin-top:20px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
+            <button class="btn-magic btn-secundario esconde-vendo-como" style="margin-top:20px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
         </div>
         <div id="tab-v_acerto" class="tab-content">
             <div id="v-acerto"></div>
@@ -536,31 +544,45 @@
 <!-- MODAL GENÉRICO DO CONSIGNADO (conteúdo montado pelo consignado.js) -->
 <div id="modal-mm" class="modal-overlay">
     <div class="modal-box" id="modal-mm-box">
-        <button class="btn-fechar-modal" onclick="fecharModalMM()">×</button>
-        <div id="modal-mm-conteudo"></div>
+        <div class="modal-cabeca" id="modal-mm-cabeca"><h3 class="modal-title" id="modal-mm-titulo"></h3><button class="btn-fechar-modal" onclick="fecharModalMM()" title="Fechar">×</button></div>
+        <div class="modal-corpo" id="modal-mm-conteudo"></div>
     </div>
 </div>
 
 <!-- MODAL ALERTA GERAL -->
 <div id="custom-modal" class="modal-overlay-alert">
     <div class="modal-box-alert">
-        <span class="modal-icon-alert" id="modal-icone-alert">✅</span>
+        <span class="modal-icon-alert" id="modal-icone-alert"></span>
         <h3 class="modal-title-alert" id="modal-titulo-alert">Sucesso</h3>
         <p class="modal-text-alert" id="modal-texto-alert">Operação realizada com sucesso!</p>
         <button id="btn-modal-ok" class="btn-modal-ok" onclick="fecharAlerta()">Certo, entendi</button>
     </div>
 </div>
 
+<!-- JANELA DE CONFIRMAÇÃO / PERGUNTA (no lugar das caixinhas do navegador) -->
+<div id="modal-pergunta" class="modal-overlay-alert" onclick="if(event.target===this) responderPergunta(false)">
+    <div class="modal-box-alert">
+        <span class="modal-icon-alert" id="pergunta-icone"></span>
+        <h3 class="modal-title-alert" id="pergunta-titulo"></h3>
+        <div class="modal-text-alert" id="pergunta-texto"></div>
+        <div id="pergunta-campo" class="pergunta-campo"><input type="text" id="pergunta-input" autocomplete="off"><small id="pergunta-erro"></small></div>
+        <div class="modal-botoes">
+            <button class="btn-modal-cancel" id="pergunta-cancelar" onclick="responderPergunta(false)">Cancelar</button>
+            <button class="btn-modal-confirm" id="pergunta-ok" onclick="responderPergunta(true)">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL NOME INDIVIDUAL (PDF) -->
 <div id="modal-nome-recibo" class="modal-overlay-alert">
     <div class="modal-box-alert">
-        <button class="btn-fechar-modal" onclick="$('modal-nome-recibo').style.display='none'">×</button>
+        <span class="modal-icon-alert">📄</span>
         <h3 class="modal-title-alert">Nome no recibo</h3>
         <p class="modal-text-alert">Como deseja que o nome do cliente apareça?</p>
         <input type="hidden" id="recibo-linha-atual">
         <input type="hidden" id="recibo-tipo-atual">
         <input type="text" id="input-nome-recibo" style="margin-bottom:16px;">
-        <div style="display:flex; gap:10px;">
+        <div class="modal-botoes">
             <button class="btn-modal-cancel" onclick="$('modal-nome-recibo').style.display='none'">Cancelar</button>
             <button class="btn-modal-confirm" onclick="executarDocumentoUnico()">Continuar</button>
         </div>
@@ -569,9 +591,9 @@
 
 <!-- MODAL LOTE PDF -->
 <div id="modal-acoes-lote" class="modal-overlay">
-    <div class="modal-box" style="display:flex; flex-direction:column;">
-        <button class="btn-fechar-modal" onclick="$('modal-acoes-lote').style.display='none'">×</button>
-        <h3 class="modal-title">📦 Cobranças e recibos em lote</h3>
+    <div class="modal-box">
+        <div class="modal-cabeca"><h3 class="modal-title">📦 Cobranças e recibos em lote</h3><button class="btn-fechar-modal" onclick="$('modal-acoes-lote').style.display='none'" title="Fechar">×</button></div>
+        <div class="modal-corpo">
         <div class="seg">
             <button id="btn-lote-pendentes" class="active" onclick="carregarLote('Pendente')">🟡 Cobrar</button>
             <button id="btn-lote-pagos" onclick="carregarLote('Pago')">🟢 Recibos</button>
@@ -581,14 +603,15 @@
         <label>Pedidos do cliente</label>
         <div id="lista-acoes-lote" class="scroll-container" style="flex:1; max-height:35vh; margin-bottom:14px;"></div>
         <button id="btn-gerar-pdf-lote" class="btn-magic btn-global" style="margin:0;" onclick="gerarPDFLote(loteAtualTipo)">📄 Gerar PDF</button>
+        </div>
     </div>
 </div>
 
 <!-- MODAL EDITAR ÍMÃ -->
 <div id="modal-editar-ima" class="modal-overlay">
     <div class="modal-box">
-        <button class="btn-fechar-modal" onclick="$('modal-editar-ima').style.display='none'">×</button>
-        <h3 class="modal-title">✏️ Editar ímã</h3>
+        <div class="modal-cabeca"><h3 class="modal-title">✏️ Editar ímã</h3><button class="btn-fechar-modal" onclick="$('modal-editar-ima').style.display='none'" title="Fechar">×</button></div>
+        <div class="modal-corpo">
         <input type="hidden" id="edit-ima-linha">
         <input type="hidden" id="edit-ima-foto-antiga">
         <input type="hidden" id="edit-ima-foto-prod-antiga">
@@ -603,15 +626,16 @@
             <button id="btn-excluir-ima-modal" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoIma()">🗑️ Excluir</button>
             <button id="btn-salvar-edicao-ima" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoIma()">💾 Atualizar</button>
         </div>
+        </div>
     </div>
 </div>
 
 <div id="modal-confirmar-exclusao-ima" class="modal-overlay-alert">
     <div class="modal-box-alert">
-        <span class="modal-icon-alert">🗑️</span>
-        <h3 class="modal-title-alert" style="color:var(--vermelho);">Excluir ímã?</h3>
+        <span class="modal-icon-alert erro">🗑️</span>
+        <h3 class="modal-title-alert">Excluir ímã?</h3>
         <p class="modal-text-alert">Apagar o ímã de <b id="nome-ima-excluir"></b>?<br>O link do cliente vai parar de funcionar na mesma hora.</p>
-        <div style="display:flex; gap:10px;">
+        <div class="modal-botoes">
             <button class="btn-modal-cancel" onclick="$('modal-confirmar-exclusao-ima').style.display='none'">Cancelar</button>
             <button id="btn-executar-exclusao-ima" class="btn-modal-confirm perigo">🗑️ Apagar</button>
         </div>
@@ -621,8 +645,8 @@
 <!-- MODAL EDITAR PRODUTO DO CATÁLOGO -->
 <div id="modal-editar-produto" class="modal-overlay">
     <div class="modal-box">
-        <button class="btn-fechar-modal" onclick="$('modal-editar-produto').style.display='none'">×</button>
-        <h3 class="modal-title">✏️ Editar produto</h3>
+        <div class="modal-cabeca"><h3 class="modal-title">✏️ Editar produto</h3><button class="btn-fechar-modal" onclick="$('modal-editar-produto').style.display='none'" title="Fechar">×</button></div>
+        <div class="modal-corpo">
         <input type="hidden" id="edit-prod-linha">
         <input type="hidden" id="edit-prod-foto-antiga">
         <div class="foto-atual-box"><img id="edit-prod-img-preview" src="" alt=""><span>Novas fotos (vazio = mantém)</span></div>
@@ -638,14 +662,15 @@
             <button id="btn-excluir-prod" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoProduto()">🗑️ Excluir</button>
             <button id="btn-salvar-edicao-prod" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoProduto()">💾 Salvar</button>
         </div>
+        </div>
     </div>
 </div>
 
 <!-- MODAL EDITAR ANÚNCIO -->
 <div id="modal-editar-anuncio" class="modal-overlay">
     <div class="modal-box">
-        <button class="btn-fechar-modal" onclick="$('modal-editar-anuncio').style.display='none'">×</button>
-        <h3 class="modal-title">💼 Editar anúncio</h3>
+        <div class="modal-cabeca"><h3 class="modal-title">💼 Editar anúncio</h3><button class="btn-fechar-modal" onclick="$('modal-editar-anuncio').style.display='none'" title="Fechar">×</button></div>
+        <div class="modal-corpo">
         <input type="hidden" id="edit-ad-linha"><input type="hidden" id="edit-ad-foto-antiga"><input type="hidden" id="edit-ad-logo-antiga">
         <div class="foto-atual-box"><img id="edit-ad-logo-preview" src="" alt="" style="border-radius:50%;"><img id="edit-ad-banner-preview" src="" alt="" style="width:80px;"><span>Vazio = mantém</span></div>
         <div class="input-group"><label>Empresa</label><input type="text" id="edit-ad-empresa" disabled></div>
@@ -666,16 +691,17 @@
             <button id="btn-excluir-ad" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoAnuncio()">🗑️ Excluir</button>
             <button id="btn-salvar-edicao-ad" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoAnuncio()">💾 Salvar</button>
         </div>
+        </div>
     </div>
 </div>
 
 <!-- MODAIS DE VENDAS -->
 <div id="custom-confirm-modal" class="modal-overlay-alert">
     <div class="modal-box-alert">
-        <span class="modal-icon-alert">💸</span>
+        <span class="modal-icon-alert ok">💸</span>
         <h3 class="modal-title-alert">Confirmar pagamento</h3>
         <p class="modal-text-alert">Marcar esta venda como <b>PAGA</b>?</p>
-        <div style="display:flex; gap:10px;">
+        <div class="modal-botoes">
             <button class="btn-modal-cancel" onclick="fecharConfirmacao()">Cancelar</button>
             <button class="btn-modal-confirm" onclick="executarPagamentoVenda()">✅ Sim, recebi</button>
         </div>
@@ -684,10 +710,10 @@
 
 <div id="custom-delete-modal" class="modal-overlay-alert">
     <div class="modal-box-alert">
-        <span class="modal-icon-alert">🗑️</span>
-        <h3 class="modal-title-alert" style="color:var(--vermelho);">Excluir venda?</h3>
+        <span class="modal-icon-alert erro">🗑️</span>
+        <h3 class="modal-title-alert">Excluir venda?</h3>
         <p class="modal-text-alert">Esta ação <b>não pode ser desfeita</b>. Se a venda tirou peça do Ateliê, a peça volta para o estoque.</p>
-        <div style="display:flex; gap:10px;">
+        <div class="modal-botoes">
             <button class="btn-modal-cancel" onclick="fecharExclusao()">Cancelar</button>
             <button class="btn-modal-confirm perigo" onclick="executarExclusaoVenda()">🗑️ Apagar</button>
         </div>
@@ -696,21 +722,22 @@
 
 <div id="custom-edit-venda-modal" class="modal-overlay">
     <div class="modal-box">
-        <button class="btn-fechar-modal" onclick="fecharEditarVenda()">×</button>
-        <h3 class="modal-title">✏️ Editar venda</h3>
+        <div class="modal-cabeca"><h3 class="modal-title">✏️ Editar venda</h3><button class="btn-fechar-modal" onclick="fecharEditarVenda()" title="Fechar">×</button></div>
+        <div class="modal-corpo">
         <input type="hidden" id="edit-venda-linha">
         <div class="row">
             <div class="col"><label>Data</label><input type="date" id="edit-venda-data"></div>
             <div class="col"><label>Status</label><select id="edit-venda-status"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div>
         </div>
         <div class="input-group"><label>Cliente</label><input type="text" id="edit-venda-cliente" list="lista-clientes-venda" autocomplete="off"></div>
-        <div class="input-group"><label>Produto</label><input type="text" id="edit-venda-produto" list="lista-produtos-venda" autocomplete="off"></div>
+        <div class="input-group"><label>Produto</label><input type="text" id="edit-venda-produto" list="lista-produtos-todos" autocomplete="off"></div>
         <div class="row">
             <div class="col"><label>Plataforma</label><input type="text" id="edit-venda-plataforma" list="lista-plataformas-venda" autocomplete="off"></div>
             <div class="col"><label>Qtd</label><input type="number" id="edit-venda-qtd" min="1"></div>
         </div>
         <div class="input-group"><label>Valor total</label><input type="text" id="edit-venda-valor" class="mask-money"></div>
         <button class="btn-magic btn-global" id="btn-salvar-edicao-venda" onclick="salvarEdicaoVenda()">💾 Salvar alterações</button>
+        </div>
     </div>
 </div>
 
@@ -731,8 +758,8 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="icon">🎁</span>Pedidos</button>
 </nav>
 
-<script src="app.js?v=4.1.0"></script>
-<script src="consignado.js?v=4.1.0"></script>
+<script src="app.js?v=4.2.0"></script>
+<script src="consignado.js?v=4.2.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

@@ -8,15 +8,26 @@
 window.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 window.painelEstoque = null; window.painelVendedor = null; window.vendAberto = null; window.configMM = {};
 
-// POST com o crachá; dá erro amigável se o servidor recusar
+// POST com o crachá; dá erro amigável se o servidor recusar.
+// No modo "ver como o vendedor", as telas do vendedor vão com o id dele (o servidor só aceita isso do Admin).
+window.ACOES_DA_TELA_VENDEDOR = ['meu_painel', 'dar_baixa', 'salvar_encomenda'];
 window.apiAcao = async function(acao, dados = {}) {
+    if (window.vendedorVisto && window.ACOES_DA_TELA_VENDEDOR.includes(acao) && !dados.vendedor_id) dados = Object.assign({ vendedor_id: window.vendedorVisto.id }, dados);
     const r = await window.apiFetch(API_PRECIFICACAO, { method: "POST", body: JSON.stringify(Object.assign({ acao }, dados)) });
     const res = await r.json();
     if (!res.sucesso) throw new Error(res.erro || "Falha na operação.");
     return res;
 };
 
-window.abrirModalMM = function(html) { window.$('modal-mm-conteudo').innerHTML = html; window.$('modal-mm').style.display = 'flex'; window.$('modal-mm-box').scrollTop = 0; };
+// O primeiro <h3 class="modal-title"> do conteúdo vira o cabeçalho fixo da janela (junto do ×)
+window.preencherModalMM = function(html) {
+    const corpo = window.$('modal-mm-conteudo'); corpo.innerHTML = html;
+    const t = corpo.querySelector(':scope > .modal-title');
+    window.$('modal-mm-titulo').innerHTML = t ? t.innerHTML : '';
+    if (t) t.remove();
+    window.$('modal-mm-cabeca').classList.toggle('sem-titulo', !t);
+};
+window.abrirModalMM = function(html) { window.preencherModalMM(html); window.$('modal-mm').style.display = 'flex'; window.$('modal-mm-conteudo').scrollTop = 0; };
 window.fecharModalMM = function() { window.$('modal-mm').style.display = 'none'; window.$('modal-mm-conteudo').innerHTML = ''; };
 
 window.fmtDataHora = function(s) { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/); if (!m) return String(s || ''); return `${m[3]}/${m[2]}/${m[1].slice(2)}${m[4] ? ` ${m[4]}:${m[5]}` : ''}`; };
@@ -27,8 +38,8 @@ window.linkZap = function(tel, texto) {
 window.linkVitrine = codigo => new URL('vitrine.html?v=' + encodeURIComponent(codigo), location.href).href;
 window.linkSistema = () => location.href.split('#')[0].split('?')[0];
 window.copiarTexto = function(txt, msg) {
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => window.mostrarAlerta("Copiado!", msg || "Copiado!", "success")).catch(() => prompt("Copie:", txt));
-    else prompt("Copie:", txt);
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => window.mostrarAlerta("Copiado!", msg || "Copiado!", "success")).catch(() => window.mostrarParaCopiar(txt));
+    else window.mostrarParaCopiar(txt);
 };
 window.imgProduto = (foto, estilo = '') => `<img src="${window.esc(foto || 'logo.png')}" class="mm-foto" style="${estilo}" onerror="this.src='logo.png'">`;
 
@@ -93,7 +104,7 @@ window.salvarEdicaoModelo = async function(linha) {
 };
 window.excluirModelo = async function(linha) {
     const p = window.arrayBancoCustos.find(x => x.linha === linha); if (!p) return;
-    if (!confirm(`EXCLUIR o modelo "${p.modelo}"?\n\nAs vendas antigas continuam no histórico. Se só não quer mais vender, prefira marcar como Inativo.`)) return;
+    if (!await window.confirmarMM({ tipo: 'perigo', icone: '🗑️', titulo: `Excluir "${p.modelo}"?`, texto: "As vendas antigas continuam no histórico.\nSe só não quer mais vender, prefira marcar como Inativo.", ok: 'Excluir modelo' })) return;
     try { await window.apiAcao("excluir_registro", { aba: "CustosProdutos", linha }); window.fecharModalMM(); window.mostrarAlerta("Excluído", "Modelo removido.", "success"); window.carregarBancoDeCustos(); }
     catch (e) { window.mostrarAlerta("Não deu", e.message, "warning"); }
 };
@@ -128,13 +139,18 @@ window.renderizarEstoque = function() {
         </div>
         ${semRepasse ? `<div class="mm-alerta">⚠️ ${semRepasse} modelo(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. Defina em <b>Modelos</b> (✏️).</div>` : ''}
         ${baixos ? `<div class="mm-alerta">🔔 ${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</div>` : ''}`;
-    const t = (window.$('busca-estoque').value || '').toLowerCase(), soComPecas = window.$('estoque-so-com-pecas').checked;
-    const lista = P.produtos.filter(p => {
-        const total = P.estoque.filter(e => e.produto_id === p.id).reduce((s, e) => s + e.qtd, 0);
-        if (soComPecas && total <= 0) return false; if (!p.ativo && total <= 0) return false;
-        return !t || p.nome.toLowerCase().includes(t);
-    });
-    if (!lista.length) { window.$('lista-estoque').innerHTML = `<p class="mm-vazio">Nenhum produto. Cadastre modelos em <b>Precificar</b>.</p>`; return; }
+    // Por padrão só aparece o que tem peça (no Ateliê ou com vendedor); a chave mostra o resto
+    const t = (window.$('busca-estoque').value || '').toLowerCase(), mostrarSem = window.$('estoque-mostrar-sem').checked;
+    const totalDe = pid => P.estoque.filter(e => e.produto_id === pid).reduce((s, e) => s + e.qtd, 0);
+    const visiveis = P.produtos.filter(p => p.ativo || totalDe(p.id) > 0), comPecas = visiveis.filter(p => totalDe(p.id) > 0);
+    const lista = (mostrarSem ? visiveis : comPecas).filter(p => !t || p.nome.toLowerCase().includes(t));
+    window.$('estoque-info-lista').innerText = mostrarSem ? `${visiveis.length} produtos` : `${comPecas.length} de ${visiveis.length} com peças`;
+    if (!lista.length) {
+        window.$('lista-estoque').innerHTML = !visiveis.length ? `<p class="mm-vazio">Nenhum produto. Cadastre modelos em <b>Precificar</b>.</p>`
+            : t ? `<p class="mm-vazio">Nada encontrado para "${window.esc(t)}".${mostrarSem ? '' : ' Ligue <b>Mostrar também produtos sem estoque</b> para procurar em todos.'}</p>`
+            : `<p class="mm-vazio">Nenhuma peça em estoque agora. Use <b>🖨️ Registrar produção</b> ou ligue <b>Mostrar também produtos sem estoque</b>.</p>`;
+        return;
+    }
     window.$('lista-estoque').innerHTML = lista.map(p => {
         const at = window.qtdEm(p.id, 0);
         const comEles = P.estoque.filter(e => e.produto_id === p.id && e.vendedor_id > 0 && e.qtd > 0);
@@ -179,50 +195,83 @@ window.confirmarAjusteAtelie = async function(pid) {
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); b.disabled = false; }
 };
 
-// 🧳 MALA: escolhe o vendedor uma vez e marca as quantidades de vários produtos
+// 🧳 MALA: escolhe o vendedor uma vez e marca as quantidades de vários produtos.
+// Por padrão lista só o que tem peça no Ateliê. Ligando "sem estoque", dá pra mandar peça que ainda
+// não foi lançada: a diferença entra como produção logo antes do envio (fica no histórico).
 window.abrirMala = function(vidPre) {
     const P = window.painelEstoque; if (!P) return;
     const vends = P.vendedores.filter(v => v.ativo);
     if (!vends.length) return window.mostrarAlerta("Atenção", "Cadastre um vendedor primeiro (aba Vendedores).", "warning");
-    const prods = P.produtos.filter(p => p.ativo && window.qtdEm(p.id, 0) > 0);
-    if (!prods.length) return window.mostrarAlerta("Ateliê vazio", "Não há peças no Ateliê. Registre uma produção primeiro.", "warning");
-    window.abrirModalMM(`<h3 class="modal-title">🧳 Enviar Mala</h3>
+    const prods = P.produtos.filter(p => p.ativo);
+    if (!prods.length) return window.mostrarAlerta("Atenção", "Cadastre um modelo em Precificar primeiro.", "warning");
+    const atelieVazio = !prods.some(p => window.qtdEm(p.id, 0) > 0);
+    window.abrirModalMM(`<h3 class="modal-title">🧳 Enviar mala</h3>
         <div class="input-group"><label>Para qual vendedor?</label><select id="mala-vendedor" onchange="window.atualizarMala()">${vends.map(v => `<option value="${v.id}" ${v.id === vidPre ? 'selected' : ''}>${window.esc(v.nome)}</option>`).join('')}</select></div>
-        <input type="text" id="mala-busca" class="search-bar" placeholder="🔍 Filtrar produtos..." onkeyup="window.filtrarMala()">
-        <div id="mala-lista" class="scroll-container" style="max-height:40vh;">${prods.map(p => `
-            <div class="mm-linha" data-nome="${window.esc(p.nome.toLowerCase())}"><span class="mm-nome">${window.esc(p.nome)}<span class="mm-sub">🏠 Ateliê: ${window.qtdEm(p.id, 0)} · <span id="mala-rep-${p.id}"></span></span></span>
-            <input type="number" class="mala-qtd" data-pid="${p.id}" min="0" max="${window.qtdEm(p.id, 0)}" value="0" oninput="window.atualizarMalaTotal()"></div>`).join('')}</div>
+        ${atelieVazio ? '<div class="mm-alerta">🏠 O Ateliê está sem peças, então estou mostrando todos os produtos. O que você mandar entra como produção na hora do envio.</div>' : ''}
+        <input type="text" id="mala-busca" class="search-bar" placeholder="🔍 Filtrar produtos..." onkeyup="window.filtrarMala()" style="margin-bottom:10px;">
+        <div class="linha-opcao"><label class="chave"><input type="checkbox" id="mala-mostrar-sem" onchange="window.filtrarMala()" ${atelieVazio ? 'checked' : ''}> Mostrar também sem estoque</label><span id="mala-info" class="info-lista"></span></div>
+        <div id="mala-lista" class="lista-escolha">${prods.map(p => { const at = window.qtdEm(p.id, 0); return `
+            <div class="mm-linha${at > 0 ? '' : ' sem-estoque'}" data-nome="${window.esc(p.nome.toLowerCase())}" data-atelie="${at}">${window.imgProduto(p.foto)}<span class="mm-nome">${window.esc(p.nome)}<span class="mm-sub">${at > 0 ? `🏠 Ateliê: ${at}` : '🏠 Sem peças no Ateliê'} · <span id="mala-rep-${p.id}"></span></span></span>
+            <input type="number" class="mala-qtd" data-pid="${p.id}" min="0" value="0" inputmode="numeric" oninput="window.atualizarMalaTotal()"></div>`; }).join('')}
+            <p class="mm-vazio" id="mala-vazio" style="display:none;">Nenhum produto aqui.</p></div>
         <div class="mm-total" id="mala-total">0 peças</div>
         <div class="input-group"><label>Observação (opcional)</label><input type="text" id="mala-obs" placeholder="Ex: feira de sábado"></div>
-        <button class="btn-magic btn-global" id="btn-mala" onclick="window.confirmarMala()">🧳 Enviar Mala</button>`);
-    window.atualizarMala();
+        <button class="btn-magic btn-global" id="btn-mala" onclick="window.confirmarMala()">🧳 Enviar mala</button>`);
+    window.atualizarMala(); window.filtrarMala();
 };
 window.atualizarMala = function() {
     const vid = parseInt(window.$('mala-vendedor').value);
     window.painelEstoque.produtos.forEach(p => { const el = window.$('mala-rep-' + p.id); if (!el) return; const r = window.repasseParaVendedor(vid, p); el.innerHTML = r ? `🤝 ${window.fmt(r)}/un` : '<b style="color:#b91c1c;">⚠️ sem repasse</b>'; });
     window.atualizarMalaTotal();
 };
-window.filtrarMala = function() { const t = window.$('mala-busca').value.toLowerCase(); document.querySelectorAll('#mala-lista .mm-linha').forEach(l => { l.style.display = l.dataset.nome.includes(t) ? '' : 'none'; }); };
+window.filtrarMala = function() {
+    const t = window.$('mala-busca').value.toLowerCase(), todos = window.$('mala-mostrar-sem').checked; let n = 0;
+    document.querySelectorAll('#mala-lista .mm-linha').forEach(l => {
+        const temQtd = (parseInt(l.querySelector('.mala-qtd').value) || 0) > 0; // o que já foi marcado nunca some
+        const ver = temQtd || (l.dataset.nome.includes(t) && (todos || parseInt(l.dataset.atelie) > 0));
+        l.style.display = ver ? '' : 'none'; if (ver) n++;
+    });
+    window.$('mala-vazio').style.display = n ? 'none' : 'block';
+    window.$('mala-vazio').innerHTML = todos ? 'Nenhum produto encontrado.' : 'Nenhum produto com peça no Ateliê. Ligue <b>Mostrar também sem estoque</b>.';
+    const comPeca = document.querySelectorAll('#mala-lista .mm-linha:not(.sem-estoque)').length;
+    window.$('mala-info').innerText = todos ? `${document.querySelectorAll('#mala-lista .mm-linha').length} produtos` : `${comPeca} com peças`;
+};
 window.itensMala = () => [...document.querySelectorAll('.mala-qtd')].map(i => ({ produto_id: parseInt(i.dataset.pid), qtd: parseInt(i.value) || 0 })).filter(i => i.qtd > 0);
+// Peças pedidas além do que existe no Ateliê (vão entrar como produção)
+window.faltasMala = itens => itens.map(i => ({ ...i, falta: Math.max(0, i.qtd - window.qtdEm(i.produto_id, 0)) })).filter(i => i.falta > 0);
 window.atualizarMalaTotal = function() {
-    const vid = parseInt(window.$('mala-vendedor').value); let pecas = 0, valor = 0;
-    window.itensMala().forEach(i => { const p = window.painelEstoque.produtos.find(x => x.id === i.produto_id); pecas += i.qtd; valor += i.qtd * window.repasseParaVendedor(vid, p); });
-    window.$('mala-total').innerHTML = `${pecas} peça(s) · ${window.fmt(valor)} em repasse se vender tudo`;
+    const vid = parseInt(window.$('mala-vendedor').value), itens = window.itensMala(); let pecas = 0, valor = 0;
+    itens.forEach(i => { const p = window.painelEstoque.produtos.find(x => x.id === i.produto_id); pecas += i.qtd; valor += i.qtd * window.repasseParaVendedor(vid, p); });
+    const falta = window.faltasMala(itens).reduce((s, i) => s + i.falta, 0);
+    window.$('mala-total').innerHTML = `${pecas} peça(s) · ${window.fmt(valor)} em repasse se vender tudo${falta ? `<span class="mm-sub" style="color:#92400e;">🖨️ ${falta} peça(s) ainda não estão no Ateliê e vão entrar como produção</span>` : ''}`;
 };
 window.confirmarMala = async function() {
     const itens = window.itensMala(); if (!itens.length) return window.mostrarAlerta("Atenção", "Coloque a quantidade em pelo menos um produto.", "warning");
-    const nomeV = window.$('mala-vendedor').selectedOptions[0].text;
-    if (!confirm(`Enviar ${itens.reduce((s, i) => s + i.qtd, 0)} peça(s) para ${nomeV}?`)) return;
+    const vid = parseInt(window.$('mala-vendedor').value), nomeV = window.$('mala-vendedor').selectedOptions[0].text;
+    const nomeDe = pid => (window.painelEstoque.produtos.find(x => x.id === pid) || {}).nome || '';
+    const semRepasse = itens.filter(i => !window.repasseParaVendedor(vid, window.painelEstoque.produtos.find(x => x.id === i.produto_id)));
+    if (semRepasse.length) return window.mostrarAlerta("Falta o preço de repasse", `Defina o repasse em Modelos (✏️) antes de enviar: ${semRepasse.map(i => nomeDe(i.produto_id)).join(', ')}.`, "warning");
+    const faltas = window.faltasMala(itens), pecas = itens.reduce((s, i) => s + i.qtd, 0);
+    const valor = itens.reduce((s, i) => s + i.qtd * window.repasseParaVendedor(vid, window.painelEstoque.produtos.find(x => x.id === i.produto_id)), 0);
+    const ok = await window.confirmarMM({ icone: '🧳', titulo: `Enviar mala para ${nomeV}?`, ok: '🧳 Enviar',
+        html: `<div class="resumo-confirma">${itens.map(i => `<div><span>${i.qtd}x ${window.esc(nomeDe(i.produto_id))}</span></div>`).join('')}
+            <div class="rc-total"><span>${pecas} peça(s)</span><b>${window.fmt(valor)}</b></div></div>
+            ${faltas.length ? `<div class="mm-alerta" style="margin:12px 0 0;text-align:left;">🖨️ ${faltas.map(f => `${f.falta}x ${window.esc(nomeDe(f.produto_id))}`).join(', ')} ainda não ${faltas.reduce((s, f) => s + f.falta, 0) > 1 ? 'estão' : 'está'} no Ateliê e vai entrar como <b>produção</b> antes do envio.</div>` : ''}` });
+    if (!ok) return;
     const b = window.$('btn-mala'); b.disabled = true; b.innerText = "⏳ Enviando...";
     try {
-        const res = await window.apiAcao("enviar_mala", { vendedor_id: parseInt(window.$('mala-vendedor').value), itens, obs: window.$('mala-obs').value });
+        for (const f of faltas) await window.apiAcao("produzir", { produto_id: f.produto_id, qtd: f.falta, obs: `Produzido para a mala de ${nomeV}` });
+        const res = await window.apiAcao("enviar_mala", { vendedor_id: vid, itens, obs: window.$('mala-obs').value });
         window.ultimoRomaneio = res;
-        window.abrirModalMM(`<div style="text-align:center;"><span class="modal-icon-alert">🧳</span><h3 class="modal-title-alert">Mala enviada!</h3>
+        window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">🧳</span><h3 class="modal-title-alert">Mala enviada!</h3>
             <p class="modal-text-alert">${res.romaneio.reduce((s, x) => s + x.qtd, 0)} peça(s) agora estão com <b>${window.esc(res.vendedor.nome)}</b>.</p>
             <a class="btn-magic btn-global" style="text-decoration:none;" href="${window.textoRomaneio(res)}" target="_blank">📲 Mandar romaneio no WhatsApp</a>
             <button class="btn-modal-cancel" style="width:100%;margin-top:10px;" onclick="window.fecharModalMM()">Fechar</button></div>`);
         window.carregarPainelEstoque(); window.carregarBancoDeCustos();
-    } catch (e) { window.mostrarAlerta("Não deu", e.message, "warning"); b.disabled = false; b.innerText = "🧳 Enviar Mala"; }
+    } catch (e) {
+        window.mostrarAlerta("Não deu", e.message, "warning"); b.disabled = false; b.innerText = "🧳 Enviar mala";
+        if (faltas.length) window.carregarPainelEstoque(); // a produção pode ter entrado mesmo se o envio falhou
+    }
 };
 window.textoRomaneio = function(res) {
     const total = res.romaneio.reduce((s, x) => s + x.qtd * x.repasse, 0);
@@ -238,8 +287,8 @@ window.abrirMovimentos = async function(filtro = {}) {
         const tipos = { PRODUCAO: '🖨️ Produção', ENVIO: '🧳 Envio', DEVOLUCAO: '↩️ Recolhido', VENDA: '✅ Venda (vendedor)', VENDA_DIRETA: '🛒 Venda direta', AJUSTE: '📋 Ajuste (+)', PERDA: '⚠️ Perda / ajuste (−)', ESTORNO: '↩️ Estorno' };
         const html = res.movimentos.length ? res.movimentos.map(m => `<div class="mm-linha"><span class="mm-nome">${tipos[m.tipo] || window.esc(m.tipo)} · <b>${m.qtd}x</b> ${window.esc(m.produto_nome)}
             <span class="mm-sub">${window.fmtDataHora(m.data_hora)} · ${m.origem_id === null ? 'entrada' : window.nomeDoLocal(m.origem_id)} → ${m.destino_id === null ? 'saída' : window.nomeDoLocal(m.destino_id)} · por ${window.esc(m.usuario)}${m.obs ? ' · ' + window.esc(m.obs) : ''}</span></span></div>`).join('') : '<p class="mm-vazio">Nenhuma movimentação ainda.</p>';
-        window.$('modal-mm-conteudo').innerHTML = `<h3 class="modal-title">📜 Movimentações</h3>${html}`;
-    } catch (e) { window.$('modal-mm-conteudo').innerHTML = `<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`; }
+        window.preencherModalMM(`<h3 class="modal-title">📜 Movimentações</h3>${html}`);
+    } catch (e) { window.preencherModalMM(`<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`); }
 };
 
 // ==========================================
@@ -262,6 +311,7 @@ window.renderizarVendedores = function() {
             ${pd.mais_antiga ? `<span class="mm-chip">⏳ desde ${window.fmtDataHora(pd.mais_antiga).slice(0, 8)}</span>` : ''}</div>
             ${v.telefone ? `<span class="mm-sub">📱 ${window.esc(v.telefone)}</span>` : ''}</div>
             <div class="mm-acoes"><button class="btn-novera btn-n-editar" style="width:auto;padding:0 12px;font-weight:800;font-size:0.8rem;" onclick="window.abrirVendedor(${v.id})">📋 Abrir</button>
+            <button class="btn-novera" title="Ver o sistema como ele(a) vê" onclick="window.verComoVendedor(${v.id})">👀</button>
             ${v.ativo ? `<button class="btn-novera" title="Enviar mala" onclick="window.abrirMala(${v.id})">🧳</button>` : ''}
             ${v.telefone ? `<a class="btn-novera" style="text-decoration:none;" title="WhatsApp" href="${window.linkZap(v.telefone, `Olá, ${v.nome}!`)}" target="_blank">💬</a>` : ''}</div></div>`;
     }).join('') : '<p class="mm-vazio">Nenhum vendedor ainda. Cadastre no botão acima ☝️</p>';
@@ -274,7 +324,7 @@ window.salvarNovoVendedor = async function() {
         await window.apiAcao("salvar_vendedor", { usuario, senha, telefone });
         window.$('nv-usuario').value = ''; window.$('nv-senha').value = ''; window.$('nv-telefone').value = '';
         const txt = `Olá, *${usuario}*! Bem-vindo(a) à equipe *Mini Mundo 3D* 🌍🖨️\n\nSeu acesso ao sistema:\n🔗 ${window.linkSistema()}\n👤 Usuário: ${usuario}\n🔑 Senha: ${senha}\n\nLá você vê as peças que estão com você, dá baixa quando vender e acompanha seu acerto. Troque a senha no primeiro acesso!`;
-        window.abrirModalMM(`<div style="text-align:center;"><span class="modal-icon-alert">🤝</span><h3 class="modal-title-alert">Vendedor cadastrado!</h3>
+        window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">🤝</span><h3 class="modal-title-alert">Vendedor cadastrado!</h3>
             <p class="modal-text-alert"><b>${window.esc(usuario)}</b> já pode entrar no sistema.</p>
             <a class="btn-magic btn-global" style="text-decoration:none;" href="${window.linkZap(telefone, txt)}" target="_blank">📲 Enviar acesso pelo WhatsApp</a>
             <button class="btn-modal-cancel" style="width:100%;margin-top:10px;" onclick="window.fecharModalMM()">Fechar</button></div>`);
@@ -286,14 +336,15 @@ window.salvarNovoVendedor = async function() {
 window.abrirVendedor = async function(vid) {
     window.abrirModalMM('<p class="mm-vazio">⏳ Carregando vendedor...</p>');
     try { window.vendAberto = await window.apiAcao("meu_painel", { vendedor_id: vid }); window.renderizarFichaVendedor(); }
-    catch (e) { window.$('modal-mm-conteudo').innerHTML = `<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`; }
+    catch (e) { window.preencherModalMM(`<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`); }
 };
 window.renderizarFichaVendedor = function() {
     const d = window.vendAberto, v = d.vendedor, info = window.painelEstoque.vendedores.find(x => x.id === v.id) || { ativo: true };
     const pend = d.baixas.filter(b => b.status === 'Pendente'), pagas = d.baixas.filter(b => b.status === 'Pago').slice(0, 15);
     const banner = window.ultimoAcerto && window.ultimoAcerto.vid === v.id ? `<div class="mm-alerta ok">✅ Acerto de ${window.fmt(window.ultimoAcerto.total)} registrado. <a href="${window.linkZap(v.telefone, `Olá, *${v.nome}*! Recebi ${window.fmt(window.ultimoAcerto.total)} referente às suas vendas. Obrigado! 🙏 — Mini Mundo 3D`)}" target="_blank">📲 Mandar recibo</a></div>` : '';
-    window.$('modal-mm-conteudo').innerHTML = `
+    window.preencherModalMM(`
         <h3 class="modal-title">👤 ${window.esc(v.nome)}</h3>${banner}
+        <button class="btn-ver-como" onclick="window.verComoVendedor(${v.id})"><span>👀</span><span><b>Ver o sistema como ${window.esc(v.nome)} vê</b><small>Abre o painel dele(a): peças, acerto e pedidos</small></span></button>
         <div class="mm-secao">💰 A receber — ${window.fmt(d.pendente_total)}</div>
         ${pend.length ? pend.map(b => `<label class="mm-linha"><input type="checkbox" class="chk-baixa" value="${b.id}" data-valor="${b.repasse_total}" checked onchange="window.somarSelecaoAcerto()">
             <span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} <b style="color:#b45309;">${window.fmt(b.repasse_total)}</b><span class="mm-sub">${window.fmtDataHora(b.data_hora)}${b.origem === 'CONFERENCIA' ? ' · 📋 diferença da conferência' : b.origem === 'ADMIN' ? ' · lançada por você' : ''}</span></span>
@@ -322,7 +373,7 @@ window.renderizarFichaVendedor = function() {
         <div class="row"><div class="col"><div class="input-group"><label>Usuário</label><input type="text" id="fv-usuario" value="${window.esc(v.nome)}"></div></div><div class="col"><div class="input-group"><label>WhatsApp</label><input type="text" id="fv-telefone" value="${window.esc(v.telefone)}"></div></div></div>
         <div class="input-group"><label>Situação</label><select id="fv-ativo"><option value="true" ${info.ativo ? 'selected' : ''}>🟢 Ativo</option><option value="false" ${info.ativo ? '' : 'selected'}>🔴 Desativado (não consegue mais entrar)</option></select></div>
         <div class="row"><div class="col"><button class="btn-magic btn-global" style="margin-top:0;padding:10px;" onclick="window.salvarDadosVendedor(${v.id})">💾 Salvar</button></div><div class="col"><button class="btn-limpar" style="width:100%;padding:12px;" onclick="window.resetarSenhaVendedor(${v.id})">🔑 Nova senha</button></div></div>
-        ${v.codigo_vitrine ? `<button class="btn-limpar" style="width:100%;padding:10px;margin-top:8px;" onclick="window.copiarTexto('${window.linkVitrine(v.codigo_vitrine)}', 'Link da vitrine copiado!')">🔗 Copiar link da vitrine dele(a)</button>` : ''}`;
+        ${v.codigo_vitrine ? `<button class="btn-limpar" style="width:100%;padding:10px;margin-top:8px;" onclick="window.copiarTexto('${window.linkVitrine(v.codigo_vitrine)}', 'Link da vitrine copiado!')">🔗 Copiar link da vitrine dele(a)</button>` : ''}`);
 };
 window.somarSelecaoAcerto = function() { const t = [...document.querySelectorAll('.chk-baixa:checked')].reduce((s, c) => s + (parseFloat(c.dataset.valor) || 0), 0); window.$('acerto-selecao').innerText = `Selecionado: ${window.fmt(t)}`; };
 window.textoCobrancaVendedor = function(d) {
@@ -334,7 +385,7 @@ window.receberSelecionadas = async function(vid) {
     const ids = [...document.querySelectorAll('.chk-baixa:checked')].map(c => parseInt(c.value));
     if (!ids.length) return window.mostrarAlerta("Atenção", "Marque as baixas que você recebeu.", "warning");
     const total = [...document.querySelectorAll('.chk-baixa:checked')].reduce((s, c) => s + (parseFloat(c.dataset.valor) || 0), 0);
-    if (!confirm(`Confirmar que recebeu ${window.fmt(total)} de ${window.vendAberto.vendedor.nome}?`)) return;
+    if (!await window.confirmarMM({ icone: '💰', titulo: 'Confirmar recebimento?', html: `Você recebeu <b>${window.fmt(total)}</b> de <b>${window.esc(window.vendAberto.vendedor.nome)}</b> (${ids.length} baixa${ids.length > 1 ? 's' : ''}) via <b>${window.esc(window.$('acerto-forma').value)}</b>?`, ok: '✅ Sim, recebi' })) return;
     const b = window.$('btn-acerto'); b.disabled = true;
     try {
         const r = await window.apiAcao("acertar_baixas", { vendedor_id: vid, ids, forma: window.$('acerto-forma').value, obs: window.$('acerto-obs').value });
@@ -343,24 +394,36 @@ window.receberSelecionadas = async function(vid) {
     } catch (e) { window.mostrarAlerta("Erro", e.message, "error"); b.disabled = false; }
 };
 window.desfazerAcerto = async function(vid, aid) {
-    if (!confirm("Desfazer esse acerto? As baixas voltam a ficar pendentes.")) return;
+    if (!await window.confirmarMM({ tipo: 'perigo', icone: '↩️', titulo: 'Desfazer esse acerto?', texto: 'As baixas desse pagamento voltam a ficar pendentes (a receber).', ok: 'Desfazer' })) return;
     try { await window.apiAcao("desfazer_acerto", { acerto_id: aid }); window.ultimoAcerto = null; await window.abrirVendedor(vid); window.carregarPainelEstoque(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
-window.pedirQtd = function(msg, max) { const v = prompt(`${msg} (máx. ${max})`, String(max)); if (v === null) return 0; const n = parseInt(v); if (!(n > 0) || n > max) { window.mostrarAlerta("Atenção", `Digite um número de 1 a ${max}.`, "warning"); return 0; } return n; };
+// Pergunta uma quantidade de 1 a max (devolve 0 se cancelar)
+window.pedirQtd = async function(o, max) {
+    const v = await window.pedirValorMM(Object.assign({ campo: 'number', valor: String(max), min: 1, max, ok: 'Confirmar',
+        validar: x => { const n = parseInt(x); return (n > 0 && n <= max) ? null : `Digite um número de 1 a ${max}.`; } }, o));
+    return v === null ? 0 : parseInt(v);
+};
+window.nomeProdutoAberto = pid => ((window.vendAberto.estoque.find(e => e.produto_id === pid) || {}).nome || '');
 window.baixaPeloAdmin = async function(vid, pid, max) {
-    const qtd = window.pedirQtd("Quantas peças ele(a) vendeu?", max); if (!qtd) return;
+    const nomeV = window.esc(window.vendAberto.vendedor.nome);
+    const qtd = await window.pedirQtd({ icone: '✅', titulo: 'Registrar venda', valor: '1', ok: '✅ Registrar',
+        html: `${nomeV} vendeu quantas peças de <b>${window.esc(window.nomeProdutoAberto(pid))}</b>?<br><small>Com ${nomeV} agora: ${max}</small>` }, max); if (!qtd) return;
     try { await window.apiAcao("dar_baixa", { vendedor_id: vid, produto_id: pid, qtd }); await window.abrirVendedor(vid); window.carregarPainelEstoque(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
 window.recolherPecas = async function(vid, pid, max) {
-    const qtd = window.pedirQtd("Quantas peças você vai recolher de volta pro Ateliê?", max); if (!qtd) return;
+    const nomeV = window.esc(window.vendAberto.vendedor.nome);
+    const qtd = await window.pedirQtd({ icone: '↩️', titulo: 'Recolher peças', ok: '↩️ Recolher',
+        html: `Quantas peças de <b>${window.esc(window.nomeProdutoAberto(pid))}</b> voltam para o Ateliê?<br><small>Com ${nomeV} agora: ${max}</small>` }, max); if (!qtd) return;
     try { await window.apiAcao("recolher", { vendedor_id: vid, itens: [{ produto_id: pid, qtd }] }); await window.abrirVendedor(vid); window.carregarPainelEstoque(); window.carregarBancoDeCustos(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
 window.definirRepasseEspecial = async function(vid, pid) {
     const p = window.painelEstoque.produtos.find(x => x.id === pid) || {}; const atual = window.vendAberto.estoque.find(e => e.produto_id === pid);
-    const v = prompt(`Repasse especial de "${p.nome}" para ${window.vendAberto.vendedor.nome}.\nPadrão: ${window.fmt(p.repasse || 0)}. Deixe vazio para voltar ao padrão.`, atual && atual.especial ? String(atual.repasse).replace('.', ',') : '');
+    const v = await window.pedirValorMM({ icone: '💲', titulo: 'Repasse especial', campo: 'dinheiro', placeholder: 'R$ 0,00', ok: '💾 Salvar',
+        html: `Quanto <b>${window.esc(window.vendAberto.vendedor.nome)}</b> te paga por <b>${window.esc(p.nome)}</b>?<br><small>Padrão: ${window.fmt(p.repasse || 0)}. Deixe vazio para voltar ao padrão.</small>`,
+        valor: atual && atual.especial ? window.fmt(atual.repasse) : '' });
     if (v === null) return;
     try { await window.apiAcao("salvar_repasse_especial", { vendedor_id: vid, produto_id: pid, preco: v.trim() }); await window.abrirVendedor(vid); window.carregarPainelEstoque(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
@@ -370,7 +433,8 @@ window.salvarDadosVendedor = async function(vid) {
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
 window.resetarSenhaVendedor = async function(vid) {
-    const s = prompt("Nova senha para o vendedor (mín. 4 caracteres):"); if (!s) return;
+    const s = await window.pedirValorMM({ icone: '🔑', titulo: 'Nova senha', texto: `Digite a nova senha de ${window.vendAberto.vendedor.nome}. Depois passe pra ele(a).`, placeholder: 'Mínimo 4 caracteres', ok: '🔑 Redefinir',
+        validar: x => x.trim().length >= 4 ? null : 'A senha precisa ter pelo menos 4 caracteres.' }); if (!s) return;
     try { await window.apiAcao("resetar_senha_vendedor", { id: vid, senha: s }); window.mostrarAlerta("Pronto!", `Senha redefinida. Passe a nova senha para ${window.vendAberto.vendedor.nome}.`, "success"); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
@@ -441,8 +505,8 @@ window.abrirLogs = async function() {
     window.abrirModalMM('<h3 class="modal-title">📜 Registro de atividades</h3><p class="mm-vazio">⏳ Carregando...</p>');
     try {
         const r = await window.apiAcao("listar_logs", { limite: 300 });
-        window.$('modal-mm-conteudo').innerHTML = `<h3 class="modal-title">📜 Registro de atividades</h3>` + (r.logs.length ? r.logs.map(l => `<div class="mm-linha"><span class="mm-nome">${window.esc(l.detalhe || l.acao)}<span class="mm-sub">${window.fmtDataHora(l.data_hora)} · ${window.esc(l.usuario)} · ${window.esc(l.acao)}</span></span></div>`).join('') : '<p class="mm-vazio">Nada registrado ainda.</p>');
-    } catch (e) { window.$('modal-mm-conteudo').innerHTML = `<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`; }
+        window.preencherModalMM(`<h3 class="modal-title">📜 Registro de atividades</h3>` + (r.logs.length ? r.logs.map(l => `<div class="mm-linha"><span class="mm-nome">${window.esc(l.detalhe || l.acao)}<span class="mm-sub">${window.fmtDataHora(l.data_hora)} · ${window.esc(l.usuario)} · ${window.esc(l.acao)}</span></span></div>`).join('') : '<p class="mm-vazio">Nada registrado ainda.</p>'));
+    } catch (e) { window.preencherModalMM(`<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`); }
 };
 
 // ==========================================
@@ -455,6 +519,28 @@ window.iniciarAppVendedor = function() {
     window.mostrarUsuarioNoMenu("Vendedor(a)");
     window.switchTab('v_estoque', '📦 Meu Estoque');
 };
+
+// 👀 VER COMO O VENDEDOR: o Admin abre as mesmas telas que o vendedor vê, com os dados dele
+window.vendedorVisto = null;
+window.verComoVendedor = function(vid) {
+    const v = window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === vid); if (!v) return;
+    window.vendedorVisto = { id: v.id, nome: v.nome }; window.painelVendedor = null;
+    ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas'].forEach(id => { window.$(id).innerHTML = ''; });
+    window.fecharModalMM();
+    document.body.classList.add('modo-vendedor', 'vendo-como');
+    window.$('ver-como-nome').innerText = v.nome;
+    window.$('subtitulo-app').innerText = `Visão de ${v.nome}`;
+    window.switchTab('v_estoque', '📦 Meu Estoque');
+};
+window.sairVisaoVendedor = function() {
+    const vid = window.vendedorVisto && window.vendedorVisto.id;
+    window.vendedorVisto = null; window.painelVendedor = null;
+    document.body.classList.remove('modo-vendedor', 'vendo-como');
+    window.$('subtitulo-app').innerText = "Central & ERP";
+    window.switchTab('vendedores', '🤝 Vendedores');
+    if (vid) window.abrirVendedor(vid);
+};
+
 window.carregarPainelVendedor = async function() {
     if (window.$('loading-v')) window.$('loading-v').style.display = 'block';
     try { window.painelVendedor = await window.apiAcao("meu_painel"); window.renderizarVendedorEstoque(); window.renderizarVendedorAcerto(); window.renderizarVendedorEncomendas(); }
@@ -484,8 +570,8 @@ window.renderizarVendedorEstoque = function() {
 window.abrirBaixa = function(pid) {
     const e = window.painelVendedor.estoque.find(x => x.produto_id === pid); if (!e) return;
     window.baixaAtual = { pid, qtd: 1, max: e.qtd, repasse: e.repasse };
-    window.abrirModalMM(`<div style="text-align:center;">${window.imgProduto(e.foto, 'width:90px;height:90px;border-radius:14px;object-fit:cover;')}
-        <h3 class="modal-title" style="margin-top:10px;">${window.esc(e.nome)}</h3>
+    window.abrirModalMM(`<h3 class="modal-title">✅ Registrar venda</h3><div style="text-align:center;">${window.imgProduto(e.foto, 'width:96px;height:96px;border-radius:16px;object-fit:cover;')}
+        <h4 class="baixa-nome">${window.esc(e.nome)}</h4>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:700;margin:0;">Quantas você vendeu? (tem ${e.qtd})</p>
         <div class="stepper"><button onclick="window.stepBaixa(-1)">−</button><span id="baixa-qtd">1</span><button onclick="window.stepBaixa(1)">+</button></div>
         <div class="mm-total">Você me repassa: <span class="mm-grande" id="baixa-total">${window.fmt(e.repasse)}</span><span style="font-size:0.75rem;color:var(--text-muted);">${window.fmt(e.repasse)} por peça · o preço de venda é com você 😉</span></div>
@@ -499,14 +585,14 @@ window.confirmarBaixa = async function() {
     const b = window.baixaAtual, btn = window.$('btn-baixa'); btn.disabled = true; btn.innerText = "⏳ Registrando...";
     try {
         const r = await window.apiAcao("dar_baixa", { produto_id: b.pid, qtd: b.qtd });
-        window.abrirModalMM(`<div style="text-align:center;"><span class="modal-icon-alert">🎉</span><h3 class="modal-title-alert">Venda registrada!</h3>
+        window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">🎉</span><h3 class="modal-title-alert">Venda registrada!</h3>
             <p class="modal-text-alert">Repasse dessa venda: <b>${window.fmt(r.repasse_total)}</b><br>Total que você me deve agora: <b>${window.fmt(r.pendente_total)}</b></p>
-            <button class="btn-modal-ok" style="background:#10b981;box-shadow:0 6px 0 #059669;" onclick="window.fecharModalMM()">Boa! 🚀</button></div>`);
+            <button class="btn-modal-ok ok" onclick="window.fecharModalMM()">Boa! 🚀</button></div>`);
         window.carregarPainelVendedor();
     } catch (e) { window.mostrarAlerta("Não deu", e.message, "warning"); btn.disabled = false; btn.innerText = "✅ Confirmar Venda"; }
 };
 window.cancelarBaixa = async function(id, peloAdmin) {
-    if (!confirm("Cancelar essa baixa? A peça volta para o estoque do vendedor.")) return;
+    if (!await window.confirmarMM({ tipo: 'perigo', icone: '✖️', titulo: 'Cancelar essa baixa?', texto: 'A venda é desfeita e a peça volta para o estoque do vendedor.', ok: 'Cancelar baixa', cancelar: 'Voltar' })) return;
     try {
         await window.apiAcao("cancelar_baixa", { id });
         if (peloAdmin) { await window.abrirVendedor(window.vendAberto.vendedor.id); window.carregarPainelEstoque(); } else window.carregarPainelVendedor();
@@ -552,7 +638,7 @@ window.salvarEncomendaVendedor = async function() {
     } catch (e) { window.mostrarAlerta("Erro", e.message, "error"); } finally { b.disabled = false; }
 };
 window.cancelarEncomendaVendedor = async function(id) {
-    if (!confirm("Cancelar esse pedido?")) return;
+    if (!await window.confirmarMM({ tipo: 'perigo', icone: '🎁', titulo: 'Cancelar esse pedido?', texto: 'A Mini Mundo deixa de produzir essa encomenda.', ok: 'Cancelar pedido', cancelar: 'Voltar' })) return;
     try { await window.apiAcao("cancelar_encomenda", { id }); window.carregarPainelVendedor(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
