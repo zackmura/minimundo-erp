@@ -1,10 +1,12 @@
 {
-  "name": "Mini Mundo 3D - Central de Automação",
+  "id": "./",
+  "name": "Mini Mundo 3D - Central & ERP",
   "short_name": "Mini Mundo",
-  "start_url": "/admin/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#fafaf9",
-  "theme_color": "#d97706",
+  "background_color": "#f5f3f0",
+  "theme_color": "#3e2723",
   "icons": [
     {
       "src": "logo1.png",

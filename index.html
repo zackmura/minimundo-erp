@@ -2,358 +2,300 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mini Mundo | Central & ERP</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#d97706">
+    <meta name="theme-color" content="#3e2723">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="logo.png">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    
-    <style>
-        .app-version { position: absolute; bottom: 15px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; pointer-events: none;}
-        .badge-versao { font-size: 0.65rem; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 6px; vertical-align: middle; margin-left: 4px; font-weight: 800;}
-    </style>
+    <link rel="icon" href="logo1.png">
 
-    <link rel="stylesheet" href="style.css?v=4.0.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=4.1.0">
 </head>
 <body>
 
+<!-- ========================================== -->
+<!-- 🔒 LOGIN                                    -->
+<!-- ========================================== -->
 <div id="login-screen">
     <div class="login-box">
         <img src="logo.png" alt="Mini Mundo" onerror="this.src='logo.jpg'; this.onerror=null;">
-        <h2>Acesso Restrito</h2>
-        <p>Diretoria e Vendedores</p>
-        
-        <input type="text" id="input-usuario" class="login-input" placeholder="Usuário" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-bottom:10px;">
-        <input type="password" id="input-senha" class="login-input" placeholder="••••••••" autocomplete="off" onkeyup="verificarEnter(event)">
-        <button id="btn-login" class="btn-magic" style="margin-top:0;" onclick="tentarLogin()">🔓 Entrar no Sistema</button>
+        <h2>Mini Mundo 3D</h2>
+        <p>Acesso da Diretoria e dos Vendedores</p>
+        <label for="input-usuario">Usuário</label>
+        <input type="text" id="input-usuario" class="login-input" placeholder="Seu usuário" autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <label for="input-senha">Senha</label>
+        <input type="password" id="input-senha" class="login-input" placeholder="••••••••" autocomplete="current-password" onkeyup="verificarEnter(event)">
+        <button id="btn-login" class="btn-magic" style="margin-top:4px;" onclick="tentarLogin()">🔓 Entrar</button>
     </div>
-    <div id="versao-login" class="app-version">v2.0.0</div>
+    <div id="versao-login" class="app-version">v4</div>
 </div>
 
 <div id="app-core">
-    <div class="admin-card">
-        
-        <div class="brand-header">
+
+    <!-- ========================================== -->
+    <!-- 🧭 MENU LATERAL (computador)                -->
+    <!-- ========================================== -->
+    <aside class="sidebar">
+        <div class="sb-marca">
             <img src="logo.png" alt="Mini Mundo 3D" onerror="this.src='logo.jpg'; this.onerror=null;">
-            <h1 id="titulo-app">Central de Automação</h1>
-            <p><span id="subtitulo-app">IA, CRM & ERP</span> <span id="versao-header" class="badge-versao">v2.0.0</span></p>
-            <p style="font-size: 0.75rem; margin-top: 5px; color: var(--primary);">Olá, <b id="nome-usuario-logado">Fernando</b>!</p>
-            <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+            <div><strong id="titulo-app">Mini Mundo 3D</strong><span id="subtitulo-app">Central & ERP</span></div>
         </div>
 
-        <div class="tabs-container" id="menu-abas">
-            <button id="btn-analytics" class="tab-btn active" onclick="switchTab('analytics', '📈 Analytics')">📈 Analytics</button>
-            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios', '📢 Anúncios')">📢 Anúncios</button>
-            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja', '🛒 Catálogo')">🛒 Catálogo</button>
-            <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz', '🎮 Quiz')">🎮 Quiz</button>
-            <button id="btn-imas" class="tab-btn" onclick="switchTab('imas', '🧲 Ímãs NFC')">🧲 Ímãs NFC</button>
-            <button id="btn-config" class="tab-btn" onclick="switchTab('config', '⚙️ Ajustes')">⚙️ Ajustes</button>
+        <nav class="sb-nav" id="menu-abas">
+            <div class="sb-grupo">Visão geral</div>
+            <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="ic">📊</span>Dashboard</button>
 
-            <div class="divisor-erp">Módulo ERP & Finanças</div>
+            <div class="sb-grupo">Vendas & Produção</div>
+            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="ic">🛒</span>Vendas</button>
+            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar', '🧮 Precificar')"><span class="ic">🧮</span>Precificar</button>
+            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos', '📋 Modelos')"><span class="ic">📋</span>Modelos</button>
+            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos', '💳 Custos')"><span class="ic">💳</span>Custos</button>
 
-            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar', '➕ Precificar')">➕ Precificar</button>
-            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas', '🛒 Vendas')">🛒 Vendas</button>
-            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos', '📋 Modelos')">📋 Modelos</button>
-            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos', '💳 Custos')">💳 Custos</button>
-            <button id="btn-dashboard_erp" class="tab-btn" onclick="switchTab('dashboard_erp', '📊 Dashboard')">📊 Dashboard</button>
+            <div class="sb-grupo">Consignado</div>
+            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque', '📦 Estoque')"><span class="ic">📦</span>Estoque</button>
+            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="ic">🤝</span>Vendedores</button>
 
-            <div class="divisor-erp">Consignado & Vendedores</div>
+            <div class="sb-grupo">Loja & Marketing</div>
+            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja', '🛍️ Catálogo da Loja')"><span class="ic">🛍️</span>Catálogo</button>
+            <button id="btn-imas" class="tab-btn" onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="ic">🧲</span>Ímãs NFC</button>
+            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios', '📢 Anúncios')"><span class="ic">📢</span>Anúncios</button>
+            <button id="btn-analytics" class="tab-btn" onclick="switchTab('analytics', '📈 Analytics')"><span class="ic">📈</span>Analytics</button>
+            <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz', '🎮 Quiz')"><span class="ic">🎮</span>Quiz</button>
 
-            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque', '📦 Estoque')">📦 Estoque</button>
-            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores', '🤝 Vendedores')">🤝 Vendedores</button>
+            <div class="sb-grupo">Sistema</div>
+            <button id="btn-config" class="tab-btn" onclick="switchTab('config', '⚙️ Ajustes')"><span class="ic">⚙️</span>Ajustes</button>
+        </nav>
+
+        <nav class="sb-nav" id="menu-abas-vendedor">
+            <div class="sb-grupo">Meu painel</div>
+            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="ic">📦</span>Meu Estoque</button>
+            <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="ic">💸</span>Meu Acerto</button>
+            <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="ic">🎁</span>Encomendas</button>
+        </nav>
+
+        <div class="sb-rodape">
+            <div class="sb-user"><span class="avatar" id="avatar-usuario">?</span><div><b id="nome-usuario-logado">—</b><small id="cargo-usuario">Diretoria</small></div></div>
+            <div class="sb-acoes"><span id="versao-header" class="badge-versao">v4</span><button class="btn-sair" onclick="fazerLogout()">Sair</button></div>
         </div>
+    </aside>
 
-        <!-- MENU DO VENDEDOR (só aparece no login de vendedor) -->
-        <div class="tabs-container" id="menu-abas-vendedor">
-            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque', '📦 Meu Estoque')">📦 Meu Estoque</button>
-            <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')">💸 Meu Acerto</button>
-            <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')">🎁 Encomendas</button>
-        </div>
+    <!-- ========================================== -->
+    <!-- 📄 CONTEÚDO                                 -->
+    <!-- ========================================== -->
+    <main class="principal">
+        <header class="topo">
+            <img class="topo-logo" src="logo.png" alt="" onerror="this.src='logo.jpg'; this.onerror=null;">
+            <h1 id="titulo-modulo-ativo">📊 Dashboard</h1>
+            <button class="btn-sair topo-sair" onclick="fazerLogout()">Sair</button>
+        </header>
 
-        <div class="titulo-wrapper"><span id="titulo-modulo-ativo">📈 ANALYTICS</span></div>
+        <div class="area">
 
-        <!-- ABA MENU GRID (Mobile Only) -->
+        <!-- ABA MENU (celular) -->
         <div id="tab-menu_mobile" class="tab-content">
-            <div class="section-title" style="margin-top:0;">Navegação do Sistema</div>
+            <div class="menu-grupo">Vendas & Produção</div>
             <div class="grid-menu">
-                <button onclick="switchTab('analytics', '📈 Analytics')"><span class="icon">📈</span> Analytics</button>
-                <button onclick="switchTab('anuncios', '📢 Anúncios')"><span class="icon">📢</span> Anúncios</button>
-                <button onclick="switchTab('quiz', '🎮 Quiz')"><span class="icon">🎮</span> Quiz</button>
-                <button onclick="switchTab('config', '⚙️ Ajustes')"><span class="icon">⚙️</span> Ajustes</button>
-                <button onclick="switchTab('precificar', '➕ Precificar')"><span class="icon">➕</span> Precificar</button>
-                <button onclick="switchTab('modelos', '📋 Modelos')"><span class="icon">📋</span> Modelos</button>
-                <button onclick="switchTab('custos', '💳 Custos')"><span class="icon">💳</span> Custos</button>
-                <button onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span> Estoque</button>
-                <button onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span> Vendedores</button>
+                <button onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span>Dashboard</button>
+                <button onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span>Vendas</button>
+                <button onclick="switchTab('precificar', '🧮 Precificar')"><span class="icon">🧮</span>Precificar</button>
+                <button onclick="switchTab('modelos', '📋 Modelos')"><span class="icon">📋</span>Modelos</button>
+                <button onclick="switchTab('custos', '💳 Custos')"><span class="icon">💳</span>Custos</button>
+            </div>
+            <div class="menu-grupo">Consignado</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span>Estoque</button>
+                <button onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span>Vendedores</button>
+            </div>
+            <div class="menu-grupo">Loja & Marketing</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('loja', '🛍️ Catálogo da Loja')"><span class="icon">🛍️</span>Catálogo</button>
+                <button onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="icon">🧲</span>Ímãs NFC</button>
+                <button onclick="switchTab('anuncios', '📢 Anúncios')"><span class="icon">📢</span>Anúncios</button>
+                <button onclick="switchTab('analytics', '📈 Analytics')"><span class="icon">📈</span>Analytics</button>
+                <button onclick="switchTab('quiz', '🎮 Quiz')"><span class="icon">🎮</span>Quiz</button>
+            </div>
+            <div class="menu-grupo">Sistema</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('config', '⚙️ Ajustes')"><span class="icon">⚙️</span>Ajustes</button>
+                <button onclick="fazerLogout()"><span class="icon">🚪</span>Sair</button>
             </div>
         </div>
 
-        <!-- CONTEÚDO DAS ABAS -->
-        <div id="tab-imas" class="tab-content">
-            <div class="section-title" style="margin-top:0;">➕ Criar / Atualizar Ímã</div>
-            <div style="background:#fff; padding:15px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
-                <div class="row">
-                    <div class="col"><div class="input-group"><label>ID Único (Ex: 123):</label><input type="text" id="ima-id" placeholder="123"></div></div>
-                    <div class="col"><div class="input-group"><label>Nomes (Ex: João & Maria):</label><input type="text" id="ima-nomes" placeholder="Arthur & Heitor"></div></div>
-                </div>
-                <div class="input-group"><label>Foto Inicial:</label><input type="file" id="ima-foto" accept="image/*"></div>
-                <div class="input-group"><label>Foto do Produto Final (Físico):</label><input type="file" id="ima-foto-produto" accept="image/*"></div>
-                <div class="input-group"><label>Link do Vídeo (Deixe vazio para o Teaser):</label><input type="text" id="ima-video" placeholder="Cole o link do YouTube aqui"></div>
-                <div class="input-group"><label>Data de Liberação (Opcional):</label><input type="datetime-local" id="ima-data"></div>
-                <button id="btn-salvar-ima" class="btn-magic btn-global" style="margin-top:5px; padding:12px; font-size:0.9rem;" onclick="cadastrarIma()">✨ Gerar Ímã</button>
-            </div>
-            <div class="section-title">📋 Ímãs Ativos</div>
-            <input type="text" id="busca-imas" class="search-bar" placeholder="🔍 Buscar por ID ou Nome..." onkeyup="filtrarImas()">
-            <div id="loading-imas" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Buscando dados dos ímãs...</div>
-            <div id="lista-imas-admin" class="scroll-container"></div>
-        </div>
-
-        <div id="tab-analytics" class="tab-content active">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <p style="font-size:0.8rem; color:var(--text-muted); margin:0; font-weight:600;">Monitoramento de engajamento.</p>
-                <button class="btn-magic btn-analise" style="width:auto; padding:6px 12px; margin:0; font-size:0.75rem; border-radius:8px;" onclick="carregarAnalytics(true)">🔄 Atualizar</button>
-            </div>
+        <!-- ========================================== -->
+        <!-- 📊 DASHBOARD                               -->
+        <!-- ========================================== -->
+        <div id="tab-dashboard_erp" class="tab-content active">
             <div class="filtros-box">
-                <div class="filtros-title">⚙️ Filtros de Pesquisa</div>
+                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">📅 Período</span><button class="btn-limpar" onclick="limparFiltrosDashboardERP()">Ver tudo</button></div>
                 <div class="row">
-                    <div class="col"><div class="input-group"><label>Mês:</label><select id="filtro-mes" onchange="limparDatasManuais()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div></div>
-                    <div class="col"><div class="input-group"><label>Ano:</label><select id="filtro-ano" onchange="limparDatasManuais()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option></select></div></div>
-                    <div class="col"><div class="input-group"><label>Time:</label><select id="filtro-time"><option value="todos">Todos</option><option value="corinthians">Corinthians</option><option value="palmeiras">Palmeiras</option><option value="santos">Santos</option><option value="são paulo">São Paulo</option><option value="flamengo">Flamengo</option></select></div></div>
+                    <div class="col"><label>Mês</label><select id="filtro-dash-mes" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
+                    <div class="col"><label>Ano</label><select id="filtro-dash-ano" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
                 </div>
-                <div style="border-top:1px solid var(--border-color); margin-top:5px; padding-top:10px;"><label style="font-size:0.7rem; text-transform:uppercase;">Ou período exato:</label><div class="row"><div class="col"><div class="input-group" style="margin-bottom:0;"><input type="date" id="data-inicio" onchange="limparFiltrosRapidos()"></div></div><div class="col"><div class="input-group" style="margin-bottom:0;"><input type="date" id="data-fim" onchange="limparFiltrosRapidos()"></div></div></div></div>
-                <button class="btn-filtro" onclick="aplicarFiltros()">Aplicar Filtros</button>
             </div>
-            <div id="loading-analytics" style="text-align:center; padding:30px; color:var(--primary); font-weight:900; font-size:1rem; display:none;">⏳ Analisando...</div>
-            <div id="painel-dashboard" style="display:none;">
-                <div class="dash-cards"><div class="dash-card"><h3>Toques Totais</h3><div class="valor" id="dash-total" style="color:var(--primary);">0</div><span class="sub-valor" id="dash-media">Média: 0/dia</span></div><div class="dash-card"><h3>Maior Audiência</h3><div class="valor" id="dash-campeao" style="font-size:1.4rem; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;"><img id="img-campeao" src="" style="width:30px; height:30px; display:none;"><span id="nome-campeao">-</span></div><span class="sub-valor" id="dash-pico">Pico: Nenhum</span></div></div>
-                <div class="section-title">📊 Ranking de Engajamento</div><div class="ranking-list" id="lista-ranking"></div><div class="section-title">📈 Desempenho Visual</div><div class="chart-box"><canvas id="graficoAcessos"></canvas></div>
+            <div class="kpis">
+                <div class="kpi destaque"><span class="kpi-rotulo">Balanço do caixa (recebido − gasto)</span><span id="dash-balanco-valor" class="kpi-valor">R$ 0,00</span></div>
+                <div class="kpi"><span class="kpi-rotulo">💰 Entradas</span><span id="dash-receita-valor" class="kpi-valor v-verde">R$ 0,00</span><span class="kpi-sub">vendas pagas + repasses</span></div>
+                <div class="kpi"><span class="kpi-rotulo">💳 Saídas</span><span id="dash-despesa-valor" class="kpi-valor v-vermelho">R$ 0,00</span><span class="kpi-sub">despesas do período</span></div>
+                <div class="kpi"><span class="kpi-rotulo">🤝 Repasses recebidos</span><span id="dash-repasses-valor" class="kpi-valor v-roxo">R$ 0,00</span><span class="kpi-sub">já somados nas entradas</span></div>
+                <div class="kpi"><span class="kpi-rotulo">⏳ A receber de vendedores</span><span id="dash-areceber-vend-valor" class="kpi-valor v-laranja">R$ 0,00</span><span class="kpi-sub">total em aberto hoje</span></div>
             </div>
-        </div>
-
-        <div id="tab-anuncios" class="tab-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <p style="font-size:0.8rem; color:var(--text-muted); margin:0; font-weight:600;">Gerencie patrocinadores.</p>
-                <div style="display:flex; gap:5px;"><button class="btn-magic btn-global" style="width:auto; padding:6px 12px; margin:0; font-size:0.75rem; border-radius:8px; display:none;" id="btn-notifica" onclick="ativarNotificacoesBrowser()">🔔 Alertas</button><button class="btn-magic btn-analise" style="width:auto; padding:6px 12px; margin:0; font-size:0.75rem; border-radius:8px;" onclick="carregarAnunciosAdmin()">🔄 Atualizar</button></div>
-            </div>
-            <input type="text" id="busca-anuncios" class="search-bar" placeholder="🔍 Buscar empresa, status ou cupom..." onkeyup="filtrarAnuncios()">
-            <div id="loading-anuncios" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Buscando...</div>
-            <div id="lista-anuncios-admin" class="scroll-container"></div>
-        </div>
-
-        <div id="tab-loja" class="tab-content">
-            <div class="section-title" style="margin-top:0;">➕ Adicionar Produto</div>
-            <div style="background:#fff; padding:15px; border-radius:16px; border:1px solid var(--border-color); margin-bottom:20px;">
-                <div class="input-group"><label>Nome:</label><input type="text" id="prod-nome" placeholder="Ex: Placa Personalizada"></div>
-                <div class="input-group"><label>Preço:</label><input type="text" id="prod-preco" class="mask-money" placeholder="Ex: R$ 60,00"></div>
-                <div class="input-group"><label>Fotos (Exemplos):</label><input type="file" id="prod-fotos" accept="image/*" multiple></div>
-                <button id="btn-salvar-produto" class="btn-magic btn-global" style="margin-top:5px; padding:12px; font-size:0.9rem;" onclick="cadastrarProdutoIA()">✨ Enviar e Cadastrar</button>
-            </div>
-            <div class="section-title">📋 Produtos Cadastrados</div>
-            <input type="text" id="busca-catalogo" class="search-bar" placeholder="🔍 Buscar nome, categoria..." onkeyup="filtrarCatalogo()">
-            <div id="loading-catalogo" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Buscando...</div>
-            <div id="lista-produtos-admin" class="scroll-container"></div>
-        </div>
-
-        <div id="tab-quiz" class="tab-content">
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0; margin-bottom:15px;">Gerador Automático de Quiz via IA.</p>
-            <div class="row"><div class="col"><div class="input-group" style="margin-bottom:5px;"><label for="tema">Foco Temático (Opcional):</label><input type="text" id="tema" placeholder="Ex: Libertadores, Ídolos, Finais..."></div></div></div>
-            <div class="row"><div class="col"><div class="input-group" style="margin-bottom:5px;"><label>Dificuldade:</label><select id="dificuldade"><option value="fáceis (nível torcedor comum)">🟢 Fácil</option><option value="médias (nível fã fanático)" selected>🟡 Médio</option><option value="difíceis e obscuras (nível historiador)">🔴 Hardcore (Difícil)</option></select></div></div><div class="col"><div class="input-group" style="margin-bottom:5px;"><label>Qtd. Perguntas:</label><input type="number" id="qtd" value="10" min="1" max="30"></div></div></div>
-            <div class="input-group" style="margin-bottom:5px; margin-top:10px;"><label>Time:</label><select id="time" onchange="carregarInfoBanco()"><option value="https://script.google.com/macros/s/AKfycbwbB1LkCbpT5ofgWXB0tGlpbMopMnjWeLfEOX4IbEEcrrvMJboZ3C5SZ9LVSaVyD8fiiQ/exec" data-nome="Corinthians">🦅 Corinthians</option><option value="https://script.google.com/macros/s/AKfycbxdeaVayrVv13eN044gzRUQBNOrnQlzo3ftqm0Jj5Sf9zEHlPApapd-rWsAHREzkweiTw/exec" data-nome="São Paulo">🔴 São Paulo</option><option value="https://script.google.com/macros/s/AKfycbwEjviHWdcxWVFc6hDAhyNE0JCH41J_DzDnUvIAlXosqihM83n1nRfe-WZUWUZs9nOb/exec" data-nome="Palmeiras">🐷 Palmeiras</option><option value="https://script.google.com/macros/s/AKfycbxiHVwdciFEW8ro_JqBokolGgSm-Vh1ILi2aB7gu9VKs4YcVnQBCEDa7QnqOPXuRlb3pQ/exec" data-nome="Santos">🐳 Santos</option><option value="https://script.google.com/macros/s/AKfycbxq7xV9ZI63_vBAUwDFrm_3j28D_GCsswGZbHmiTeE-saN7MwuR58zFE5JkTiK_5YkAZQ/exec" data-nome="Flamengo">🔴 Flamengo</option></select></div>
-            <div class="badges-container"><div class="badge badge-blue" id="badge-total">📊 Total neste time: Carregando...</div><div class="badge badge-green" id="badge-ultimo">🕒 Último lote: Nenhum</div></div>
-            <div class="box-perigo" style="margin-top:10px;"><label style="color:#e11d48; margin-bottom:0; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.75rem; font-weight:800;"><input type="checkbox" id="substituir" style="width:18px; height:18px; margin:0;">⚠️ MODO RECICLAGEM: APAGAR banco antigo e substituir</label></div>
-            <button id="btn-iniciar" class="btn-magic" style="padding:12px; font-size:0.9rem;" onclick="iniciarAutomacao(false)">Gerar para o Time</button>
-            <button id="btn-global" class="btn-magic btn-global" style="padding:12px; font-size:0.9rem;" onclick="iniciarAutomacao(true)">GERAR TODOS (GLOBAL)</button>
-        </div>
-
-        <div id="tab-config" class="tab-content">
-            <div class="section-title" style="margin-top:0;">🛒 Taxas de Plataformas</div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:-5px; margin-bottom:15px; font-weight:600;">Cadastre as plataformas (Shopee, Elo7, etc) para calcular sugestões de preço.</p>
-            <div style="background:#fff; border:1px solid var(--border-color); padding:15px; border-radius:12px; margin-bottom:20px;">
-                <div class="input-group"><label>Nome da Plataforma:</label><input type="text" id="config-plat-nome" placeholder="Ex: Shopee"></div>
-                <div class="row">
-                    <div class="col"><div class="input-group"><label>Comissão (%):</label><input type="number" id="config-plat-pct" placeholder="Ex: 20"></div></div>
-                    <div class="col"><div class="input-group"><label>Taxa Fixa (R$):</label><input type="number" id="config-plat-fixa" placeholder="Ex: 4.00" step="0.50"></div></div>
+            <div id="loading-dashboard" class="loading-mm">⏳ Processando...</div>
+            <div id="conteudo-dashboard" style="display:none;">
+                <div class="card"><div class="card-titulo">👑 Top 10 clientes</div><p class="card-desc">Quem mais comprou no período.</p><canvas id="chartClientes"></canvas></div>
+                <div class="grade-2">
+                    <div class="card"><div class="card-titulo">🏆 Top 5 produtos</div><p class="card-desc">Peças mais vendidas (loja + vendedores).</p><canvas id="chartProdutos"></canvas></div>
+                    <div class="card"><div class="card-titulo">📱 Por canal</div><p class="card-desc">Valor vendido por plataforma.</p><canvas id="chartPlataformas"></canvas></div>
                 </div>
-                <button class="btn-magic btn-global" style="margin-top:0; padding:10px;" onclick="salvarPlataforma()">➕ Adicionar</button>
-            </div>
-            <div id="lista-plataformas" style="margin-bottom:25px;"></div>
-            <div class="section-title">🤝 Consignado (Vendedores)</div>
-            <div style="background:#fff; border:1px solid var(--border-color); padding:15px; border-radius:12px; margin-bottom:20px;">
-                <div class="row">
-                    <div class="col"><div class="input-group"><label>Markup do repasse sobre o custo (%)</label><input type="number" id="cfg-markup-repasse" placeholder="100"></div></div>
-                    <div class="col"><div class="input-group"><label>Margem sugerida ao vendedor (%)</label><input type="number" id="cfg-margem-vendedor" placeholder="50"></div></div>
-                </div>
-                <div class="row">
-                    <div class="col"><div class="input-group"><label>Alerta de estoque baixo (un)</label><input type="number" id="cfg-estoque-minimo" placeholder="2"></div></div>
-                    <div class="col"><div class="input-group"><label>Seu WhatsApp (avisos de pagamento)</label><input type="text" id="cfg-telefone-admin" placeholder="11999998888"></div></div>
-                </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 10px; font-weight:600;">Ex.: custo R$ 10 com markup 100% → repasse sugerido R$ 20. Com margem 50% → preço sugerido ao vendedor R$ 30 (ele vende pelo preço que quiser).</p>
-                <button class="btn-magic btn-global" style="margin-top:0; padding:10px;" onclick="salvarConfigMM()">💾 Salvar Parâmetros</button>
-            </div>
-            <div class="section-title">🔑 Chaves de Integração</div>
-            <div class="input-group"><label>🧠 Chave Privada (Gemini):</label><input type="password" id="api-key" onchange="salvarChaves()"></div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-5px; font-weight:600;">📸 O envio de fotos (OnionSys + backup ImgBB) agora usa as chaves guardadas no servidor.</p>
-            <div class="section-title">🔒 Segurança</div>
-            <div class="row" style="margin-bottom:20px;">
-                <div class="col"><button class="btn-limpar" style="width:100%; padding:12px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button></div>
-                <div class="col"><button class="btn-limpar" style="width:100%; padding:12px;" onclick="abrirLogs()">📜 Ver registro de atividades</button></div>
             </div>
         </div>
 
-        <div class="log-container" id="terminal">
-            <div class="log-line"><span class="log-time">[Sistema]</span><span class="log-info">Painel de Diretoria Mini Mundo Carregado.</span></div>
-        </div>
-
-        <div id="tab-precificar" class="tab-content">
-            <button class="btn-magic btn-excluir" onclick="toggleConfig()" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#475569; margin-top:0; margin-bottom:20px;">⚙️ Configurações da Impressora (Custos Fixos)</button>
-            <div id="area-config" style="display:none; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
-                <div class="row"><div class="col"><label>Consumo (Watts)</label><input type="number" id="v-watts" value="175" oninput="calcular()"></div><div class="col"><label>Energia (R$/kWh)</label><input type="number" id="v-kwh" value="0.70" step="0.01" oninput="calcular()"></div></div>
-                <div class="row"><div class="col"><label>Máquina/Hora (R$)</label><input type="number" id="v-maq" value="0.75" step="0.01" oninput="calcular()"></div><div class="col"><label>Sua Hora (R$)</label><input type="number" id="v-hora" value="10.00" step="0.50" oninput="calcular()"></div></div>
-            </div>
-            <div class="section-title">📝 Dados do Novo Projeto</div>
-            <div class="input-group"><label>Nome do Modelo</label><input type="text" id="v-modelo" class="input-var" placeholder="Ex: Placa profissões"></div>
-            <div class="row"><div class="col"><label>Filamento (kg)</label><input type="number" id="v-filamento" class="input-var" value="100" step="1" oninput="calcular()"></div><div class="col"><label>Peso (g)</label><input type="number" id="v-peso" class="input-var" value="126" step="1" oninput="calcular()"></div></div>
-            <div class="row"><div class="col"><label>Tempo Imp. (h)</label><input type="number" id="v-tempo-imp" class="input-var" value="9" step="0.1" oninput="calcular()"></div><div class="col"><label>Mão de Obra (h)</label><input type="number" id="v-tempo-mao" class="input-var" value="0" step="0.1" oninput="calcular()"></div></div>
-            <div class="input-group"><label>Custos Extras (Embalagem, Ímãs, etc)</label><input type="number" id="v-insumos" class="input-var" value="0" step="0.50" oninput="calcular()"></div>
-            <div class="resumo-box">
-                <h3>Custo Real de Produção</h3>
-                <div class="custo-linha"><span>Material (Filamento)</span> <span id="r-material">R$ 0,00</span></div>
-                <div class="custo-linha"><span>Energia Elétrica</span> <span id="r-energia">R$ 0,00</span></div>
-                <div class="custo-linha"><span>Manutenção/Depreciação</span> <span id="r-deprec">R$ 0,00</span></div>
-                <div class="custo-linha"><span>Mão de Obra</span> <span id="r-humano">R$ 0,00</span></div>
-                <div class="custo-linha"><span>Taxa de Falha (10%)</span> <span id="r-falha">R$ 0,00</span></div>
-                <div class="custo-linha" style="border-bottom:none;"><span>Insumos Extras</span> <span id="r-insumos">R$ 0,00</span></div>
-                <div class="custo-total"><span>Custo Total:</span> <span id="r-total">R$ 0,00</span></div>
-            </div>
-            <div class="section-title">💰 Margens Sugeridas</div>
-            <div class="markup-box"><p class="markup-title">Peças Simples / Reposição (2x a 3x)</p><p class="markup-preco" id="m-simples-preco">R$ 0,00 a R$ 0,00</p><p class="markup-lucro" id="m-simples-lucro">Lucro: R$ 0,00 a R$ 0,00</p></div>
-            <div class="markup-box" style="background:#fffbeb; border-color:#fde68a;"><p class="markup-title" style="color:#b45309;">Decorativos / Colecionáveis (4x a 6x)</p><p class="markup-preco" id="m-decor-preco">R$ 0,00 a R$ 0,00</p><p class="markup-lucro" id="m-decor-lucro">Lucro: R$ 0,00 a R$ 0,00</p></div>
-            <div class="markup-box" style="background:#eff6ff; border-color:#bfdbfe;">
-                <p class="markup-title" style="color:#1d4ed8;">🤝 Preço de Repasse (Vendedores)</p>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 8px; font-weight:600;">Sugestão: custo × <b id="m-repasse-fator">2,00</b> (ajuste o % em Ajustes). Pode digitar outro valor.</p>
-                <input type="text" id="v-repasse" class="mask-money" placeholder="R$ 0,00" style="font-size:1.2rem; font-weight:900; color:#1d4ed8;">
-                <p class="markup-lucro" id="m-repasse-lucro">Seu lucro por peça vendida pelo vendedor: R$ 0,00</p>
-            </div>
-            <button id="btn-salvar-custo" class="btn-magic btn-global" onclick="salvarBancoModelos()">💾 Salvar Modelo no Banco</button>
-        </div>
-
+        <!-- ========================================== -->
+        <!-- 🛒 VENDAS                                  -->
+        <!-- ========================================== -->
         <div id="tab-vendas" class="tab-content">
-            <div class="resumo-box" style="background:#1e293b; padding:15px;">
-                <div style="text-align:center; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;">
-                    <h3 style="color:#94a3b8; font-size:0.9rem; margin-bottom:5px;">TOTAL VENDIDO (NO FILTRO)</h3>
-                    <span id="vendas-total-valor" style="font-size:2.2rem; color:#f8fafc; font-weight:900;">R$ 0,00</span>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <div style="text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">A Receber</h3><span id="vendas-pendentes-valor" style="font-size:1.1rem; color:#f59e0b; font-weight:900;">R$ 0,00</span></div>
-                    <div style="text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Receita</h3><span id="vendas-pagas-valor" style="font-size:1.1rem; color:#10b981; font-weight:900;">R$ 0,00</span></div>
-                    <div style="text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Lucro Projetado</h3><span id="vendas-lucro-valor" style="font-size:1.1rem; color:#38bdf8; font-weight:900;">R$ 0,00</span></div>
-                    <div style="text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Itens Vendidos</h3><span id="vendas-qtd-valor" style="font-size:1.1rem; color:#e2e8f0; font-weight:900;">0 un</span></div>
-                </div>
+            <div class="kpis">
+                <div class="kpi"><span class="kpi-rotulo">Total vendido</span><span id="vendas-total-valor" class="kpi-valor">R$ 0,00</span><span class="kpi-sub">no filtro atual</span></div>
+                <div class="kpi"><span class="kpi-rotulo">🟢 Recebido</span><span id="vendas-pagas-valor" class="kpi-valor v-verde">R$ 0,00</span></div>
+                <div class="kpi"><span class="kpi-rotulo">🟡 A receber</span><span id="vendas-pendentes-valor" class="kpi-valor v-laranja">R$ 0,00</span></div>
+                <div class="kpi"><span class="kpi-rotulo">Lucro projetado</span><span id="vendas-lucro-valor" class="kpi-valor v-azul">R$ 0,00</span></div>
+                <div class="kpi"><span class="kpi-rotulo">Itens vendidos</span><span id="vendas-qtd-valor" class="kpi-valor">0 un</span></div>
             </div>
 
-            <!-- NOVA ESTÉTICA DE VENDA COM SUGESTÃO DE PREÇO -->
-            <div style="background:#f0fdf4; padding:20px; border-radius:16px; border:2px solid #bbf7d0; margin-bottom:25px;">
-                <div class="section-title" style="margin-top:0; color:#047857; border-left-color:#10b981;">🛒 Registrar Nova Venda</div>
-                <div id="loading-opcoes-venda" style="text-align:center; color:#166534; font-weight:700; font-size:0.8rem; margin-bottom:10px; display:none;">Sincronizando listas...</div>
-                
-                <div class="row"><div class="col"><label>Data da Venda</label><input type="date" id="venda-data"></div><div class="col"><label>Status</label><select id="venda-status" class="input-var" style="border-color:#bbf7d0 !important; background-color:#fff !important;"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div></div>
-                <div class="input-group"><label>Cliente</label><input type="text" id="venda-cliente" class="input-var" list="lista-clientes-venda" placeholder="Ex: João Silva" autocomplete="off" style="border-color:#bbf7d0 !important; background-color:#fff !important;"><datalist id="lista-clientes-venda"></datalist></div>
-                <div class="input-group"><label>Produto Vendido (Custo Automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Ex: Placa profissões" autocomplete="off" style="border-color:#bbf7d0 !important; background-color:#fff !important;" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist></div>
+            <div class="card card-destaque">
+                <div class="card-titulo">➕ Registrar nova venda</div>
+                <p class="card-desc">Venda direta (loja, Shopee, Elo7...). Vendas dos vendedores entram pela baixa deles.</p>
+                <div id="loading-opcoes-venda" class="loading-mm" style="padding:6px;">Sincronizando listas...</div>
+                <div class="row">
+                    <div class="col"><label>Data da venda</label><input type="date" id="venda-data"></div>
+                    <div class="col"><label>Status</label><select id="venda-status" class="input-var"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div>
+                </div>
+                <div class="input-group"><label>Cliente</label><input type="text" id="venda-cliente" class="input-var" list="lista-clientes-venda" placeholder="Ex: João Silva" autocomplete="off"><datalist id="lista-clientes-venda"></datalist></div>
+                <div class="input-group"><label>Produto vendido (custo automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Ex: Placa profissões" autocomplete="off" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist></div>
                 <label id="box-baixa-atelie" class="check-estoque" style="display:none;"><input type="checkbox" id="venda-baixa-atelie"> 📦 Tirar do estoque do Ateliê (<span id="venda-atelie-qtd">0</span> disponíveis) — desmarque se for sob encomenda</label>
                 <div class="row">
-                    <div class="col">
-                        <label>Plataforma</label>
-                        <select id="venda-plataforma" class="input-var" style="border-color:#bbf7d0 !important; background-color:#fff !important;" onchange="calcularSugestao()">
-                            <!-- Preenchido via JS -->
-                        </select>
-                    </div>
-                    <div class="col">
-                        <label>Qtd</label>
-                        <input type="number" id="venda-qtd" class="input-var" value="1" min="1" style="border-color:#bbf7d0 !important; background-color:#fff !important;" oninput="calcularSugestao()">
-                    </div>
+                    <div class="col"><label>Plataforma</label><select id="venda-plataforma" class="input-var" onchange="calcularSugestao()"></select></div>
+                    <div class="col"><label>Quantidade</label><input type="number" id="venda-qtd" class="input-var" value="1" min="1" oninput="calcularSugestao()"></div>
+                    <div class="col"><label>Markup desejado (%)</label><input type="number" id="venda-markup" class="input-var" value="100" oninput="calcularSugestao()"></div>
                 </div>
-                <div class="input-group">
-                    <label>Markup Desejado (%)</label>
-                    <input type="number" id="venda-markup" class="input-var" value="100" style="border-color:#bbf7d0 !important; background-color:#fff !important;" oninput="calcularSugestao()">
+                <div id="box-sugestao-preco" class="box-sugestao" onclick="aplicarPrecoSugerido()">
+                    <small>💡 Preço sugerido — toque para usar</small>
+                    <strong id="venda-sugestao-valor">R$ 0,00</strong>
+                    <span>Lucro garantido: <b id="venda-sugestao-lucro">R$ 0,00</b></span>
                 </div>
-                <!-- CAIXA DE SUGESTÃO DE PREÇO -->
-                <div id="box-sugestao-preco" style="display:none; background:#fffbeb; border:1px solid #fde68a; padding:12px; border-radius:12px; text-align:center; cursor:pointer; margin-bottom:15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition:0.2s;" onclick="aplicarPrecoSugerido()" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <span style="font-size:0.8rem; color:#b45309; display:block; font-weight:800; text-transform:uppercase;">💡 Preço Sugerido (Clique para usar)</span>
-                    <span id="venda-sugestao-valor" style="font-size:1.8rem; font-weight:900; color:#d97706; display:block; margin: 5px 0;">R$ 0,00</span>
-                    <span style="font-size:0.75rem; color:#78716c; display:block; margin-top:4px;">Lucro garantido: <b id="venda-sugestao-lucro">R$ 0,00</b></span>
-                </div>
-                <div class="input-group"><label>Valor Final a Cobrar</label><input type="text" id="venda-valor" class="input-var mask-money" placeholder="R$ 0,00" style="border-color:#bbf7d0 !important; background-color:#fff !important; font-size:1.2rem; color:#047857;"></div>
-                <button class="btn-magic btn-global" id="btn-salvar-venda" onclick="salvarVenda()" style="margin-bottom:0; box-shadow:0 8px 20px rgba(16,185,129,0.3);">✅ Lançar Venda</button>
+                <div class="input-group"><label>Valor final a cobrar</label><input type="text" id="venda-valor" class="input-var mask-money campo-dinheiro" placeholder="R$ 0,00"></div>
+                <button class="btn-magic btn-global" id="btn-salvar-venda" onclick="salvarVenda()">✅ Lançar venda</button>
             </div>
 
-            <div class="section-title">📊 Histórico de Vendas</div>
+            <div class="section-title">📊 Histórico de vendas</div>
             <div class="filtros-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-                    <label style="margin:0;">Filtros:</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1; justify-content:flex-end;">
-                        <button class="btn-limpar" style="background:#dcfce7; color:#166534; border-color:#a7f3d0;" onclick="abrirModalAcoesLote()">📦 Ações em Lote</button>
-                        <button class="btn-limpar" onclick="limparFiltrosVendas()">🧹 Limpar</button>
-                    </div>
+                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">Filtros</span>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn-limpar" onclick="abrirModalAcoesLote()">📦 Cobranças e recibos em lote</button><button class="btn-limpar" onclick="limparFiltrosVendas()">🧹 Limpar</button></div></div>
+                <div class="row">
+                    <div class="col"><label>Mês</label><select id="filtro-v-mes" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
+                    <div class="col"><label>Ano</label><select id="filtro-v-ano" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+                    <div class="col"><label>Pagamento</label><select id="filtro-v-status" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="pago">🟢 Pagos</option><option value="pendente">🟡 Pendentes</option></select></div>
                 </div>
-                <div class="row" style="margin-bottom:10px;"><div class="col"><label>Mês:</label><select id="filtro-v-mes" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div><div class="col"><label>Ano:</label><select id="filtro-v-ano" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option></select></div></div>
-                <div class="input-group" style="margin-bottom:0;"><label>Status do Pagamento:</label><select id="filtro-v-status" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="pago">Somente Pagos 🟢</option><option value="pendente">Somente Pendentes 🟡</option></select></div>
-                <input type="text" id="busca-venda" class="search-bar" style="margin-top:15px; margin-bottom:0;" placeholder="🔍 Buscar cliente ou produto..." list="lista-clientes-busca" autocomplete="off" onkeyup="filtrarVendas()">
+                <input type="text" id="busca-venda" class="search-bar" style="margin-bottom:0;" placeholder="🔍 Buscar cliente ou produto..." list="lista-clientes-busca" autocomplete="off" onkeyup="filtrarVendas()">
                 <datalist id="lista-clientes-busca"></datalist>
+                <datalist id="lista-plataformas-venda"></datalist>
             </div>
-            <div id="loading-vendas" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Carregando vendas...</div>
+            <div id="loading-vendas" class="loading-mm">⏳ Carregando vendas...</div>
             <div id="lista-vendas"></div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- 🧮 PRECIFICAR                              -->
+        <!-- ========================================== -->
+        <div id="tab-precificar" class="tab-content">
+            <div class="grade-2">
+                <div>
+                    <div class="card">
+                        <div class="card-cabeca"><div class="card-titulo">📝 Novo projeto</div><button class="btn-limpar" onclick="toggleConfig()">⚙️ Custos da impressora</button></div>
+                        <div id="area-config" style="display:none; background:#fafaf9; padding:14px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:14px;">
+                            <div class="row"><div class="col"><label>Consumo (Watts)</label><input type="number" id="v-watts" value="175" oninput="calcular()"></div><div class="col"><label>Energia (R$/kWh)</label><input type="number" id="v-kwh" value="0.70" step="0.01" oninput="calcular()"></div></div>
+                            <div class="row"><div class="col"><label>Máquina/hora (R$)</label><input type="number" id="v-maq" value="0.75" step="0.01" oninput="calcular()"></div><div class="col"><label>Sua hora (R$)</label><input type="number" id="v-hora" value="10.00" step="0.50" oninput="calcular()"></div></div>
+                        </div>
+                        <div class="input-group"><label>Nome do modelo</label><input type="text" id="v-modelo" class="input-var" placeholder="Ex: Placa profissões"></div>
+                        <div class="row"><div class="col"><label>Filamento (R$/kg)</label><input type="number" id="v-filamento" class="input-var" value="100" step="1" oninput="calcular()"></div><div class="col"><label>Peso (g)</label><input type="number" id="v-peso" class="input-var" value="126" step="1" oninput="calcular()"></div></div>
+                        <div class="row"><div class="col"><label>Tempo de impressão (h)</label><input type="number" id="v-tempo-imp" class="input-var" value="9" step="0.1" oninput="calcular()"></div><div class="col"><label>Mão de obra (h)</label><input type="number" id="v-tempo-mao" class="input-var" value="0" step="0.1" oninput="calcular()"></div></div>
+                        <div class="input-group"><label>Custos extras (embalagem, ímãs etc.)</label><input type="number" id="v-insumos" class="input-var" value="0" step="0.50" oninput="calcular()"></div>
+                    </div>
+                    <div class="resumo-box">
+                        <h3>💲 Custo real de produção</h3>
+                        <div class="custo-linha"><span>Material (filamento)</span> <span id="r-material">R$ 0,00</span></div>
+                        <div class="custo-linha"><span>Energia elétrica</span> <span id="r-energia">R$ 0,00</span></div>
+                        <div class="custo-linha"><span>Manutenção/depreciação</span> <span id="r-deprec">R$ 0,00</span></div>
+                        <div class="custo-linha"><span>Mão de obra</span> <span id="r-humano">R$ 0,00</span></div>
+                        <div class="custo-linha"><span>Taxa de falha (10%)</span> <span id="r-falha">R$ 0,00</span></div>
+                        <div class="custo-linha" style="border-bottom:none;"><span>Insumos extras</span> <span id="r-insumos">R$ 0,00</span></div>
+                        <div class="custo-total"><span>Custo total</span> <span id="r-total">R$ 0,00</span></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card">
+                        <div class="card-titulo">💰 Preços sugeridos</div>
+                        <p class="card-desc">Referências para venda direta ao cliente.</p>
+                        <div class="markup-box"><p class="markup-title">Peças simples / reposição (2x a 3x)</p><p class="markup-preco" id="m-simples-preco">R$ 0,00</p><p class="markup-lucro" id="m-simples-lucro">Lucro: R$ 0,00</p></div>
+                        <div class="markup-box decor"><p class="markup-title">Decorativos / colecionáveis (4x a 6x)</p><p class="markup-preco" id="m-decor-preco">R$ 0,00</p><p class="markup-lucro" id="m-decor-lucro">Lucro: R$ 0,00</p></div>
+                        <div class="markup-box repasse">
+                            <p class="markup-title">🤝 Preço de repasse (vendedores)</p>
+                            <p class="texto-ajuda">Sugestão: custo × <b id="m-repasse-fator">2,00</b> (ajuste o % em Ajustes). Pode digitar outro valor.</p>
+                            <input type="text" id="v-repasse" class="mask-money" placeholder="R$ 0,00" style="font-size:1.15rem; font-weight:800; color:#1d4ed8;">
+                            <p class="markup-lucro" id="m-repasse-lucro">Seu lucro por peça vendida pelo vendedor: R$ 0,00</p>
+                        </div>
+                        <button id="btn-salvar-custo" class="btn-magic btn-global" onclick="salvarBancoModelos()">💾 Salvar modelo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 📋 MODELOS                                 -->
+        <!-- ========================================== -->
         <div id="tab-modelos" class="tab-content">
-            <div class="section-title" style="margin-top:0;">📋 Modelos Cadastrados</div>
+            <p class="texto-ajuda">Seus produtos com custo, preço de repasse e estoque. Toque no ✏️ para definir o repasse, a foto ou desativar.</p>
             <input type="text" id="busca-banco" class="search-bar" placeholder="🔍 Buscar modelo pelo nome..." onkeyup="filtrarBanco()">
-            <div id="loading-banco" style="text-align:center; padding:30px; color:var(--primary); font-weight:900; font-size:1rem; display:none;">⏳ Lendo Banco...</div>
+            <div id="loading-banco" class="loading-mm">⏳ Lendo modelos...</div>
             <div id="lista-banco"></div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- 💳 CUSTOS                                  -->
+        <!-- ========================================== -->
         <div id="tab-custos" class="tab-content">
-            <div class="resumo-box" style="background:#1e293b; text-align:center;"><h3 style="color:#94a3b8; font-size:0.9rem; margin-bottom:5px;">Investimento (Filtro)</h3><div class="custo-total" style="justify-content:center; background:transparent; font-size:2.2rem; color:#38bdf8; margin-top:5px;"><span id="total-despesas-valor">R$ 0,00</span></div></div>
-
-            <div style="background:#fffbeb; padding:20px; border-radius:16px; border:2px solid #fde68a; margin-bottom:25px;">
-                <div class="section-title" style="margin-top:0; color:#b45309; border-left-color:#d97706;">➕ Registrar Nova Compra</div>
-                <div class="row" style="margin-bottom:10px;"><div class="col"><label>Data</label><input type="date" id="d-data"></div><div class="col"><label>Local</label><input type="text" id="d-local" class="input-var" list="lista-locais-sugestao" placeholder="Ex: Shopee"><datalist id="lista-locais-sugestao"></datalist></div></div>
-                <div class="input-group"><label>Item / Produto</label><input type="text" id="d-item" class="input-var" list="lista-itens-sugestao" placeholder="Ex: Filamento" autocomplete="off"><datalist id="lista-itens-sugestao"></datalist></div>
-                <div class="row"><div class="col"><label>Quantidade</label><input type="number" id="d-qtd" class="input-var" value="1" min="1" step="0.01"></div><div class="col"><label>Valor Unit.</label><input type="text" id="d-valor-uni" class="input-var mask-money" placeholder="R$ 0,00"></div></div>
-                <div class="resumo-box" style="margin-top:5px; padding:15px; margin-bottom:15px;"><div class="custo-total" style="margin-top:0; font-size:1.1rem; padding:5px;"><span>Total a Lançar:</span> <span id="d-total-calc">R$ 0,00</span></div></div>
-                <button class="btn-magic btn-global" id="btn-salvar-despesa" onclick="salvarDespesa()" style="margin-bottom:0;">💳 Lançar Despesa</button>
+            <div class="kpis"><div class="kpi destaque"><span class="kpi-rotulo">Investimento no filtro</span><span id="total-despesas-valor" class="kpi-valor">R$ 0,00</span></div></div>
+            <div class="card card-destaque">
+                <div class="card-titulo">➕ Registrar nova compra</div>
+                <p class="card-desc">Filamento, embalagens, peças da impressora...</p>
+                <div class="row">
+                    <div class="col"><label>Data</label><input type="date" id="d-data"></div>
+                    <div class="col"><label>Local / fornecedor</label><input type="text" id="d-local" class="input-var" list="lista-locais-sugestao" placeholder="Ex: Shopee"><datalist id="lista-locais-sugestao"></datalist></div>
+                </div>
+                <div class="input-group"><label>Item / produto</label><input type="text" id="d-item" class="input-var" list="lista-itens-sugestao" placeholder="Ex: Filamento PLA" autocomplete="off"><datalist id="lista-itens-sugestao"></datalist></div>
+                <div class="row">
+                    <div class="col"><label>Quantidade</label><input type="number" id="d-qtd" class="input-var" value="1" min="1" step="0.01"></div>
+                    <div class="col"><label>Valor unitário</label><input type="text" id="d-valor-uni" class="input-var mask-money" placeholder="R$ 0,00"></div>
+                </div>
+                <div class="total-linha"><span>Total a lançar</span> <span id="d-total-calc">R$ 0,00</span></div>
+                <button class="btn-magic btn-global" id="btn-salvar-despesa" onclick="salvarDespesa()">💳 Lançar despesa</button>
             </div>
 
-            <div class="section-title">🧾 Histórico de Lançamentos</div>
+            <div class="section-title">🧾 Histórico de compras</div>
             <div class="filtros-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><label style="margin:0;">Filtros:</label><button class="btn-limpar" onclick="limparFiltrosDespesas()">🧹 Limpar Tudo</button></div>
-                <div class="row" style="margin-bottom:10px;"><div class="col"><label>Mês:</label><select id="filtro-d-mes" onchange="filtrarDespesas()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div><div class="col"><label>Ano:</label><select id="filtro-d-ano" onchange="filtrarDespesas()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option></select></div></div>
-                <div class="input-group" style="margin-bottom:0;"><label>Local / Fornecedor:</label><select id="filtro-d-local" onchange="filtrarDespesas()"><option value="todos">Todos os Locais</option></select></div>
-                <input type="text" id="busca-despesa" class="search-bar" style="margin-top:15px; margin-bottom:0;" placeholder="🔍 Buscar item..." onkeyup="filtrarDespesas()">
+                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">Filtros</span><button class="btn-limpar" onclick="limparFiltrosDespesas()">🧹 Limpar</button></div>
+                <div class="row">
+                    <div class="col"><label>Mês</label><select id="filtro-d-mes" onchange="filtrarDespesas()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
+                    <div class="col"><label>Ano</label><select id="filtro-d-ano" onchange="filtrarDespesas()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+                    <div class="col"><label>Fornecedor</label><select id="filtro-d-local" onchange="filtrarDespesas()"><option value="todos">Todos</option></select></div>
+                </div>
+                <input type="text" id="busca-despesa" class="search-bar" style="margin-bottom:0;" placeholder="🔍 Buscar item..." onkeyup="filtrarDespesas()">
             </div>
-            <div id="loading-despesas" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Lendo histórico...</div><div id="lista-despesas"></div>
-        </div>
-
-        <div id="tab-dashboard_erp" class="tab-content">
-            <div class="resumo-box" style="background:#1e293b; padding:25px 15px;">
-                <div style="text-align:center; margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;"><h3 style="color:#94a3b8; font-size:0.9rem; margin-bottom:5px;">BALANÇO DO CAIXA REAL</h3><p style="color:#64748b; font-size:0.7rem; margin-top:0;">Receitas Pagas menos Despesas Pagas</p><span id="dash-balanco-valor" style="font-size:2.4rem; color:#10b981; font-weight:900;">R$ 0,00</span></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Entradas (Receitas)</h3><span id="dash-receita-valor" style="font-size:1.2rem; color:#38bdf8; font-weight:900;">R$ 0,00</span></div><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">Saídas (Despesas)</h3><span id="dash-despesa-valor" style="font-size:1.2rem; color:#ef4444; font-weight:900;">R$ 0,00</span></div></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">🤝 Repasses Recebidos</h3><p style="color:#64748b; font-size:0.65rem; margin:0 0 4px;">(já somados nas entradas)</p><span id="dash-repasses-valor" style="font-size:1.2rem; color:#a78bfa; font-weight:900;">R$ 0,00</span></div><div style="text-align:center; background:rgba(255,255,255,0.05); padding:15px 10px; border-radius:10px;"><h3 style="color:#94a3b8; font-size:0.75rem; margin-bottom:5px;">⏳ A Receber de Vendedores</h3><p style="color:#64748b; font-size:0.65rem; margin:0 0 4px;">(total em aberto hoje)</p><span id="dash-areceber-vend-valor" style="font-size:1.2rem; color:#f59e0b; font-weight:900;">R$ 0,00</span></div></div>
-            </div>
-            <div class="filtros-box" style="margin-bottom:20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><label style="margin:0; color:var(--brand-dark);">Filtros do Dashboard:</label><button class="btn-limpar" onclick="limparFiltrosDashboardERP()">🧹 Limpar Tudo</button></div>
-                <div class="row" style="margin-bottom:0;"><div class="col"><label>Mês:</label><select id="filtro-dash-mes" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div><div class="col"><label>Ano:</label><select id="filtro-dash-ano" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option></select></div></div>
-            </div>
-            <div id="loading-dashboard" style="text-align:center; padding:20px; color:var(--primary); font-weight:800; display:none;">⏳ Processando...</div>
-            <div id="conteudo-dashboard" style="display:none;">
-                <div class="filtros-box" style="margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05);"><div class="section-title" style="margin-top:0; color:#166534; border-left-color:#10b981;">👑 Top 10 Clientes</div><canvas id="chartClientes"></canvas></div>
-                <div class="filtros-box" style="margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05);"><div class="section-title" style="margin-top:0; color:#b45309; border-left-color:#d97706;">🏆 Top 5 Produtos</div><canvas id="chartProdutos"></canvas></div>
-                <div class="filtros-box" style="margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05);"><div class="section-title" style="margin-top:0; color:#1e3a8a; border-left-color:#3b82f6;">📱 Plataformas</div><canvas id="chartPlataformas"></canvas></div>
-            </div>
+            <div id="loading-despesas" class="loading-mm">⏳ Lendo histórico...</div>
+            <div id="lista-despesas"></div>
         </div>
 
         <!-- ========================================== -->
@@ -361,13 +303,15 @@
         <!-- ========================================== -->
         <div id="tab-estoque" class="tab-content">
             <div id="estoque-resumo"></div>
-            <div class="row" style="margin-bottom:12px;">
-                <div class="col"><button class="btn-magic btn-global" style="margin-top:0;" onclick="abrirProducao()">🖨️ Registrar Produção</button></div>
-                <div class="col"><button class="btn-magic" style="margin-top:0;" onclick="abrirMala()">🧳 Enviar Mala</button></div>
+            <div class="barra-acoes">
+                <button class="btn-magic btn-global" onclick="abrirProducao()">🖨️ Registrar produção</button>
+                <button class="btn-magic" onclick="abrirMala()">🧳 Enviar mala</button>
+                <button class="btn-magic btn-secundario" onclick="abrirMovimentos()">📜 Histórico</button>
             </div>
-            <button class="btn-limpar" style="width:100%; margin-bottom:15px; padding:12px;" onclick="abrirMovimentos()">📜 Histórico de movimentações</button>
-            <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
-            <label class="check-estoque" style="margin-bottom:12px;"><input type="checkbox" id="estoque-so-com-pecas" onchange="renderizarEstoque()"> Mostrar só produtos com peças</label>
+            <div class="filtros-box" style="padding:14px;">
+                <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
+                <label class="check-estoque" style="margin:0;"><input type="checkbox" id="estoque-so-com-pecas" onchange="renderizarEstoque()"> Mostrar só produtos com peças</label>
+            </div>
             <div id="loading-estoque" class="loading-mm">⏳ Carregando estoque...</div>
             <div id="lista-estoque"></div>
         </div>
@@ -379,18 +323,172 @@
             <div id="vendedores-resumo"></div>
             <details class="box-novo">
                 <summary>➕ Cadastrar novo vendedor</summary>
-                <div class="row" style="margin-top:12px;">
+                <div class="row">
                     <div class="col"><div class="input-group"><label>Usuário (login)</label><input type="text" id="nv-usuario" placeholder="Ex: Kamila" autocomplete="off"></div></div>
                     <div class="col"><div class="input-group"><label>Senha inicial</label><input type="text" id="nv-senha" placeholder="Mín. 4 caracteres" autocomplete="off"></div></div>
+                    <div class="col"><div class="input-group"><label>WhatsApp</label><input type="text" id="nv-telefone" placeholder="11999998888"></div></div>
                 </div>
-                <div class="input-group"><label>WhatsApp</label><input type="text" id="nv-telefone" placeholder="11999998888"></div>
-                <button class="btn-magic btn-global" style="margin-top:0; padding:12px;" onclick="salvarNovoVendedor()">🤝 Cadastrar Vendedor</button>
+                <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarNovoVendedor()">🤝 Cadastrar vendedor</button>
             </details>
-            <div class="section-title">👥 Equipe</div>
+            <div class="section-title" style="margin-top:0;">👥 Equipe</div>
             <div id="loading-vendedores" class="loading-mm">⏳ Carregando equipe...</div>
             <div id="lista-vendedores"></div>
-            <div class="section-title">🎁 Encomendas dos Vendedores</div>
+            <div class="section-title">🎁 Encomendas dos vendedores</div>
             <div id="lista-encomendas-admin"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 🛍️ CATÁLOGO DA LOJA                        -->
+        <!-- ========================================== -->
+        <div id="tab-loja" class="tab-content">
+            <div class="card card-destaque">
+                <div class="card-titulo">✨ Adicionar produto na vitrine</div>
+                <p class="card-desc">A IA escreve a descrição e escolhe a categoria a partir da foto.</p>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Nome</label><input type="text" id="prod-nome" placeholder="Ex: Placa personalizada"></div></div>
+                    <div class="col"><div class="input-group"><label>Preço</label><input type="text" id="prod-preco" class="mask-money" placeholder="R$ 60,00"></div></div>
+                </div>
+                <div class="input-group"><label>Fotos</label><input type="file" id="prod-fotos" accept="image/*" multiple></div>
+                <button id="btn-salvar-produto" class="btn-magic btn-global" style="margin-top:0;" onclick="cadastrarProdutoIA()">✨ Enviar e cadastrar</button>
+            </div>
+            <div class="section-title">📋 Produtos cadastrados</div>
+            <input type="text" id="busca-catalogo" class="search-bar" placeholder="🔍 Buscar nome, categoria..." onkeyup="filtrarCatalogo()">
+            <div id="loading-catalogo" class="loading-mm">⏳ Buscando...</div>
+            <div id="lista-produtos-admin" class="scroll-container"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 🧲 ÍMÃS NFC                                -->
+        <!-- ========================================== -->
+        <div id="tab-imas" class="tab-content">
+            <div class="card card-destaque">
+                <div class="card-titulo">➕ Criar ímã</div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>ID único</label><input type="text" id="ima-id" placeholder="Ex: 123"></div></div>
+                    <div class="col"><div class="input-group"><label>Nomes</label><input type="text" id="ima-nomes" placeholder="Ex: Arthur & Heitor"></div></div>
+                </div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Foto inicial (cliente)</label><input type="file" id="ima-foto" accept="image/*"></div></div>
+                    <div class="col"><div class="input-group"><label>Foto do produto final</label><input type="file" id="ima-foto-produto" accept="image/*"></div></div>
+                </div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Link do vídeo (vazio = teaser)</label><input type="text" id="ima-video" placeholder="Cole o link do YouTube"></div></div>
+                    <div class="col"><div class="input-group"><label>Data de liberação (opcional)</label><input type="datetime-local" id="ima-data"></div></div>
+                </div>
+                <button id="btn-salvar-ima" class="btn-magic btn-global" style="margin-top:0;" onclick="cadastrarIma()">✨ Gerar ímã</button>
+            </div>
+            <div class="section-title">📋 Ímãs ativos</div>
+            <input type="text" id="busca-imas" class="search-bar" placeholder="🔍 Buscar por ID ou nome..." onkeyup="filtrarImas()">
+            <div id="loading-imas" class="loading-mm">⏳ Buscando ímãs...</div>
+            <div id="lista-imas-admin" class="scroll-container"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 📢 ANÚNCIOS                                -->
+        <!-- ========================================== -->
+        <div id="tab-anuncios" class="tab-content">
+            <div class="card-cabeca">
+                <p class="texto-ajuda" style="margin:0;">Patrocinadores que se cadastram pelo site.</p>
+                <div style="display:flex; gap:8px;"><button class="btn-limpar" id="btn-notifica" style="display:none;" onclick="ativarNotificacoesBrowser()">🔔 Ativar alertas</button><button class="btn-limpar" onclick="carregarAnunciosAdmin()">🔄 Atualizar</button></div>
+            </div>
+            <input type="text" id="busca-anuncios" class="search-bar" placeholder="🔍 Buscar empresa, status ou cupom..." onkeyup="filtrarAnuncios()">
+            <div id="loading-anuncios" class="loading-mm">⏳ Buscando...</div>
+            <div id="lista-anuncios-admin" class="scroll-container"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 📈 ANALYTICS                               -->
+        <!-- ========================================== -->
+        <div id="tab-analytics" class="tab-content">
+            <div class="filtros-box">
+                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">Toques nos chaveiros NFC</span><button class="btn-limpar" onclick="carregarAnalytics(true)">🔄 Atualizar</button></div>
+                <div class="row">
+                    <div class="col"><label>Mês</label><select id="filtro-mes" onchange="limparDatasManuais()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
+                    <div class="col"><label>Ano</label><select id="filtro-ano" onchange="limparDatasManuais()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+                    <div class="col"><label>Time</label><select id="filtro-time"><option value="todos">Todos</option><option value="corinthians">Corinthians</option><option value="palmeiras">Palmeiras</option><option value="santos">Santos</option><option value="são paulo">São Paulo</option><option value="flamengo">Flamengo</option></select></div>
+                </div>
+                <label>Ou um período exato</label>
+                <div class="row"><div class="col"><input type="date" id="data-inicio" onchange="limparFiltrosRapidos()"></div><div class="col"><input type="date" id="data-fim" onchange="limparFiltrosRapidos()"></div></div>
+                <button class="btn-filtro" onclick="aplicarFiltros()">Aplicar filtros</button>
+            </div>
+            <div id="loading-analytics" class="loading-mm">⏳ Analisando...</div>
+            <div id="painel-dashboard" style="display:none;">
+                <div class="dash-cards">
+                    <div class="dash-card"><h3>Toques totais</h3><div class="valor v-laranja" id="dash-total">0</div><span class="sub-valor" id="dash-media">Média: 0/dia</span></div>
+                    <div class="dash-card"><h3>Maior audiência</h3><div class="valor" id="dash-campeao" style="font-size:1.4rem; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px;"><img id="img-campeao" src="" alt="" style="width:30px; height:30px; display:none;"><span id="nome-campeao">-</span></div><span class="sub-valor" id="dash-pico">Pico: Nenhum</span></div>
+                </div>
+                <div class="section-title">📊 Ranking de engajamento</div>
+                <div class="ranking-list" id="lista-ranking"></div>
+                <div class="section-title">📈 Desempenho visual</div>
+                <div class="chart-box"><canvas id="graficoAcessos"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 🎮 QUIZ                                    -->
+        <!-- ========================================== -->
+        <div id="tab-quiz" class="tab-content">
+            <div class="card">
+                <div class="card-titulo">🎮 Gerador automático de quiz</div>
+                <p class="card-desc">A IA cria perguntas sobre a história do time e salva na planilha do quiz.</p>
+                <div class="input-group"><label for="tema">Foco temático (opcional)</label><input type="text" id="tema" placeholder="Ex: Libertadores, ídolos, finais..."></div>
+                <div class="row">
+                    <div class="col"><div class="input-group"><label>Dificuldade</label><select id="dificuldade"><option value="fáceis (nível torcedor comum)">🟢 Fácil</option><option value="médias (nível fã fanático)" selected>🟡 Médio</option><option value="difíceis e obscuras (nível historiador)">🔴 Hardcore (Difícil)</option></select></div></div>
+                    <div class="col"><div class="input-group"><label>Qtd. de perguntas</label><input type="number" id="qtd" value="10" min="1" max="30"></div></div>
+                </div>
+                <div class="input-group"><label>Time</label><select id="time" onchange="carregarInfoBanco()"><option value="https://script.google.com/macros/s/AKfycbwbB1LkCbpT5ofgWXB0tGlpbMopMnjWeLfEOX4IbEEcrrvMJboZ3C5SZ9LVSaVyD8fiiQ/exec" data-nome="Corinthians">🦅 Corinthians</option><option value="https://script.google.com/macros/s/AKfycbxdeaVayrVv13eN044gzRUQBNOrnQlzo3ftqm0Jj5Sf9zEHlPApapd-rWsAHREzkweiTw/exec" data-nome="São Paulo">🔴 São Paulo</option><option value="https://script.google.com/macros/s/AKfycbwEjviHWdcxWVFc6hDAhyNE0JCH41J_DzDnUvIAlXosqihM83n1nRfe-WZUWUZs9nOb/exec" data-nome="Palmeiras">🐷 Palmeiras</option><option value="https://script.google.com/macros/s/AKfycbxiHVwdciFEW8ro_JqBokolGgSm-Vh1ILi2aB7gu9VKs4YcVnQBCEDa7QnqOPXuRlb3pQ/exec" data-nome="Santos">🐳 Santos</option><option value="https://script.google.com/macros/s/AKfycbxq7xV9ZI63_vBAUwDFrm_3j28D_GCsswGZbHmiTeE-saN7MwuR58zFE5JkTiK_5YkAZQ/exec" data-nome="Flamengo">🔴 Flamengo</option></select></div>
+                <div class="badges-container"><div class="badge badge-blue" id="badge-total">📊 Total neste time: Carregando...</div><div class="badge badge-green" id="badge-ultimo">🕒 Último lote: Nenhum</div></div>
+                <div class="box-perigo"><label><input type="checkbox" id="substituir">⚠️ Modo reciclagem: APAGAR o banco antigo do time e substituir</label></div>
+                <div class="barra-acoes" style="margin-bottom:0;">
+                    <button id="btn-iniciar" class="btn-magic" onclick="iniciarAutomacao(false)">Gerar para o time</button>
+                    <button id="btn-global" class="btn-magic btn-analise" onclick="iniciarAutomacao(true)">Gerar para todos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ⚙️ AJUSTES                                 -->
+        <!-- ========================================== -->
+        <div id="tab-config" class="tab-content">
+            <div class="grade-2">
+                <div class="card">
+                    <div class="card-titulo">🛒 Taxas de plataformas</div>
+                    <p class="card-desc">Usadas para sugerir o preço de venda (Shopee, Elo7...).</p>
+                    <div class="input-group"><label>Nome da plataforma</label><input type="text" id="config-plat-nome" placeholder="Ex: Shopee"></div>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label>Comissão (%)</label><input type="number" id="config-plat-pct" placeholder="Ex: 20"></div></div>
+                        <div class="col"><div class="input-group"><label>Taxa fixa (R$)</label><input type="number" id="config-plat-fixa" placeholder="Ex: 4.00" step="0.50"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin:0 0 14px;" onclick="salvarPlataforma()">➕ Adicionar</button>
+                    <div id="lista-plataformas"></div>
+                </div>
+                <div class="card">
+                    <div class="card-titulo">🤝 Consignado (vendedores)</div>
+                    <p class="card-desc">Ex.: custo R$ 10 com markup 100% → repasse sugerido R$ 20. Com margem 50% → preço sugerido ao vendedor R$ 30 (ele vende pelo preço que quiser).</p>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label>Markup do repasse sobre o custo (%)</label><input type="number" id="cfg-markup-repasse" placeholder="100"></div></div>
+                        <div class="col"><div class="input-group"><label>Margem sugerida ao vendedor (%)</label><input type="number" id="cfg-margem-vendedor" placeholder="50"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label>Alerta de estoque baixo (un)</label><input type="number" id="cfg-estoque-minimo" placeholder="2"></div></div>
+                        <div class="col"><div class="input-group"><label>Seu WhatsApp (avisos)</label><input type="text" id="cfg-telefone-admin" placeholder="11999998888"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM()">💾 Salvar parâmetros</button>
+                </div>
+            </div>
+            <div class="grade-2" style="margin-top:20px;">
+                <div class="card">
+                    <div class="card-titulo">🔑 Chaves de integração</div>
+                    <div class="input-group" style="margin-top:12px;"><label>🧠 Chave privada (Gemini)</label><input type="password" id="api-key" onchange="salvarChaves()"></div>
+                    <p class="texto-ajuda" style="margin:0;">📸 O envio de fotos (OnionSys + backup ImgBB) usa as chaves guardadas no servidor.</p>
+                </div>
+                <div class="card">
+                    <div class="card-titulo">🔒 Segurança</div>
+                    <p class="card-desc">Troque sua senha e veja quem fez o quê no sistema.</p>
+                    <button class="btn-magic btn-secundario" style="margin-top:0;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
+                    <button class="btn-magic btn-secundario" onclick="abrirLogs()">📜 Registro de atividades</button>
+                </div>
+            </div>
         </div>
 
         <!-- ========================================== -->
@@ -402,31 +500,37 @@
             <div id="loading-v" class="loading-mm">⏳ Carregando suas peças...</div>
             <div id="v-lista-estoque"></div>
             <div id="v-vitrine"></div>
-            <button class="btn-limpar" style="width:100%; margin-top:20px; padding:12px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
+            <button class="btn-magic btn-secundario" style="margin-top:20px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
         </div>
         <div id="tab-v_acerto" class="tab-content">
             <div id="v-acerto"></div>
         </div>
         <div id="tab-v_encomendas" class="tab-content">
-            <div style="background:#f0fdf4; padding:20px; border-radius:16px; border:2px solid #bbf7d0; margin-bottom:25px;">
-                <div class="section-title" style="margin-top:0; color:#047857; border-left-color:#10b981;">🎁 Pedir Peça para a Fábrica</div>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin:-5px 0 12px; font-weight:600;">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
+            <div class="card card-destaque">
+                <div class="card-titulo">🎁 Pedir peça para a fábrica</div>
+                <p class="card-desc">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
                 <div class="input-group"><label>Produto (opcional)</label><select id="ve-produto"></select></div>
-                <div class="input-group"><label>Descrição / Personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
+                <div class="input-group"><label>Descrição / personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
                 <div class="row">
                     <div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="ve-qtd" value="1" min="1"></div></div>
                     <div class="col"><div class="input-group"><label>Para quando? (opcional)</label><input type="date" id="ve-prazo"></div></div>
                 </div>
-                <button class="btn-magic btn-global" id="btn-ve-salvar" style="margin-top:0;" onclick="salvarEncomendaVendedor()">📨 Enviar Pedido</button>
+                <button class="btn-magic btn-global" id="btn-ve-salvar" style="margin-top:0;" onclick="salvarEncomendaVendedor()">📨 Enviar pedido</button>
             </div>
-            <div class="section-title">📋 Meus Pedidos</div>
+            <div class="section-title">📋 Meus pedidos</div>
             <div id="v-lista-encomendas"></div>
         </div>
-    </div>
+
+        <div class="log-container" id="terminal" style="display:none;">
+            <div class="log-line"><span class="log-time">[Sistema]</span><span class="log-info">Painel Mini Mundo carregado.</span></div>
+        </div>
+
+        </div>
+    </main>
 </div>
 
 <!-- ========================================== -->
-<!-- TODOS OS MODAIS DO SISTEMA BLINDADOS       -->
+<!-- JANELAS (MODAIS)                            -->
 <!-- ========================================== -->
 
 <!-- MODAL GENÉRICO DO CONSIGNADO (conteúdo montado pelo consignado.js) -->
@@ -449,13 +553,13 @@
 
 <!-- MODAL NOME INDIVIDUAL (PDF) -->
 <div id="modal-nome-recibo" class="modal-overlay-alert">
-    <div class="modal-box-alert" style="padding-top:20px;">
+    <div class="modal-box-alert">
         <button class="btn-fechar-modal" onclick="$('modal-nome-recibo').style.display='none'">×</button>
-        <h3 class="modal-title-alert" style="color:var(--brand-dark); font-size:1.1rem; margin-bottom:5px;">NOME NO RECIBO</h3>
-        <p class="modal-text-alert" style="margin-bottom:15px; font-size:0.8rem;">Como deseja que o nome do cliente apareça?</p>
+        <h3 class="modal-title-alert">Nome no recibo</h3>
+        <p class="modal-text-alert">Como deseja que o nome do cliente apareça?</p>
         <input type="hidden" id="recibo-linha-atual">
         <input type="hidden" id="recibo-tipo-atual">
-        <input type="text" id="input-nome-recibo" class="login-input" style="padding:12px; margin-bottom:15px; text-align:left;">
+        <input type="text" id="input-nome-recibo" style="margin-bottom:16px;">
         <div style="display:flex; gap:10px;">
             <button class="btn-modal-cancel" onclick="$('modal-nome-recibo').style.display='none'">Cancelar</button>
             <button class="btn-modal-confirm" onclick="executarDocumentoUnico()">Continuar</button>
@@ -465,26 +569,18 @@
 
 <!-- MODAL LOTE PDF -->
 <div id="modal-acoes-lote" class="modal-overlay">
-    <div class="modal-box" style="padding: 20px; display:flex; flex-direction:column; max-height:90vh;">
+    <div class="modal-box" style="display:flex; flex-direction:column;">
         <button class="btn-fechar-modal" onclick="$('modal-acoes-lote').style.display='none'">×</button>
-        <h3 class="modal-title">📦 Ações em Lote</h3>
-        <div class="tabs-container" style="margin-bottom:15px; background: transparent; padding: 0;">
-            <button id="btn-lote-pendentes" class="tab-btn active" style="min-width: 0; padding: 12px 5px;" onclick="carregarLote('Pendente')">🟡 Cobrar</button>
-            <button id="btn-lote-pagos" class="tab-btn" style="min-width: 0; padding: 12px 5px;" onclick="carregarLote('Pago')">🟢 Recibos</button>
+        <h3 class="modal-title">📦 Cobranças e recibos em lote</h3>
+        <div class="seg">
+            <button id="btn-lote-pendentes" class="active" onclick="carregarLote('Pendente')">🟡 Cobrar</button>
+            <button id="btn-lote-pagos" onclick="carregarLote('Pago')">🟢 Recibos</button>
         </div>
-        <div class="input-group">
-            <label style="color:var(--primary);">SELECIONE O CLIENTE</label>
-            <select id="lote-select-cliente" class="input-var" onchange="selecionarClienteLote()"></select>
-        </div>
-        <div class="input-group">
-            <label style="color:var(--primary);">NOME NO RECIBO/COBRANÇA</label>
-            <input type="text" id="lote-nome-personalizado" class="input-var" placeholder="Nome que vai no PDF">
-        </div>
-        <label style="font-weight:700; color:var(--text-muted); font-size:0.8rem; margin-bottom:5px; display:block; text-transform:uppercase;">Pedidos do Cliente:</label>
-        <div id="lista-acoes-lote" class="scroll-container" style="flex: 1; overflow-y:auto; padding-right:5px; margin-bottom: 15px; max-height:35vh;"></div>
-        <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
-            <button id="btn-gerar-pdf-lote" class="btn-magic btn-global" style="margin:0; box-shadow:0 4px 15px rgba(16,185,129,0.3);" onclick="gerarPDFLote(loteAtualTipo)">📄 GERAR PDF</button>
-        </div>
+        <div class="input-group"><label>Cliente</label><select id="lote-select-cliente" onchange="selecionarClienteLote()"></select></div>
+        <div class="input-group"><label>Nome no recibo/cobrança</label><input type="text" id="lote-nome-personalizado" placeholder="Nome que vai no PDF"></div>
+        <label>Pedidos do cliente</label>
+        <div id="lista-acoes-lote" class="scroll-container" style="flex:1; max-height:35vh; margin-bottom:14px;"></div>
+        <button id="btn-gerar-pdf-lote" class="btn-magic btn-global" style="margin:0;" onclick="gerarPDFLote(loteAtualTipo)">📄 Gerar PDF</button>
     </div>
 </div>
 
@@ -492,20 +588,20 @@
 <div id="modal-editar-ima" class="modal-overlay">
     <div class="modal-box">
         <button class="btn-fechar-modal" onclick="$('modal-editar-ima').style.display='none'">×</button>
-        <h3 class="modal-title">✏️ Editar Ímã</h3>
+        <h3 class="modal-title">✏️ Editar ímã</h3>
         <input type="hidden" id="edit-ima-linha">
         <input type="hidden" id="edit-ima-foto-antiga">
-        <input type="hidden" id="edit-ima-foto-prod-antiga"> 
-        <div class="foto-atual-box"><img id="edit-ima-img-preview" src=""><span>Foto do Cliente (vazio para manter).</span></div>
+        <input type="hidden" id="edit-ima-foto-prod-antiga">
+        <div class="foto-atual-box"><img id="edit-ima-img-preview" src="" alt=""><span>Foto do cliente (vazio = mantém)</span></div>
         <div class="input-group"><input type="file" id="edit-ima-foto" accept="image/*"></div>
-        <div class="foto-atual-box"><img id="edit-ima-prod-preview" src="" style="display:none;"><span>Foto do Produto (vazio para manter).</span></div>
+        <div class="foto-atual-box"><img id="edit-ima-prod-preview" src="" alt="" style="display:none;"><span>Foto do produto (vazio = mantém)</span></div>
         <div class="input-group"><input type="file" id="edit-ima-foto-prod" accept="image/*"></div>
-        <div class="input-group"><label>Nomes do cliente:</label><input type="text" id="edit-ima-nomes"></div>
-        <div class="input-group"><label style="color:#d97706;">Novo Link do Vídeo (Upgrade!):</label><input type="text" id="edit-ima-video" style="border-color:#d97706; background:#fffbeb;"></div>
-        <div class="input-group"><label>Nova Data de Liberação:</label><input type="datetime-local" id="edit-ima-data"></div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button id="btn-excluir-ima-modal" class="btn-magic btn-excluir" style="margin-top:0; flex:1;" onclick="confirmarExclusaoIma()">🗑️ Excluir</button>
-            <button id="btn-salvar-edicao-ima" class="btn-magic btn-global" style="margin-top:0; flex:2;" onclick="salvarEdicaoIma()">💾 Atualizar</button>
+        <div class="input-group"><label>Nomes do cliente</label><input type="text" id="edit-ima-nomes"></div>
+        <div class="input-group"><label style="color:var(--primary);">Novo link do vídeo</label><input type="text" id="edit-ima-video"></div>
+        <div class="input-group"><label>Nova data de liberação</label><input type="datetime-local" id="edit-ima-data"></div>
+        <div style="display:flex; gap:10px;">
+            <button id="btn-excluir-ima-modal" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoIma()">🗑️ Excluir</button>
+            <button id="btn-salvar-edicao-ima" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoIma()">💾 Atualizar</button>
         </div>
     </div>
 </div>
@@ -513,54 +609,62 @@
 <div id="modal-confirmar-exclusao-ima" class="modal-overlay-alert">
     <div class="modal-box-alert">
         <span class="modal-icon-alert">🗑️</span>
-        <h3 class="modal-title-alert" style="color:#ef4444;">Excluir Ímã?</h3>
+        <h3 class="modal-title-alert" style="color:var(--vermelho);">Excluir ímã?</h3>
         <p class="modal-text-alert">Apagar o ímã de <b id="nome-ima-excluir"></b>?<br>O link do cliente vai parar de funcionar na mesma hora.</p>
-        <div style="display:flex; gap:10px; margin-top:15px;">
+        <div style="display:flex; gap:10px;">
             <button class="btn-modal-cancel" onclick="$('modal-confirmar-exclusao-ima').style.display='none'">Cancelar</button>
-            <button id="btn-executar-exclusao-ima" class="btn-modal-confirm" style="background:#ef4444; box-shadow:0 6px 0 #b91c1c;">🗑️ Apagar</button>
+            <button id="btn-executar-exclusao-ima" class="btn-modal-confirm perigo">🗑️ Apagar</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL EDITAR PRODUTO -->
+<!-- MODAL EDITAR PRODUTO DO CATÁLOGO -->
 <div id="modal-editar-produto" class="modal-overlay">
     <div class="modal-box">
         <button class="btn-fechar-modal" onclick="$('modal-editar-produto').style.display='none'">×</button>
-        <h3 class="modal-title">✏️ Editar Produto</h3>
+        <h3 class="modal-title">✏️ Editar produto</h3>
         <input type="hidden" id="edit-prod-linha">
         <input type="hidden" id="edit-prod-foto-antiga">
-        <div class="foto-atual-box"><img id="edit-prod-img-preview" src=""><span>Deixe vazio para manter atual.</span></div>
+        <div class="foto-atual-box"><img id="edit-prod-img-preview" src="" alt=""><span>Novas fotos (vazio = mantém)</span></div>
         <div class="input-group"><input type="file" id="edit-prod-fotos-novas" accept="image/*" multiple></div>
-        <div class="input-group"><label>Nome:</label><input type="text" id="edit-prod-nome"></div>
+        <div class="input-group"><label>Nome</label><input type="text" id="edit-prod-nome"></div>
         <div class="row">
-            <div class="col"><div class="input-group"><label>Preço:</label><input type="text" id="edit-prod-preco" class="mask-money"></div></div>
-            <div class="col"><div class="input-group"><label>Categoria:</label><input type="text" id="edit-prod-categoria"></div></div>
+            <div class="col"><div class="input-group"><label>Preço</label><input type="text" id="edit-prod-preco" class="mask-money"></div></div>
+            <div class="col"><div class="input-group"><label>Categoria</label><input type="text" id="edit-prod-categoria"></div></div>
         </div>
-        <div class="input-group"><label>Descrição:</label><textarea id="edit-prod-desc"></textarea></div>
-        <div class="input-group"><label>Status:</label><select id="edit-prod-status"><option value="true">🟢 ATIVO</option><option value="false">🔴 INATIVO</option></select></div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button id="btn-excluir-prod" class="btn-magic btn-excluir" style="margin-top:0; flex:1;" onclick="confirmarExclusaoProduto()">🗑️ Excluir</button>
-            <button id="btn-salvar-edicao-prod" class="btn-magic btn-global" style="margin-top:0; flex:2;" onclick="salvarEdicaoProduto()">💾 Salvar</button>
+        <div class="input-group"><label>Descrição</label><textarea id="edit-prod-desc"></textarea></div>
+        <div class="input-group"><label>Status</label><select id="edit-prod-status"><option value="true">🟢 Ativo</option><option value="false">🔴 Inativo</option></select></div>
+        <div style="display:flex; gap:10px;">
+            <button id="btn-excluir-prod" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoProduto()">🗑️ Excluir</button>
+            <button id="btn-salvar-edicao-prod" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoProduto()">💾 Salvar</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL EDITAR ANUNCIO -->
+<!-- MODAL EDITAR ANÚNCIO -->
 <div id="modal-editar-anuncio" class="modal-overlay">
     <div class="modal-box">
         <button class="btn-fechar-modal" onclick="$('modal-editar-anuncio').style.display='none'">×</button>
-        <h3 class="modal-title">💼 Editar Anúncio</h3>
+        <h3 class="modal-title">💼 Editar anúncio</h3>
         <input type="hidden" id="edit-ad-linha"><input type="hidden" id="edit-ad-foto-antiga"><input type="hidden" id="edit-ad-logo-antiga">
-        <div class="foto-atual-box"><img id="edit-ad-logo-preview" src="" style="border-radius:50%;"><img id="edit-ad-banner-preview" src="" style="width:60px;"><span>Vazio = mantém atual.</span></div>
-        <div class="input-group"><label>Empresa:</label><input type="text" id="edit-ad-empresa" disabled style="background:#f1f5f9; color:#94a3b8;"></div>
-        <div class="row"><div class="col"><div class="input-group"><label>Status:</label><select id="edit-ad-status"><option value="ATIVO">🟢 ATIVA</option><option value="PENDENTE">🟡 PENDENTE</option><option value="CANCELADO">🔴 CANCELADA</option></select></div></div><div class="col"><div class="input-group"><label>Vencimento:</label><input type="date" id="edit-ad-vencimento"></div></div></div>
-        <div class="input-group"><label>Nova Logo:</label><input type="file" id="edit-ad-logo-nova" accept="image/*"></div>
-        <div class="input-group"><label>Novo Banner:</label><input type="file" id="edit-ad-banner-novo" accept="image/*"></div>
-        <div class="input-group"><label>Chamada:</label><input type="text" id="edit-ad-desc" maxlength="60"></div>
-        <div class="row"><div class="col"><div class="input-group"><label>Cupom:</label><input type="text" id="edit-ad-cupom" style="text-transform:uppercase;"></div></div><div class="col"><div class="input-group"><label>Valor:</label><input type="text" id="edit-ad-valor" class="mask-money"></div></div></div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button id="btn-excluir-ad" class="btn-magic btn-excluir" style="margin-top:0; flex:1;" onclick="confirmarExclusaoAnuncio()">🗑️ Excluir</button>
-            <button id="btn-salvar-edicao-ad" class="btn-magic btn-global" style="margin-top:0; flex:2;" onclick="salvarEdicaoAnuncio()">💾 Salvar</button>
+        <div class="foto-atual-box"><img id="edit-ad-logo-preview" src="" alt="" style="border-radius:50%;"><img id="edit-ad-banner-preview" src="" alt="" style="width:80px;"><span>Vazio = mantém</span></div>
+        <div class="input-group"><label>Empresa</label><input type="text" id="edit-ad-empresa" disabled></div>
+        <div class="row">
+            <div class="col"><div class="input-group"><label>Status</label><select id="edit-ad-status"><option value="ATIVO">🟢 Ativo</option><option value="PENDENTE">🟡 Pendente</option><option value="CANCELADO">🔴 Cancelado</option></select></div></div>
+            <div class="col"><div class="input-group"><label>Vencimento</label><input type="date" id="edit-ad-vencimento"></div></div>
+        </div>
+        <div class="row">
+            <div class="col"><div class="input-group"><label>Nova logo</label><input type="file" id="edit-ad-logo-nova" accept="image/*"></div></div>
+            <div class="col"><div class="input-group"><label>Novo banner</label><input type="file" id="edit-ad-banner-novo" accept="image/*"></div></div>
+        </div>
+        <div class="input-group"><label>Chamada</label><input type="text" id="edit-ad-desc" maxlength="60"></div>
+        <div class="row">
+            <div class="col"><div class="input-group"><label>Cupom</label><input type="text" id="edit-ad-cupom" style="text-transform:uppercase;"></div></div>
+            <div class="col"><div class="input-group"><label>Valor negociado</label><input type="text" id="edit-ad-valor" class="mask-money"></div></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button id="btn-excluir-ad" class="btn-magic btn-excluir" style="flex:1;" onclick="confirmarExclusaoAnuncio()">🗑️ Excluir</button>
+            <button id="btn-salvar-edicao-ad" class="btn-magic btn-global" style="flex:2;" onclick="salvarEdicaoAnuncio()">💾 Salvar</button>
         </div>
     </div>
 </div>
@@ -569,11 +673,11 @@
 <div id="custom-confirm-modal" class="modal-overlay-alert">
     <div class="modal-box-alert">
         <span class="modal-icon-alert">💸</span>
-        <h3 class="modal-title-alert">Confirmar Pagamento</h3>
-        <p class="modal-text-alert">Tem certeza que deseja marcar esta venda como <b>PAGA</b>?</p>
-        <div style="display:flex; gap:10px; margin-top:15px;">
+        <h3 class="modal-title-alert">Confirmar pagamento</h3>
+        <p class="modal-text-alert">Marcar esta venda como <b>PAGA</b>?</p>
+        <div style="display:flex; gap:10px;">
             <button class="btn-modal-cancel" onclick="fecharConfirmacao()">Cancelar</button>
-            <button class="btn-modal-confirm" onclick="executarPagamentoVenda()">✅ Sim, Recebi!</button>
+            <button class="btn-modal-confirm" onclick="executarPagamentoVenda()">✅ Sim, recebi</button>
         </div>
     </div>
 </div>
@@ -581,54 +685,54 @@
 <div id="custom-delete-modal" class="modal-overlay-alert">
     <div class="modal-box-alert">
         <span class="modal-icon-alert">🗑️</span>
-        <h3 class="modal-title-alert" style="color:#ef4444;">Excluir Venda?</h3>
-        <p class="modal-text-alert">Tem certeza que deseja apagar o registro dessa venda? Esta ação <b>não pode ser desfeita.</b></p>
-        <div style="display:flex; gap:10px; margin-top:15px;">
+        <h3 class="modal-title-alert" style="color:var(--vermelho);">Excluir venda?</h3>
+        <p class="modal-text-alert">Esta ação <b>não pode ser desfeita</b>. Se a venda tirou peça do Ateliê, a peça volta para o estoque.</p>
+        <div style="display:flex; gap:10px;">
             <button class="btn-modal-cancel" onclick="fecharExclusao()">Cancelar</button>
-            <button class="btn-modal-confirm" style="background:#ef4444; box-shadow:0 6px 0 #b91c1c;" onclick="executarExclusaoVenda()">🗑️ Apagar</button>
+            <button class="btn-modal-confirm perigo" onclick="executarExclusaoVenda()">🗑️ Apagar</button>
         </div>
     </div>
 </div>
 
-<div id="custom-edit-venda-modal" class="modal-overlay-alert" style="align-items:flex-start; padding-top:40px;">
-    <div class="modal-box" style="padding:20px;">
-        <button onclick="fecharEditarVenda()" style="position:absolute; top:15px; right:15px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-weight:bold; color:#64748b; cursor:pointer;">×</button>
-        <h3 class="section-title" style="margin-top:0; margin-bottom:20px; color:var(--brand-dark);">✏️ Editar Venda</h3>
+<div id="custom-edit-venda-modal" class="modal-overlay">
+    <div class="modal-box">
+        <button class="btn-fechar-modal" onclick="fecharEditarVenda()">×</button>
+        <h3 class="modal-title">✏️ Editar venda</h3>
         <input type="hidden" id="edit-venda-linha">
-        <div class="row" style="text-align:left;">
+        <div class="row">
             <div class="col"><label>Data</label><input type="date" id="edit-venda-data"></div>
             <div class="col"><label>Status</label><select id="edit-venda-status"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div>
         </div>
-        <div class="input-group" style="text-align:left;"><label>Cliente</label><input type="text" id="edit-venda-cliente" list="lista-clientes-venda" autocomplete="off"></div>
-        <div class="input-group" style="text-align:left;"><label>Produto</label><input type="text" id="edit-venda-produto" list="lista-produtos-venda" autocomplete="off"></div>
-        <div class="row" style="text-align:left;">
+        <div class="input-group"><label>Cliente</label><input type="text" id="edit-venda-cliente" list="lista-clientes-venda" autocomplete="off"></div>
+        <div class="input-group"><label>Produto</label><input type="text" id="edit-venda-produto" list="lista-produtos-venda" autocomplete="off"></div>
+        <div class="row">
             <div class="col"><label>Plataforma</label><input type="text" id="edit-venda-plataforma" list="lista-plataformas-venda" autocomplete="off"></div>
             <div class="col"><label>Qtd</label><input type="number" id="edit-venda-qtd" min="1"></div>
         </div>
-        <div class="input-group" style="text-align:left;"><label>Valor Total</label><input type="text" id="edit-venda-valor" class="mask-money"></div>
-        <button class="btn-magic btn-global" id="btn-salvar-edicao-venda" onclick="salvarEdicaoVenda()" style="margin-bottom:0;">💾 Salvar Alterações</button>
+        <div class="input-group"><label>Valor total</label><input type="text" id="edit-venda-valor" class="mask-money"></div>
+        <button class="btn-magic btn-global" id="btn-salvar-edicao-venda" onclick="salvarEdicaoVenda()">💾 Salvar alterações</button>
     </div>
 </div>
 
-<button class="fab-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Voltar ao Topo">⬆️</button>
+<button class="fab-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Voltar ao topo">⬆️</button>
 
-<div class="bottom-nav" id="bottom-nav-admin">
-    <button id="nav-dashboard_erp" class="bottom-nav-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span> Dashboard</button>
-    <button id="nav-vendas" class="bottom-nav-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span> Vendas</button>
-    <button id="nav-imas" class="bottom-nav-btn" onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="icon">🧲</span> Ímãs</button>
-    <button id="nav-loja" class="bottom-nav-btn" onclick="switchTab('loja', '🛒 Catálogo')"><span class="icon">📦</span> Loja</button>
-    <button id="nav-menu_mobile" class="bottom-nav-btn" onclick="switchTab('menu_mobile', 'Navegação')"><span class="icon">☰</span> Menu</button>
-</div>
+<!-- BARRA DE BAIXO (celular) -->
+<nav class="bottom-nav" id="bottom-nav-admin">
+    <button id="nav-dashboard_erp" class="bottom-nav-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span>Início</button>
+    <button id="nav-vendas" class="bottom-nav-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span>Vendas</button>
+    <button id="nav-estoque" class="bottom-nav-btn" onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span>Estoque</button>
+    <button id="nav-vendedores" class="bottom-nav-btn" onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span>Vendedores</button>
+    <button id="nav-menu_mobile" class="bottom-nav-btn" onclick="switchTab('menu_mobile', '☰ Menu')"><span class="icon">☰</span>Menu</button>
+</nav>
 
-<div class="bottom-nav" id="bottom-nav-vendedor">
-    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="icon">📦</span> Estoque</button>
-    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="icon">💸</span> Acerto</button>
-    <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="icon">🎁</span> Pedidos</button>
-</div>
+<nav class="bottom-nav" id="bottom-nav-vendedor">
+    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="icon">📦</span>Estoque</button>
+    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="icon">💸</span>Acerto</button>
+    <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="icon">🎁</span>Pedidos</button>
+</nav>
 
-<!-- PUXANDO O ARQUIVO NOVO PARA FUGIR DO CACHE -->
-<script src="app.js?v=4.0.0"></script>
-<script src="consignado.js?v=4.0.0"></script>
+<script src="app.js?v=4.1.0"></script>
+<script src="consignado.js?v=4.1.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

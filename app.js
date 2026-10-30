@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v4.0.0 (Consignado)";
+const VERSAO_APP = "v4.1.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -114,9 +114,8 @@ window.iniciarApp = function(){
     window.$('app-core').style.display="block";
     if(localStorage.getItem("gemini_api_key")) window.$('api-key').value=localStorage.getItem("gemini_api_key");
 
-    const userLogado = localStorage.getItem("mm_usuario");
-    if(userLogado && window.$('nome-usuario-logado')) window.$('nome-usuario-logado').innerText = userLogado;
-    
+    window.mostrarUsuarioNoMenu("Diretoria");
+
     const h = new Date(), mStr = String(h.getMonth()+1).padStart(2,'0'), aStr = String(h.getFullYear()), dIso = h.toISOString().split('T')[0];
     window.$('filtro-mes').value=mStr; window.$('filtro-ano').value=aStr; window.$('d-data').value=dIso; window.$('venda-data').value=dIso; 
     window.$('filtro-d-mes').value=mStr; window.$('filtro-d-ano').value=aStr; window.$('filtro-v-mes').value=mStr; window.$('filtro-v-ano').value=aStr; window.$('filtro-dash-mes').value=mStr; window.$('filtro-dash-ano').value=aStr;
@@ -124,7 +123,17 @@ window.iniciarApp = function(){
     window.carregarAnalytics(); window.carregarCatalogoAdmin(); window.carregarAnunciosAdmin(true); window.atualizarBadgeUltimo(); window.carregarBancoDeCustos(); window.calcular();
     window.carregarPlataformas(); window.carregarConfigMM();
     if("Notification" in window && Notification.permission!=="granted" && Notification.permission!=="denied") window.$('btn-notifica').style.display="inline-flex";
-    setInterval(()=>window.carregarAnunciosAdmin(true), 120000); 
+    setInterval(()=>window.carregarAnunciosAdmin(true), 120000);
+    window.switchTab('dashboard_erp', '📊 Dashboard');
+};
+
+// Nome, inicial e cargo no rodapé do menu lateral; "logado" libera a barra de baixo do celular
+window.mostrarUsuarioNoMenu = function(cargo){
+    document.body.classList.add('logado');
+    const u = localStorage.getItem("mm_usuario") || "";
+    window.$('nome-usuario-logado').innerText = u || "—";
+    window.$('avatar-usuario').innerText = (u.trim()[0] || "?");
+    window.$('cargo-usuario').innerText = cargo;
 };
 
 window.switchTab = function(tabName, tituloAba = null) {
@@ -137,8 +146,10 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(window.$('nav-'+tabName)) window.$('nav-'+tabName).classList.add('active');
     if(tituloAba) window.$('titulo-modulo-ativo').innerText = tituloAba;
 
-    const abasERP = ['precificar','vendas','modelos','custos','dashboard_erp','estoque','vendedores','v_estoque','v_acerto','v_encomendas'];
-    window.$('terminal').style.display = abasERP.includes(tabName) ? 'none' : 'block';
+    // O console técnico só aparece nas telas que mostram o andamento da IA e dos uploads
+    const abasComConsole = ['loja','quiz','imas','anuncios'];
+    window.$('terminal').style.display = abasComConsole.includes(tabName) ? 'block' : 'none';
+    window.scrollTo(0, 0);
     if(tabName==='estoque' || tabName==='vendedores') window.carregarPainelEstoque();
     if(tabName.startsWith('v_')) window.carregarPainelVendedor();
 
@@ -548,7 +559,7 @@ window.carregarDespesas = async function(){ window.$('loading-despesas').style.d
 window.alimentarDatalistE_Filtro = function(aD){ const dI=window.$('lista-itens-sugestao'), dL=window.$('lista-locais-sugestao'), fL=window.$('filtro-d-local'); const iU=[...new Set(aD.map(d=>d.item.trim()))].filter(i=>i), lU=[...new Set(aD.map(d=>d.local.trim()))].filter(i=>i); dI.innerHTML=iU.map(n=>`<option value="${n}">`).join(''); dL.innerHTML=lU.map(n=>`<option value="${n}">`).join(''); fL.innerHTML='<option value="todos">Todos os Locais</option>'+lU.map(n=>`<option value="${n}">${n}</option>`).join(''); };
 window.limparFiltrosDespesas = function(){ window.$('filtro-d-mes').value="todos"; window.$('filtro-d-ano').value="todos"; window.$('filtro-d-local').value="todos"; window.$('busca-despesa').value=""; window.filtrarDespesas(); };
 window.filtrarDespesas = function(){ const mS=window.$('filtro-d-mes').value, aS=window.$('filtro-d-ano').value, lS=window.$('filtro-d-local').value.toLowerCase(), tB=window.$('busca-despesa').value.toLowerCase(); const flt=window.arrayDespesas.filter(d=>{ if(tB&&!d.item.toLowerCase().includes(tB))return false; if(lS!=="todos"&&d.local.toLowerCase()!==lS)return false; if(mS!=="todos"||aS!=="todos"){let pt=[]; if(d.data.includes('/'))pt=d.data.split('/'); else if(d.data.includes('-')){let p=d.data.split('-');pt=[p[2],p[1],p[0]];} else if(d.data.includes(' ')){let td=new Date(d.data);if(!isNaN(td))pt=[td.getDate(),String(td.getMonth()+1).padStart(2,'0'),td.getFullYear()];} if(pt.length>=3){let m=String(pt[1]).padStart(2,'0'), a=String(pt[2]).substring(0,4); if(mS!=="todos"&&m!==mS)return false; if(aS!=="todos"&&a!==aS)return false;}else return false;} return true; }); window.renderizarListaDespesas(flt); };
-window.renderizarListaDespesas = function(aD){ const lD=window.$('lista-despesas'); lD.innerHTML=""; let sT=0; if(aD.length===0){lD.innerHTML="<p style='text-align:center;color:#999;padding:20px;font-weight:600;'>Nenhuma despesa.</p>";window.$('total-despesas-valor').innerText="R$ 0,00";return;} let h=""; aD.forEach(d=>{let nG=window.limparValorPlanilha(d.valor); sT+=nG; let dH=`<div class="pb-detalhes" style="flex-direction:column;gap:8px;align-items:flex-start;margin-top:5px;"><div style="display:flex;gap:10px;flex-wrap:wrap;"><span style="color:#64748b;">📅 ${d.data}</span><span style="color:#64748b;">🏢 ${d.local}</span></div>`; if(d.quantidade&&d.preco_uni&&d.preco_uni!=="R$ 0,00"){dH+=`<div style="display:flex;gap:10px;flex-wrap:wrap;"><span style="color:#64748b;">📦 Qtd: ${d.quantidade}</span><span style="color:#64748b;">💲 ${window.formatarDoBanco(d.preco_uni)} /un</span></div>`;} dH+=`</div>`; h+=`<div class="produto-banco-card"><div class="pb-info"><h4 class="pb-nome" style="color:#334155;">${d.item}</h4>${dH}</div><div class="pb-custo" style="background:transparent;border:none;color:#ef4444;font-size:1.1rem;padding-right:0;">- ${window.fmt(nG)}</div></div>`;}); lD.innerHTML=h; window.$('total-despesas-valor').innerText=window.fmt(sT); };
+window.renderizarListaDespesas = function(aD){ const lD=window.$('lista-despesas'); lD.innerHTML=""; let sT=0; if(aD.length===0){lD.innerHTML="<p class='lista-vazia'>Nenhuma despesa nesse filtro.</p>";window.$('total-despesas-valor').innerText="R$ 0,00";return;} let h=""; aD.forEach(d=>{let nG=window.limparValorPlanilha(d.valor); sT+=nG; const unit=(d.quantidade&&d.preco_uni&&window.limparValorPlanilha(d.preco_uni)>0)?`<span>📦 ${window.esc(d.quantidade)} × ${window.formatarDoBanco(d.preco_uni)}</span>`:''; h+=`<div class="item"><div class="item-topo"><div style="min-width:0;"><h4 class="item-nome">${window.esc(d.item)}</h4><div class="item-meta"><span>📅 ${window.esc(d.data)}</span><span>🏢 ${window.esc(d.local)}</span>${unit}</div></div><div class="item-valor negativo">− ${window.fmt(nG)}</div></div></div>`;}); lD.innerHTML=h; window.$('total-despesas-valor').innerText=window.fmt(sT); };
 window.salvarDespesa = async function(){ const dC=window.$('d-data').value, lC=window.$('d-local').value.trim(), iC=window.$('d-item').value.trim(), qC=window.$('d-qtd').value, vU=window.$('d-valor-uni').value; if(!dC||!iC||!vU||!lC)return window.mostrarAlerta("Atenção","Preencha tudo.","warning"); const btn=window.$('btn-salvar-despesa'); btn.disabled=true; btn.innerText="⏳ Lançando..."; try{ const p={acao:"salvar_despesa",item:iC,local:lC,data:dC.split('-').reverse().join('/'),quantidade:qC,preco_uni:window.fmtPlanilha(window.limparValorPlanilha(vU)),preco_total:window.fmtPlanilha(window.despesaTotalCalculada)}; const r=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify(p)}); const res=await r.json(); if(res.sucesso){window.mostrarAlerta("Lançado!","Registrado.","success");window.$('d-item').value="";window.$('d-valor-uni').value="";window.$('d-qtd').value="1";window.calcularDespesaTotal();window.carregarDespesas();}else throw new Error(res.erro); }catch(e){window.mostrarAlerta("Erro",e.message,"error");}finally{btn.disabled=false;btn.innerText="💳 Lançar Despesa";} };
 
 // ==========================================
@@ -841,8 +852,8 @@ window.renderizarListaVendas = function(aV){
     let sP = 0, sPa = 0, sL = 0, sQ = 0; 
     
     if (aV.length === 0) { 
-        lD.innerHTML = "<p style='text-align:center;color:#999;padding:20px;'>Nenhuma venda.</p>"; 
-        window.$('vendas-total-valor').innerText = "R$ 0,00"; window.$('vendas-pendentes-valor').innerText = "R$ 0,00"; 
+        lD.innerHTML = "<p class='lista-vazia'>Nenhuma venda nesse filtro.</p>";
+        window.$('vendas-total-valor').innerText = "R$ 0,00"; window.$('vendas-pendentes-valor').innerText = "R$ 0,00";
         window.$('vendas-pagas-valor').innerText = "R$ 0,00"; window.$('vendas-lucro-valor').innerText = "R$ 0,00"; 
         window.$('vendas-qtd-valor').innerText = "0 un"; 
         return; 
@@ -852,7 +863,7 @@ window.renderizarListaVendas = function(aV){
     aV.forEach(v => { 
         let nV = window.limparValorPlanilha(v.valor_venda), nL = window.limparValorPlanilha(v.lucro), nQ = parseFloat(v.qtd) || 0, isP = v.status.toLowerCase() === "pendente"; 
         sQ += nQ; if (isP) sP += nV; else sPa += nV; sL += nL; 
-        let cs = isP ? "card-pendente" : "", em = isP ? "🟡" : "🟢", lS = v.lucro && nL > 0 ? `💰 Lucro: ${window.formatarDoBanco(v.lucro)}` : ""; 
+        let lS = v.lucro && nL > 0 ? `<span class="mm-chip verde">💰 Lucro ${window.formatarDoBanco(v.lucro)}</span>` : "";
         
         let bB = isP 
             ? `<button class="btn-novera btn-n-cobranca" onclick="window.solicitarNomeDocumento(${v.linha}, 'Pendente')" title="Gerar Lembrete">🔔</button>
@@ -860,36 +871,23 @@ window.renderizarListaVendas = function(aV){
             : `<button class="btn-novera btn-n-recibo" onclick="window.solicitarNomeDocumento(${v.linha}, 'Pago')" title="Gerar Recibo">🧾</button>`;
 
         h += `
-        <div class="produto-banco-card ${cs}" style="padding:15px; margin-bottom:12px;">
-            <div class="card-row-top">
-                <div class="pb-info">
-                    <h4 class="pb-nome" style="margin:0 0 6px 0; font-size:1rem;">${v.cliente}</h4>
-                    <div class="pb-detalhes" style="flex-direction:column; gap:4px; align-items:flex-start;">
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <span style="color:#64748b;">📅 ${v.data}</span>
-                            <span style="color:#64748b; font-weight:800;">🏷️ ${v.produto} (x${v.qtd})</span>
-                        </div>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
-                            <span style="color:#64748b;">📱 ${v.plataforma}</span>
-                            ${v.baixa_estoque ? '<span style="color:#1d4ed8; font-weight:800;">📦 Saiu do Ateliê</span>' : ''}
-                            <span style="color:#10b981; font-weight:900;">${lS}</span>
-                        </div>
-                        <div style="margin-top:2px;">
-                            <span style="font-weight:900; font-size:0.75rem; color:${isP ? '#b45309' : '#059669'};">${em} ${v.status.toUpperCase()}</span>
-                        </div>
-                    </div>
+        <div class="item ${isP ? 'item-pendente' : ''}">
+            <div class="item-topo">
+                <div style="min-width:0;">
+                    <h4 class="item-nome">${window.esc(v.cliente)}</h4>
+                    <div class="item-meta"><span>🏷️ ${window.esc(v.produto)} × ${window.esc(v.qtd)}</span><span>📅 ${window.esc(v.data)}</span><span>📱 ${window.esc(v.plataforma)}</span></div>
                 </div>
-                <div class="pb-custo" style="background:transparent; border:none; color:var(--brand-dark); font-size:1.2rem; padding:0; text-align:right;">
-                    ${window.fmt(nV)}
+                <div class="item-valor">${window.fmt(nV)}</div>
+            </div>
+            <div class="item-rodape">
+                <div class="mm-chips"><span class="mm-chip ${isP ? 'amarelo' : 'verde'}">${isP ? '🟡 Pendente' : '🟢 Pago'}</span>${lS}${v.baixa_estoque ? '<span class="mm-chip azul">📦 Saiu do Ateliê</span>' : ''}</div>
+                <div class="acoes-venda-box">
+                    ${bB}
+                    <button class="btn-novera btn-n-editar" onclick="window.abrirModalEditarVenda(${v.linha})" title="Editar venda">✏️</button>
+                    <button class="btn-novera btn-n-apagar" onclick="window.abrirConfirmacaoExclusao(${v.linha})" title="Excluir venda">🗑️</button>
                 </div>
             </div>
-            
-            <div class="acoes-venda-box" style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
-                ${bB}
-                <button class="btn-novera btn-n-editar" onclick="window.abrirModalEditarVenda(${v.linha})" title="Editar Venda">✏️</button>
-                <button class="btn-novera btn-n-apagar" onclick="window.abrirConfirmacaoExclusao(${v.linha})" title="Excluir Venda">🗑️</button>
-            </div>
-        </div>`; 
+        </div>`;
     }); 
     lD.innerHTML = h; 
     window.$('vendas-total-valor').innerText = window.fmt(sP + sPa); 

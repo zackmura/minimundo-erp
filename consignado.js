@@ -123,8 +123,8 @@ window.renderizarEstoque = function() {
         <div class="mm-resumo">
             <div class="mm-kpi"><h3>🏠 Peças no Ateliê</h3><span>${noAtelie}</span></div>
             <div class="mm-kpi"><h3>👥 Com vendedores</h3><span>${comVend}</span></div>
-            <div class="mm-kpi"><h3>💼 Em repasse na rua</h3><span style="color:#a78bfa;">${window.fmt(valorComVend)}</span></div>
-            <div class="mm-kpi"><h3>⏳ A receber</h3><span style="color:#f59e0b;">${window.fmt(aReceber)}</span></div>
+            <div class="mm-kpi"><h3>💼 Em repasse na rua</h3><span class="v-roxo">${window.fmt(valorComVend)}</span></div>
+            <div class="mm-kpi"><h3>⏳ A receber</h3><span class="v-laranja">${window.fmt(aReceber)}</span></div>
         </div>
         ${semRepasse ? `<div class="mm-alerta">⚠️ ${semRepasse} modelo(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. Defina em <b>Modelos</b> (✏️).</div>` : ''}
         ${baixos ? `<div class="mm-alerta">🔔 ${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</div>` : ''}`;
@@ -253,7 +253,7 @@ window.renderizarVendedores = function() {
     const ativos = P.vendedores.filter(v => v.ativo);
     window.$('vendedores-resumo').innerHTML = `<div class="mm-resumo">
         <div class="mm-kpi"><h3>🤝 Vendedores ativos</h3><span>${ativos.length}</span></div>
-        <div class="mm-kpi"><h3>⏳ A receber</h3><span style="color:#f59e0b;">${window.fmt(P.pendentes.reduce((s, x) => s + x.total, 0))}</span></div></div>`;
+        <div class="mm-kpi"><h3>⏳ A receber</h3><span class="v-laranja">${window.fmt(P.pendentes.reduce((s, x) => s + x.total, 0))}</span></div></div>`;
     window.$('lista-vendedores').innerHTML = P.vendedores.length ? P.vendedores.map(v => {
         const pd = pend(v.id), pc = pecasDe(v.id);
         return `<div class="mm-card" style="${v.ativo ? '' : 'opacity:0.6;'}"><div class="mm-info"><h4>👤 ${window.esc(v.nome)} ${v.ativo ? '' : '<span class="tag-inativo">Desativado</span>'}</h4>
@@ -291,7 +291,7 @@ window.abrirVendedor = async function(vid) {
 window.renderizarFichaVendedor = function() {
     const d = window.vendAberto, v = d.vendedor, info = window.painelEstoque.vendedores.find(x => x.id === v.id) || { ativo: true };
     const pend = d.baixas.filter(b => b.status === 'Pendente'), pagas = d.baixas.filter(b => b.status === 'Pago').slice(0, 15);
-    const banner = window.ultimoAcerto && window.ultimoAcerto.vid === v.id ? `<div class="mm-alerta" style="background:#dcfce7;border-color:#bbf7d0;color:#166534;">✅ Acerto de ${window.fmt(window.ultimoAcerto.total)} registrado. <a href="${window.linkZap(v.telefone, `Olá, *${v.nome}*! Recebi ${window.fmt(window.ultimoAcerto.total)} referente às suas vendas. Obrigado! 🙏 — Mini Mundo 3D`)}" target="_blank">📲 Mandar recibo</a></div>` : '';
+    const banner = window.ultimoAcerto && window.ultimoAcerto.vid === v.id ? `<div class="mm-alerta ok">✅ Acerto de ${window.fmt(window.ultimoAcerto.total)} registrado. <a href="${window.linkZap(v.telefone, `Olá, *${v.nome}*! Recebi ${window.fmt(window.ultimoAcerto.total)} referente às suas vendas. Obrigado! 🙏 — Mini Mundo 3D`)}" target="_blank">📲 Mandar recibo</a></div>` : '';
     window.$('modal-mm-conteudo').innerHTML = `
         <h3 class="modal-title">👤 ${window.esc(v.nome)}</h3>${banner}
         <div class="mm-secao">💰 A receber — ${window.fmt(d.pendente_total)}</div>
@@ -451,8 +451,8 @@ window.abrirLogs = async function() {
 window.iniciarAppVendedor = function() {
     document.body.classList.add('modo-vendedor');
     window.$('login-screen').style.display = "none"; window.$('app-core').style.display = "block";
-    window.$('titulo-app').innerText = "Painel do Vendedor"; window.$('subtitulo-app').innerText = "Mini Mundo 3D";
-    window.$('nome-usuario-logado').innerText = localStorage.getItem("mm_usuario") || "";
+    window.$('subtitulo-app').innerText = "Painel do Vendedor";
+    window.mostrarUsuarioNoMenu("Vendedor(a)");
     window.switchTab('v_estoque', '📦 Meu Estoque');
 };
 window.carregarPainelVendedor = async function() {
@@ -466,7 +466,7 @@ window.renderizarVendedorEstoque = function() {
     const pecas = d.estoque.reduce((s, e) => s + e.qtd, 0), valor = d.estoque.reduce((s, e) => s + e.qtd * e.repasse, 0);
     window.$('v-resumo').innerHTML = `<div class="mm-resumo">
         <div class="mm-kpi"><h3>📦 Peças com você</h3><span>${pecas}</span></div>
-        <div class="mm-kpi" style="cursor:pointer;" onclick="window.switchTab('v_acerto','💸 Meu Acerto')"><h3>💰 Você me deve</h3><span style="color:#f59e0b;">${window.fmt(d.pendente_total)}</span></div></div>
+        <div class="mm-kpi" style="cursor:pointer;" onclick="window.switchTab('v_acerto','💸 Meu Acerto')"><h3>💰 Você me deve</h3><span class="v-laranja">${window.fmt(d.pendente_total)}</span></div></div>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;text-align:center;margin:-5px 0 15px;">Vendeu? Toque em <b>✅ Vendi</b> na peça. Repasse total se vender tudo: <b>${window.fmt(valor)}</b></p>`;
     const t = (window.$('v-busca-estoque').value || '').toLowerCase();
     const lista = d.estoque.filter(e => !t || e.nome.toLowerCase().includes(t));
@@ -519,11 +519,10 @@ window.renderizarVendedorAcerto = function() {
     const agora = Date.now(), podeCancelar = b => b.origem === 'VENDEDOR' && (agora - new Date(String(b.data_hora).replace(' ', 'T') + '-03:00').getTime()) < 48 * 3600 * 1000;
     const msgPago = `Olá! Aqui é ${d.vendedor.nome} 👋\n\nFiz o pagamento do repasse das minhas vendas:\n\n${pend.map(b => `• ${b.qtd}x ${b.produto_nome}: ${window.fmt(b.repasse_total)}`).join('\n')}\n\n💰 *Total: ${window.fmt(d.pendente_total)}*\n\n(segue o comprovante)`;
     window.$('v-acerto').innerHTML = `
-        <div class="resumo-box" style="background:#1e293b;text-align:center;">
-            <h3 style="color:#94a3b8;font-size:0.9rem;margin-bottom:5px;">VOCÊ ME DEVE</h3>
-            <span style="font-size:2.4rem;color:${d.pendente_total > 0 ? '#f59e0b' : '#10b981'};font-weight:900;">${window.fmt(d.pendente_total)}</span>
-            <p style="color:#94a3b8;font-size:0.75rem;margin:5px 0 0;">${d.pendente_qtd} venda(s) aguardando acerto</p></div>
-        ${d.pendente_total > 0 && d.telefone_admin ? `<a class="btn-magic btn-global" style="text-decoration:none;margin-bottom:15px;" target="_blank" href="${window.linkZap(d.telefone_admin, msgPago)}">📲 Avisar que paguei (WhatsApp)</a>` : ''}
+        <div class="kpis"><div class="kpi destaque" style="text-align:center;"><span class="kpi-rotulo">Você me deve</span>
+            <span class="kpi-valor" style="color:${d.pendente_total > 0 ? '#fbbf24' : '#6ee7b7'};">${window.fmt(d.pendente_total)}</span>
+            <span class="kpi-sub">${d.pendente_qtd} venda(s) aguardando acerto</span></div></div>
+        ${d.pendente_total > 0 && d.telefone_admin ? `<a class="btn-magic btn-global" style="margin:0 0 16px;" target="_blank" href="${window.linkZap(d.telefone_admin, msgPago)}">📲 Avisar que paguei (WhatsApp)</a>` : ''}
         <div class="section-title">⏳ Aguardando acerto</div>
         ${pend.length ? pend.map(b => `<div class="mm-linha"><span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} · <b style="color:#b45309;">${window.fmt(b.repasse_total)}</b><span class="mm-sub">${window.fmtDataHora(b.data_hora)}${b.origem === 'CONFERENCIA' ? ' · 📋 diferença encontrada na conferência' : ''}</span></span>
             ${podeCancelar(b) ? `<button class="btn-novera btn-n-apagar" title="Errei, cancelar" onclick="window.cancelarBaixa(${b.id}, false)">✖</button>` : ''}</div>`).join('') : '<p class="mm-vazio">Tudo em dia! ✅</p>'}
