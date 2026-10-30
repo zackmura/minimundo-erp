@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v4.2.0";
+const VERSAO_APP = "v5.0.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -65,7 +65,6 @@ document.addEventListener('input', e => {
         e.target.value="R$ "+val; 
     }
     if(e.target.id==="d-valor-uni"||e.target.id==="d-qtd") window.calcularDespesaTotal();
-    if(e.target.id==="v-repasse"){ e.target.dataset.editado="1"; window.atualizarLucroRepasse(); }
 });
 
 // ==========================================
@@ -112,19 +111,18 @@ window.fazerLogout = function(){ ['mm_token','mm_usuario','mm_cargo'].forEach(k 
 window.iniciarApp = function(){
     window.$('login-screen').style.display="none";
     window.$('app-core').style.display="block";
-    if(localStorage.getItem("gemini_api_key")) window.$('api-key').value=localStorage.getItem("gemini_api_key");
 
     window.mostrarUsuarioNoMenu("Diretoria");
 
-    const h = new Date(), mStr = String(h.getMonth()+1).padStart(2,'0'), aStr = String(h.getFullYear()), dIso = h.toISOString().split('T')[0];
-    window.$('filtro-mes').value=mStr; window.$('filtro-ano').value=aStr; window.$('d-data').value=dIso; window.$('venda-data').value=dIso; 
-    window.$('filtro-d-mes').value=mStr; window.$('filtro-d-ano').value=aStr; window.$('filtro-v-mes').value=mStr; window.$('filtro-v-ano').value=aStr; window.$('filtro-dash-mes').value=mStr; window.$('filtro-dash-ano').value=aStr;
+    const h = new Date(), mStr = String(h.getMonth()+1).padStart(2,'0'), aStr = String(h.getFullYear()), dIso = window.isoHojeMM();
+    window.$('filtro-mes').value=mStr; window.$('filtro-ano').value=aStr; window.$('d-data').value=dIso; window.$('pdv-data').value=dIso;
+    window.$('filtro-d-mes').value=mStr; window.$('filtro-d-ano').value=aStr;
 
-    window.carregarAnalytics(); window.carregarCatalogoAdmin(); window.carregarAnunciosAdmin(true); window.atualizarBadgeUltimo(); window.carregarBancoDeCustos(); window.calcular();
-    window.carregarPlataformas(); window.carregarConfigMM();
+    window.carregarAnalytics(); window.carregarCatalogoAdmin(); window.carregarAnunciosAdmin(true); window.atualizarBadgeUltimo(); window.carregarBancoDeCustos();
+    window.carregarPlataformas(); window.carregarConfigMM(); window.carregarOpcoesVenda();
     if("Notification" in window && Notification.permission!=="granted" && Notification.permission!=="denied") window.$('btn-notifica').style.display="inline-flex";
     setInterval(()=>window.carregarAnunciosAdmin(true), 120000);
-    window.switchTab('dashboard_erp', '📊 Dashboard');
+    window.switchTab('dashboard_erp');
 };
 
 // Nome, inicial e cargo no rodapé do menu lateral; "logado" libera a barra de baixo do celular
@@ -136,15 +134,49 @@ window.mostrarUsuarioNoMenu = function(cargo){
     window.$('cargo-usuario').innerText = cargo;
 };
 
+// Ícones desenhados (ficam no <svg> escondido do index.html): window.ic('carrinho')
+window.ic = (nome, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${nome}"/></svg>`;
+
+// Cada tela: ícone, título e a frase que aparece embaixo do título
+window.TELAS = {
+    dashboard_erp: ['painel', 'Dashboard', 'Como está o negócio no período'],
+    vendas: ['carrinho', 'Vendas', 'Lance pedidos e acompanhe os recebimentos'],
+    precificar: ['calculadora', 'Precificar', 'Calcule o custo e cadastre peças e kits'],
+    modelos: ['pacote', 'Produtos', 'Peças e kits com custo, preços e estoque'],
+    custos: ['carteira', 'Custos', 'Compras e despesas do ateliê'],
+    estoque: ['arquivo', 'Estoque', 'Ateliê, kits e peças com os vendedores'],
+    vendedores: ['usuarios', 'Vendedores', 'Equipe, acertos e encomendas'],
+    loja: ['sacola', 'Catálogo da loja', 'Produtos da vitrine online'],
+    imas: ['ima', 'Ímãs NFC', 'Ímãs com vídeo para os clientes'],
+    anuncios: ['megafone', 'Anúncios', 'Patrocinadores do site'],
+    analytics: ['barras', 'Analytics', 'Toques nos chaveiros NFC'],
+    quiz: ['controle', 'Quiz', 'Perguntas geradas pela IA'],
+    config: ['ajustes', 'Ajustes', 'Parâmetros, taxas e chaves de acesso'],
+    menu_mobile: ['grade', 'Menu', 'Todas as telas do sistema'],
+    v_estoque: ['arquivo', 'Meu estoque', 'Peças que estão com você'],
+    v_acerto: ['dinheiro', 'Meu acerto', 'O que você deve e o que já pagou'],
+    v_encomendas: ['presente', 'Encomendas', 'Peça algo para a fábrica']
+};
+
+// Aviso rápido no canto (some sozinho)
+window.toastMM = function(msg) {
+    let t = window.$('toast-mm'); if (!t) return;
+    t.innerHTML = `${window.ic('check')}<span>${window.esc(msg)}</span>`; t.classList.add('visivel');
+    clearTimeout(window.toastMM.timer); window.toastMM.timer = setTimeout(() => t.classList.remove('visivel'), 2600);
+};
+
 window.switchTab = function(tabName, tituloAba = null) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
+
     if(window.$('btn-'+tabName)) window.$('btn-'+tabName).classList.add('active');
     window.$('tab-'+tabName).classList.add('active');
     if(window.$('nav-'+tabName)) window.$('nav-'+tabName).classList.add('active');
-    if(tituloAba) window.$('titulo-modulo-ativo').innerText = tituloAba;
+    const tela = window.TELAS[tabName];
+    if (tela) { window.$('topo-ic').innerHTML = window.ic(tela[0]); window.$('titulo-modulo-ativo').innerText = tela[1]; window.$('topo-sub').innerText = tela[2]; }
+    else if (tituloAba) { window.$('titulo-modulo-ativo').innerText = tituloAba; window.$('topo-sub').innerText = ''; }
+    if (window.vendedorVisto && tabName.startsWith('v_')) window.$('topo-sub').innerText = `Visão de ${window.vendedorVisto.nome}`;
 
     // O console técnico só aparece nas telas que mostram o andamento da IA e dos uploads
     const abasComConsole = ['loja','quiz','imas','anuncios'];
@@ -153,11 +185,14 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(tabName==='estoque' || tabName==='vendedores') window.carregarPainelEstoque();
     if(tabName.startsWith('v_')) window.carregarPainelVendedor();
 
-    if(tabName==='modelos') window.carregarBancoDeCustos(); 
-    if(tabName==='custos') window.carregarDespesas(); 
+    if(tabName==='modelos') window.carregarBancoDeCustos();
+    if(tabName==='custos') window.carregarDespesas();
     if(tabName==='vendas'){ window.carregarOpcoesVenda(); window.carregarVendas(); window.carregarBancoDeCustos(); }
+    if(tabName==='precificar'){ window.pfMontarListas(); window.pfCalcular(); }
+    if(tabName==='config') window.abrirAjustes();
     if(tabName==='dashboard_erp') window.carregarDashboardERP();
-    if(tabName==='imas') window.carregarImas(); 
+    if(tabName==='imas') window.carregarImas();
+    if (window.atualizarBarraPDV) window.atualizarBarraPDV();
 };
 
 // ==========================================
@@ -588,15 +623,14 @@ window.fileToBase64 = f=>new Promise((r,j)=>{const rd=new FileReader();rd.readAs
 window.comprimirImagem = function(f,mW,mH,q){ return new Promise((r,j)=>{ if(!f.type.match(/image.*/))return j(new Error(`Formato inválido.`)); const rd=new FileReader();rd.readAsDataURL(f); rd.onload=e=>{ const i=new Image();i.src=e.target.result; i.onload=()=>{ let w=i.width,h=i.height; if(w>h){if(w>mW){h=Math.round(h*mW/w);w=mW;}}else{if(h>mH){w=Math.round(w*mH/h);h=mH;}} const cv=document.createElement('canvas');cv.width=w;cv.height=h; const cx=cv.getContext('2d');cx.drawImage(i,0,0,w,h); const nU=Date.now()+"_"+f.name.replace(/[^a-zA-Z0-9.]/g,'_').toLowerCase(); cv.toBlob(b=>b?r(new File([b],nU,{type:'image/jpeg'})):j(new Error("Compressão.")),'image/jpeg',q); };};}); };
 
 window.cadastrarProdutoIA = async function(){ 
-    const ak=window.$('api-key').value.trim(), ik="", n=window.$('prod-nome').value.trim(), p=window.$('prod-preco').value.trim(), f=window.$('prod-fotos').files, b=window.$('btn-salvar-produto'); 
-    if(!ak){window.switchTab('config');return window.addLog("❌ ERRO: Coloque a chave da IA (Gemini)!","error");} 
-    if(!n||!p||f.length===0)return window.addLog("⚠️ Preencha Nome, Preço e escolha Foto.","warn"); 
+    const ik="", n=window.$('prod-nome').value.trim(), p=window.$('prod-preco').value.trim(), f=window.$('prod-fotos').files, b=window.$('btn-salvar-produto');
+    if(!n||!p||f.length===0)return window.addLog("⚠️ Preencha Nome, Preço e escolha Foto.","warn");
     b.disabled=true; b.innerText="⏳ Analisando..."; 
     try{ 
         window.addLog(`Cadastrando: ${n}...`,"warn"); const b6=await window.fileToBase64(f[0]); let ls=[]; for(let i=0;i<f.length;i++){window.addLog(`⏳ Foto ${i+1}...`,"info"); const urlF=await window.fazerUploadInteligente(await window.comprimirImagem(f[i],1000,1000,0.8),ik,false); ls.push(urlF); window.addLog(`✅ Foto ${i+1} online.`,"success");} window.addLog(`🤖 IA criando copy...`,"info"); 
         const pr=`Atue como Copywriter Sênior da 'Mini Mundo 3D', marca de impressão 3D.\nTítulo: ${n}\nPreço: ${p}\nResponda EXATAMENTE neste formato (sem asteriscos ou negrito):\nDescricao: [Sua copy em até 3 frases vendendo o produto]\nCategoria: [1 ou 2 palavras definindo a categoria]`; 
-        const rI=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${ak}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:pr},{inlineData:{mimeType:f[0].type,data:b6}}]}]})}); 
-        if(!rI.ok)throw new Error("IA não respondeu."); const dI=await rI.json(); const resIA=dI.candidates[0].content.parts[0].text; let ds="Exclusivo Mini Mundo 3D.", ct="Geral"; let mD=resIA.match(/descri[cç][aã]o:\s*(.*)/i); if(mD)ds=mD[1].replace(/\*/g,'').trim(); let mC=resIA.match(/categoria:\s*(.*)/i); if(mC)ct=mC[1].replace(/\*/g,'').trim(); window.addLog(`💾 Salvando na Base de Dados...`,"info"); 
+        // A chave do Gemini fica no servidor (Ajustes → Chaves de acesso)
+        const resIA=(await window.apiAcao("ia_gerar",{prompt:pr,imagem_base64:b6,mime:f[0].type})).texto; let ds="Exclusivo Mini Mundo 3D.", ct="Geral"; let mD=resIA.match(/descri[cç][aã]o:\s*(.*)/i); if(mD)ds=mD[1].replace(/\*/g,'').trim(); let mC=resIA.match(/categoria:\s*(.*)/i); if(mC)ct=mC[1].replace(/\*/g,'').trim(); window.addLog(`💾 Salvando na Base de Dados...`,"info"); 
         // 🔥 AGORA SALVA NO MYSQL! 🔥
         const rS=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify({acao:"salvar_produto",nome:n,descricao:ds,preco:p,foto:ls.join(","),categoria:ct})}); 
         const resS=await rS.json(); 
@@ -607,24 +641,10 @@ window.cadastrarProdutoIA = async function(){
 // ==========================================
 // ADMIN: QUIZ (MANTIDO NO GOOGLE SHEETS)
 // ==========================================
-window.salvarChaves = function(){ localStorage.setItem("gemini_api_key",window.$('api-key').value); };
 window.atualizarBadgeUltimo = function(){ const uT=localStorage.getItem("ultimo_time_gerado"), uH=localStorage.getItem("ultimo_horario_gerado"); if(uT&&uH)window.$('badge-ultimo').innerHTML=`🕒 Último: <b>${uT}</b> (${uH})`; };
 window.carregarInfoBanco = async function(){ const s=window.$('time'), bT=window.$('badge-total'); bT.innerHTML=`⏳ Contando...`; try{const r=await fetch(s.value);const d=await r.json();bT.innerHTML=`📊 Total: <b>${(d.quiz&&Array.isArray(d.quiz))?d.quiz.length:0} perguntas</b>`;}catch(e){bT.innerHTML=`⚠️ Erro.`;} };
-window.processarTimeUnico = async function(tN,tU,q,aK,t,d,mR){ window.addLog(`>> GERANDO: ${tN.toUpperCase()}`,"warn"); const pr=`Gere ${q} perguntas sobre história do ${tN} (Dificuldade: ${d}). ${t?`Tema OBRIGATÓRIO: "${t}".`:`Varie temas.`}\nREGRAS: Fatos históricos, max 15 palavras/perg, max 4 palavras/opc.\nFormato ESTRITO:\nPergunta: [Texto]\nA) [Opc 1]\nB) [Opc 2]\nC) [Opc 3]\nD) [Opc 4]\nCorreta: [1 a 4]\nAPENAS o texto puro.`; let tx=null; for(let i=1;i<=3;i++){const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${aK}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:pr}]}]})}); if(r.ok){const ds=await r.json();tx=ds.candidates[0].content.parts[0].text;window.addLog(`IA respondeu!`,"success");break;} if(r.status===429&&i<3){window.addLog(`⚠️ Limite IA. Tentando em 5s...`,"warn");await window.delay(5000);continue;} throw new Error(`IA recusou (${r.status}).`);} const pg=[]; tx.split(/(?:Pergunta|Q):/i).filter(b=>b.trim().length>0).forEach(b=>{const l=b.trim().split('\n').map(x=>x.trim()).filter(x=>x!==''); if(l.length>=5){let c=1,lC=l.find(x=>/Correta/i.test(x));if(lC){let m=lC.match(/\d+/);if(m)c=parseInt(m[0]);} pg.push({pergunta:l[0],opcoes:[l[1].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[2].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[3].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[4].replace(/^[A-D1-4][\)\.-]?\s*/i,'')],correta:c});} }); if(pg.length===0)throw new Error("IA gerou texto inválido."); window.addLog(`Geradas ${pg.length} perguntas.`,"info"); if(mR)window.addLog(`⚠️ Reciclagem!`,"error"); const rP=await fetch(tU,{method:"POST",body:JSON.stringify({acao:"salvar_quiz",perguntas:pg,substituir:mR})}); const rS=await rP.json(); if(rS.sucesso){window.addLog(`✅ SUCESSO!`,"success");localStorage.setItem("ultimo_time_gerado",tN);localStorage.setItem("ultimo_horario_gerado",new Date().toLocaleString('pt-BR'));}else throw new Error(rS.erro); };
-window.iniciarAutomacao = async function(mG){ const aK=window.$('api-key').value.trim(); if(!aK){window.switchTab('config');return window.addLog("ERRO: Chave Gemini!","error");} const q=window.$('qtd').value,t=window.$('tema').value.trim(),d=window.$('dificuldade').value,mR=window.$('substituir').checked,bU=window.$('btn-iniciar'),bG=window.$('btn-global'); bU.disabled=true;bG.disabled=true; try{ if(mG){window.addLog(`--- LOTE GLOBAL ---`,"warn"); const o=Array.from(window.$('time').options); for(let i=0;i<o.length;i++){try{await window.processarTimeUnico(o[i].getAttribute("data-nome"),o[i].value,q,aK,t,d,mR);}catch(e){window.addLog(`❌ ERRO ${o[i].getAttribute("data-nome")}: ${e.message}`,"error");} if(i<o.length-1){window.addLog("Aguardando 5s...","info");await window.delay(5000);}} window.addLog(`--- FINALIZADO ---`,"success");}else{const s=window.$('time');await window.processarTimeUnico(s.options[s.selectedIndex].getAttribute("data-nome"),s.value,q,aK,t,d,mR);} window.atualizarBadgeUltimo();window.carregarInfoBanco(); }catch(er){window.addLog(`FALHA: ${er.message}`,"error");}finally{bU.disabled=false;bG.disabled=false;} };
-
-// ==========================================
-// ERP: CALCULADORA E MODELOS (AGORA NO MYSQL)
-// ==========================================
-window.toggleConfig = function(){ const a=window.$('area-config'); a.style.display=a.style.display==="block"?"none":"block"; };
-window.calcular = function(){ const vW=parseFloat(window.$('v-watts').value)||0, vK=parseFloat(window.$('v-kwh').value)||0, vM=parseFloat(window.$('v-maq').value)||0, vH=parseFloat(window.$('v-hora').value)||0, f=parseFloat(window.$('v-filamento').value)||0, p=parseFloat(window.$('v-peso').value)||0, tI=parseFloat(window.$('v-tempo-imp').value)||0, tM=parseFloat(window.$('v-tempo-mao').value)||0, ins=parseFloat(window.$('v-insumos').value)||0; const cMat=(f/1000)*p, cEne=(vW/1000)*tI*vK, cDep=tI*vM, cHum=tM*vH, cFa=(cMat+cEne+cDep+cHum)*0.10, cTot=cMat+cEne+cDep+cHum+cFa+ins; window.custoTotalGlobal=cTot; window.$('r-material').innerText=window.fmt(cMat); window.$('r-energia').innerText=window.fmt(cEne); window.$('r-deprec').innerText=window.fmt(cDep); window.$('r-humano').innerText=window.fmt(cHum); window.$('r-falha').innerText=window.fmt(cFa); window.$('r-insumos').innerText=window.fmt(ins); window.$('r-total').innerText=window.fmt(cTot); const psMi=(cTot*2)+cHum, psMa=(cTot*3)+cHum, pdMi=(cTot*4)+cHum, pdMa=(cTot*6)+cHum; window.$('m-simples-preco').innerText=`${window.fmt(psMi)} ou ${window.fmt(psMa)}`; window.$('m-simples-lucro').innerText=`Lucro: ${window.fmt(psMi-cTot)} a ${window.fmt(psMa-cTot)}`; window.$('m-decor-preco').innerText=`${window.fmt(pdMi)} ou ${window.fmt(pdMa)}`; window.$('m-decor-lucro').innerText=`Lucro: ${window.fmt(pdMi-cTot)} a ${window.fmt(pdMa-cTot)}`; window.sugerirRepasseCalculadora(); };
-// 🤝 Repasse sugerido = custo × (1 + markup do repasse). Só preenche sozinho enquanto você não digitar outro valor.
-window.sugerirRepasseCalculadora = function(){ const campo=window.$('v-repasse'); if(!campo) return; const mk=parseFloat((window.configMM||{}).markup_repasse); const fator=1+((isNaN(mk)?100:mk)/100); window.$('m-repasse-fator').innerText=fator.toFixed(2).replace('.',','); if(campo.dataset.editado!=="1") campo.value=window.custoTotalGlobal>0?window.fmt(window.custoTotalGlobal*fator):""; window.atualizarLucroRepasse(); };
-window.atualizarLucroRepasse = function(){ const el=window.$('m-repasse-lucro'); if(!el) return; const rep=window.limparValorPlanilha(window.$('v-repasse').value); el.innerText=`Seu lucro por peça vendida pelo vendedor: ${window.fmt(rep-window.custoTotalGlobal)}`; el.style.color=rep>0&&rep<window.custoTotalGlobal?"#ef4444":""; };
-window.salvarBancoModelos = async function(){ const m=window.$('v-modelo').value.trim(); if(!m)return window.mostrarAlerta("Atenção","Digite o Nome do Modelo.","warning"); const btn=window.$('btn-salvar-custo'); btn.disabled=true; btn.innerText="⏳ Salvando..."; try{ const p={acao:"salvar_custo",modelo:m,peso:window.$('v-peso').value,tempo:window.$('v-tempo-imp').value,insumos:window.fmtPlanilha(parseFloat(window.$('v-insumos').value)||0),custo_total:window.fmtPlanilha(window.custoTotalGlobal),preco_repasse:window.$('v-repasse')&&window.$('v-repasse').value?window.fmtPlanilha(window.limparValorPlanilha(window.$('v-repasse').value)):""}; const r=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify(p)}); const res=await r.json(); if(res.sucesso){window.mostrarAlerta("Sucesso!","Produto salvo!","success");window.$('v-modelo').value="";if(window.$('v-repasse'))window.$('v-repasse').dataset.editado="";window.calcular();window.carregarBancoDeCustos();}else if(res.erro==="DUPLICADO"){window.mostrarAlerta("Duplicado","Já existe no banco.","warning");}else throw new Error(res.erro); }catch(e){window.mostrarAlerta("Erro",e.message,"error");}finally{btn.disabled=false;btn.innerText="💾 Salvar Modelo no Banco";} };
-window.carregarBancoDeCustos = async function(){ window.$('loading-banco').style.display="block"; window.$('lista-banco').innerHTML=""; try{ const r=await window.apiFetch(API_PRECIFICACAO+"?acao=listar_custos"); const res=await r.json(); if(res.sucesso){window.arrayBancoCustos=res.produtos;window.renderizarListaBanco(window.arrayBancoCustos);window.montarListaProdutosVenda();}else throw new Error(res.erro); }catch(e){window.$('loading-banco').innerHTML="❌ Erro na Planilha.";}finally{window.$('loading-banco').style.display="none";} };
-window.renderizarListaBanco = function(aP){ const lD=window.$('lista-banco'); lD.innerHTML=""; if(aP.length===0){lD.innerHTML="<p style='text-align:center;color:#999;padding:20px;font-weight:600;'>Nenhum modelo.</p>";return;} let h=""; aP.forEach(p=>{const rep=p.preco_repasse?`<span class="pb-tag" style="color:#1d4ed8;font-weight:800;">🤝 Repasse ${window.fmt(p.preco_repasse)}</span>`:`<span class="pb-tag" style="color:#b45309;font-weight:800;">⚠️ Sem repasse</span>`; const est=`<span class="pb-tag">🏠 Ateliê: ${p.est_atelie||0}</span><span class="pb-tag">👥 Vendedores: ${p.est_vendedores||0}</span>`; h+=`<div class="produto-banco-card" style="${p.ativo===false?'opacity:0.6;':''}"><div class="card-row-top"><div class="pb-info"><h4 class="pb-nome">${window.esc(p.modelo)} ${p.ativo===false?'<span class="tag-inativo">Inativo</span>':''}</h4><div class="pb-detalhes"><span class="pb-tag">⚖️ ${window.esc(p.peso||"0")}g</span><span class="pb-tag">⏱️ ${window.esc(p.tempo||"0")}h</span><span class="pb-tag">📦 ${window.formatarDoBanco(p.insumos)}</span></div><div class="pb-detalhes">${rep}${est}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;"><div class="pb-custo">${window.formatarDoBanco(p.custo_total)}</div><button class="btn-novera btn-n-editar" onclick="window.abrirModalEditarModelo(${p.linha})" title="Editar modelo, repasse e foto">✏️</button></div></div></div>`;}); lD.innerHTML=h; };
-window.filtrarBanco = function(){ const t=window.$('busca-banco').value.toLowerCase(); window.renderizarListaBanco(window.arrayBancoCustos.filter(p=>p.modelo.toLowerCase().includes(t))); };
+window.processarTimeUnico = async function(tN,tU,q,aK,t,d,mR){ window.addLog(`>> GERANDO: ${tN.toUpperCase()}`,"warn"); const pr=`Gere ${q} perguntas sobre história do ${tN} (Dificuldade: ${d}). ${t?`Tema OBRIGATÓRIO: "${t}".`:`Varie temas.`}\nREGRAS: Fatos históricos, max 15 palavras/perg, max 4 palavras/opc.\nFormato ESTRITO:\nPergunta: [Texto]\nA) [Opc 1]\nB) [Opc 2]\nC) [Opc 3]\nD) [Opc 4]\nCorreta: [1 a 4]\nAPENAS o texto puro.`; const tx=(await window.apiAcao("ia_gerar",{prompt:pr})).texto; window.addLog(`IA respondeu!`,"success"); const pg=[]; tx.split(/(?:Pergunta|Q):/i).filter(b=>b.trim().length>0).forEach(b=>{const l=b.trim().split('\n').map(x=>x.trim()).filter(x=>x!==''); if(l.length>=5){let c=1,lC=l.find(x=>/Correta/i.test(x));if(lC){let m=lC.match(/\d+/);if(m)c=parseInt(m[0]);} pg.push({pergunta:l[0],opcoes:[l[1].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[2].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[3].replace(/^[A-D1-4][\)\.-]?\s*/i,''),l[4].replace(/^[A-D1-4][\)\.-]?\s*/i,'')],correta:c});} }); if(pg.length===0)throw new Error("IA gerou texto inválido."); window.addLog(`Geradas ${pg.length} perguntas.`,"info"); if(mR)window.addLog(`⚠️ Reciclagem!`,"error"); const rP=await fetch(tU,{method:"POST",body:JSON.stringify({acao:"salvar_quiz",perguntas:pg,substituir:mR})}); const rS=await rP.json(); if(rS.sucesso){window.addLog(`✅ SUCESSO!`,"success");localStorage.setItem("ultimo_time_gerado",tN);localStorage.setItem("ultimo_horario_gerado",new Date().toLocaleString('pt-BR'));}else throw new Error(rS.erro); };
+window.iniciarAutomacao = async function(mG){ const aK=""; const q=window.$('qtd').value,t=window.$('tema').value.trim(),d=window.$('dificuldade').value,mR=window.$('substituir').checked,bU=window.$('btn-iniciar'),bG=window.$('btn-global'); bU.disabled=true;bG.disabled=true; try{ if(mG){window.addLog(`--- LOTE GLOBAL ---`,"warn"); const o=Array.from(window.$('time').options); for(let i=0;i<o.length;i++){try{await window.processarTimeUnico(o[i].getAttribute("data-nome"),o[i].value,q,aK,t,d,mR);}catch(e){window.addLog(`❌ ERRO ${o[i].getAttribute("data-nome")}: ${e.message}`,"error");} if(i<o.length-1){window.addLog("Aguardando 5s...","info");await window.delay(5000);}} window.addLog(`--- FINALIZADO ---`,"success");}else{const s=window.$('time');await window.processarTimeUnico(s.options[s.selectedIndex].getAttribute("data-nome"),s.value,q,aK,t,d,mR);} window.atualizarBadgeUltimo();window.carregarInfoBanco(); }catch(er){window.addLog(`FALHA: ${er.message}`,"error");}finally{bU.disabled=false;bG.disabled=false;} };
 
 // ==========================================
 // ERP: DESPESAS (AGORA NO MYSQL)
@@ -862,127 +882,7 @@ window.gerarHTMLImpressao = function(grupos, tipo) {
     win.document.close();
 };
 
-window.calcularSugestao = function() {
-    const prodName = window.$('venda-produto').value.trim().toLowerCase();
-    const platName = window.$('venda-plataforma').value.trim().toLowerCase();
-    const markup = parseFloat(window.$('venda-markup').value) || 100;
-    const qtd = parseFloat(window.$('venda-qtd').value) || 1;
-
-    const produto = prodName ? window.arrayBancoCustos.find(p => p.modelo.toLowerCase() === prodName) : null;
-    window.atualizarBoxBaixaAtelie(produto);
-    if (!produto) { window.$('box-sugestao-preco').style.display = 'none'; return; }
-
-    let custoUnitario = window.limparValorPlanilha(produto.custo_total);
-    let custoTotalBase = custoUnitario * qtd;
-
-    const plat = window.arrayPlataformas.find(p => p.nome.toLowerCase() === platName) || { pct: 0, fixa: 0 };
-    
-    let lucroDesejado = custoTotalBase * (markup / 100);
-    let valorBaseReceber = custoTotalBase + lucroDesejado; 
-
-    let taxaPct = parseFloat(plat.pct) / 100;
-    let taxaFixaTotal = parseFloat(plat.fixa) * qtd; 
-
-    if (taxaPct >= 1) taxaPct = 0.99; 
-
-    let precoSugerido = (valorBaseReceber + taxaFixaTotal) / (1 - taxaPct);
-    
-    window.$('venda-sugestao-valor').innerText = window.fmt(precoSugerido);
-    window.$('venda-sugestao-lucro').innerText = window.fmt(lucroDesejado);
-    window.$('box-sugestao-preco').style.display = 'block';
-    window.$('box-sugestao-preco').dataset.valor = precoSugerido.toFixed(2);
-};
-
-// 📦 Se tem peça pronta no Ateliê, oferece tirar de lá (já vem marcado). Sem estoque = sob encomenda.
-window.atualizarBoxBaixaAtelie = function(produto) {
-    const box = window.$('box-baixa-atelie'), chk = window.$('venda-baixa-atelie'); if (!box) return;
-    const prodAnterior = box.dataset.produto || '';
-    if (!produto || !(produto.est_atelie > 0)) { box.style.display = 'none'; chk.checked = false; box.dataset.produto = ''; return; }
-    window.$('venda-atelie-qtd').innerText = produto.est_atelie;
-    if (prodAnterior !== String(produto.linha)) chk.checked = true;
-    box.dataset.produto = produto.linha; box.style.display = 'flex';
-};
-
-// 🛒 Sugestões do campo "Produto vendido": por padrão só o que tem peça no Ateliê (com a quantidade ao lado)
-window.montarListaProdutosVenda = function() {
-    const dl = window.$('lista-produtos-venda'); if (!dl) return;
-    const todos = window.$('venda-mostrar-sem-estoque').checked;
-    const ativos = (window.arrayBancoCustos || []).filter(p => p.ativo !== false);
-    const lista = ativos.filter(p => todos || (p.est_atelie || 0) > 0);
-    dl.innerHTML = lista.map(p => `<option value="${window.esc(p.modelo)}" label="${p.est_atelie > 0 ? `🏠 ${p.est_atelie} no Ateliê` : 'sem estoque'}">`).join('');
-    const comEstoque = ativos.filter(p => (p.est_atelie || 0) > 0).length;
-    window.$('venda-info-lista').innerText = ativos.length ? (todos ? `${ativos.length} produtos` : `${comEstoque} com estoque`) : '';
-    window.$('venda-produto').placeholder = todos || comEstoque ? "Toque para escolher o produto" : "Nenhum produto com estoque — digite o nome";
-};
-
-window.aplicarPrecoSugerido = function() {
-    let val = parseFloat(window.$('box-sugestao-preco').dataset.valor);
-    if (!isNaN(val)) { window.$('venda-valor').value = window.fmt(val); }
-};
-
-window.carregarOpcoesVenda = async function(){ window.$('loading-opcoes-venda').style.display="block"; try{ const r=await window.apiFetch(API_PRECIFICACAO+"?acao=listar_opcoes_venda"); const res=await r.json(); if(res.sucesso){ window.$('lista-clientes-venda').innerHTML=res.clientes.map(n=>`<option value="${n}">`).join(''); window.$('lista-clientes-busca').innerHTML=res.clientes.map(n=>`<option value="${n}">`).join(''); window.$('lista-produtos-todos').innerHTML=res.produtos.map(n=>`<option value="${window.esc(n)}">`).join(''); window.montarListaProdutosVenda(); window.$('lista-plataformas-venda').innerHTML=res.plataformas.map(n=>`<option value="${n}">`).join('');} }catch(e){}finally{window.$('loading-opcoes-venda').style.display="none";} };
-
-window.salvarVenda = async function(){ const dV=window.$('venda-data').value, c=window.$('venda-cliente').value.trim(), p=window.$('venda-produto').value.trim(), pl=window.$('venda-plataforma').value.trim(), q=window.$('venda-qtd').value, vS=window.$('venda-valor').value, s=window.$('venda-status').value; if(!dV||!c||!p||!pl||!vS)return window.mostrarAlerta("Atenção","Preencha tudo.","warning"); const btn=window.$('btn-salvar-venda'); btn.disabled=true; btn.innerText="⏳ Lançando..."; try{ const prodObj=window.arrayBancoCustos.find(x=>x.modelo.toLowerCase()===p.toLowerCase()); const baixar=!!(prodObj&&window.$('venda-baixa-atelie').checked&&window.$('box-baixa-atelie').style.display!=='none'); const py={acao:"salvar_venda",data_venda:dV.split('-').reverse().join('/'),cliente:c,produto:p,plataforma:pl,qtd:q,valor_venda:window.fmtPlanilha(window.limparValorPlanilha(vS)),status:s,produto_id:prodObj?prodObj.linha:null,baixar_estoque:baixar}; const r=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify(py)}); const res=await r.json(); if(res.sucesso){window.mostrarAlerta("Venda Feita! 🎉",baixar?`Registrado! ${q} peça(s) saíram do Ateliê.`:"Registrado!","success");window.$('venda-cliente').value="";window.$('venda-produto').value="";window.$('venda-plataforma').value="";window.$('venda-qtd').value="1";window.$('venda-valor').value="";window.$('venda-status').value="Pago"; window.$('box-sugestao-preco').style.display="none"; window.atualizarBoxBaixaAtelie(null); window.carregarVendas(); if(baixar) window.carregarBancoDeCustos();}else throw new Error(res.erro); }catch(e){window.mostrarAlerta("Erro",e.message,"error");}finally{btn.disabled=false;btn.innerText="✅ Lançar Venda";} };
-
 window.salvarEdicaoVenda = async function(){ const l=window.$('edit-venda-linha').value, dV=window.$('edit-venda-data').value, s=window.$('edit-venda-status').value, c=window.$('edit-venda-cliente').value.trim(), p=window.$('edit-venda-produto').value.trim(), pl=window.$('edit-venda-plataforma').value.trim(), q=window.$('edit-venda-qtd').value, vS=window.$('edit-venda-valor').value; if(!dV||!c||!p||!pl||!vS)return window.mostrarAlerta("Atenção","Preencha tudo.","warning"); const btn=window.$('btn-salvar-edicao-venda'); btn.disabled=true; btn.innerText="⏳ Salvando..."; try{ const py={acao:"atualizar_venda",linha:l,data_venda:dV.split('-').reverse().join('/'),cliente:c,produto:p,plataforma:pl,qtd:q,valor_venda:window.fmtPlanilha(window.limparValorPlanilha(vS)),status:s}; const r=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify(py)}); const res=await r.json(); if(res.sucesso){window.fecharEditarVenda();window.mostrarAlerta("Atualizado!","Editada.","success");window.carregarVendas();}else throw new Error(res.erro); }catch(e){window.mostrarAlerta("Erro",e.message,"error");}finally{btn.disabled=false;btn.innerText="💾 Salvar Alterações";} };
-
-window.carregarVendas = async function(){ window.$('loading-vendas').style.display="block"; window.$('lista-vendas').innerHTML=""; try{ const r=await window.apiFetch(API_PRECIFICACAO+"?acao=listar_vendas"); const res=await r.json(); if(res.sucesso){window.arrayVendas=res.vendas; window.filtrarVendas();}else throw new Error(res.erro); }catch(e){window.$('loading-vendas').innerHTML="❌ Erro Vendas.";}finally{window.$('loading-vendas').style.display="none";} };
-
-window.limparFiltrosVendas = function(){ window.$('filtro-v-mes').value="todos"; window.$('filtro-v-ano').value="todos"; window.$('filtro-v-status').value="todos"; window.$('busca-venda').value=""; window.filtrarVendas(); };
-
-window.gerarRelatorioCliente = function() { const busca = window.$('busca-venda').value.trim().toLowerCase(); if(!busca) return window.mostrarAlerta("Atenção", "Para gerar o extrato, digite o nome do cliente na barra de busca primeiro!", "warning"); const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); const tB = norm(busca); const mS = window.$('filtro-v-mes').value, aS = window.$('filtro-v-ano').value, stS = window.$('filtro-v-status').value.toLowerCase(); const filtrados = window.arrayVendas.filter(v => { if (!norm(v.cliente).includes(tB)) return false; if (stS !== "todos" && v.status.toLowerCase() !== stS) return false; if (mS !== "todos" || aS !== "todos") { let pt = v.data.includes('/') ? v.data.split('/') : (v.data.includes('-') ? v.data.split('-').reverse() : []); if (pt.length >= 3) { let m = String(pt[1]).padStart(2,'0'), a = String(pt[2]).substring(0,4); if (mS !== "todos" && m !== mS) return false; if (aS !== "todos" && a !== aS) return false; } else return false; } return true; }); if(filtrados.length === 0) return window.mostrarAlerta("Ops", "Nenhuma venda encontrada para este cliente nos filtros atuais.", "warning"); let total = 0; let texto = `*🧾 EXTRATO DE PEDIDOS | MINI MUNDO 3D*\n*Cliente:* ${filtrados[0].cliente}\n\n`; filtrados.forEach(v => { let val = window.limparValorPlanilha(v.valor_venda); total += val; let icone = v.status.toLowerCase() === 'pago' ? '🟢' : '🟡'; texto += `📅 *${v.data}* - ${v.produto} (x${v.qtd})\n💰 Valor: ${window.fmt(val)} | Status: ${icone} ${v.status}\n\n`; }); texto += `*TOTAL DA FATURA: ${window.fmt(total)}*`; navigator.clipboard.writeText(texto).then(() => { window.mostrarAlerta("Copiado!", "O relatório do cliente foi copiado. É só colar no WhatsApp!", "success"); }).catch(() => { window.mostrarParaCopiar(texto, "Copie o extrato"); }); };
-
-window.filtrarVendas = function(){ const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); const mS=window.$('filtro-v-mes').value, aS=window.$('filtro-v-ano').value, stS=window.$('filtro-v-status').value.toLowerCase(), tB=norm(window.$('busca-venda').value); const flt=window.arrayVendas.filter(v=>{ if(tB&&!(norm(v.cliente).includes(tB)||norm(v.produto).includes(tB)))return false; if(stS!=="todos"&&v.status.toLowerCase()!==stS)return false; if(mS!=="todos"||aS!=="todos"){ let pt=[]; if(v.data.includes('/'))pt=v.data.split('/'); else if(v.data.includes('-')){let p=v.data.split('-');pt=[p[2],p[1],p[0]];} else if(v.data.includes(' ')){let td=new Date(v.data);if(!isNaN(td))pt=[td.getDate(),String(td.getMonth()+1).padStart(2,'0'),td.getFullYear()];} if(pt.length>=3){let m=String(pt[1]).padStart(2,'0'), a=String(pt[2]).substring(0,4); if(mS!=="todos"&&m!==mS)return false; if(aS!=="todos"&&a!==aS)return false;}else return false; } return true; }); window.vendasFiltradasAtuais = flt; window.renderizarListaVendas(flt); };
-
-window.renderizarListaVendas = function(aV){ 
-    const lD = window.$('lista-vendas'); lD.innerHTML = ""; 
-    let sP = 0, sPa = 0, sL = 0, sQ = 0; 
-    
-    if (aV.length === 0) { 
-        lD.innerHTML = "<p class='lista-vazia'>Nenhuma venda nesse filtro.</p>";
-        window.$('vendas-total-valor').innerText = "R$ 0,00"; window.$('vendas-pendentes-valor').innerText = "R$ 0,00";
-        window.$('vendas-pagas-valor').innerText = "R$ 0,00"; window.$('vendas-lucro-valor').innerText = "R$ 0,00"; 
-        window.$('vendas-qtd-valor').innerText = "0 un"; 
-        return; 
-    } 
-
-    let h = ""; 
-    aV.forEach(v => { 
-        let nV = window.limparValorPlanilha(v.valor_venda), nL = window.limparValorPlanilha(v.lucro), nQ = parseFloat(v.qtd) || 0, isP = v.status.toLowerCase() === "pendente"; 
-        sQ += nQ; if (isP) sP += nV; else sPa += nV; sL += nL; 
-        let lS = v.lucro && nL > 0 ? `<span class="mm-chip verde">💰 Lucro ${window.formatarDoBanco(v.lucro)}</span>` : "";
-        
-        let bB = isP 
-            ? `<button class="btn-novera btn-n-cobranca" onclick="window.solicitarNomeDocumento(${v.linha}, 'Pendente')" title="Gerar Lembrete">🔔</button>
-               <button class="btn-novera btn-n-baixa" onclick="window.abrirConfirmacaoPagamento(${v.linha})" title="Marcar como Pago">💸</button>` 
-            : `<button class="btn-novera btn-n-recibo" onclick="window.solicitarNomeDocumento(${v.linha}, 'Pago')" title="Gerar Recibo">🧾</button>`;
-
-        h += `
-        <div class="item ${isP ? 'item-pendente' : ''}">
-            <div class="item-topo">
-                <div style="min-width:0;">
-                    <h4 class="item-nome">${window.esc(v.cliente)}</h4>
-                    <div class="item-meta"><span>🏷️ ${window.esc(v.produto)} × ${window.esc(v.qtd)}</span><span>📅 ${window.esc(v.data)}</span><span>📱 ${window.esc(v.plataforma)}</span></div>
-                </div>
-                <div class="item-valor">${window.fmt(nV)}</div>
-            </div>
-            <div class="item-rodape">
-                <div class="mm-chips"><span class="mm-chip ${isP ? 'amarelo' : 'verde'}">${isP ? '🟡 Pendente' : '🟢 Pago'}</span>${lS}${v.baixa_estoque ? '<span class="mm-chip azul">📦 Saiu do Ateliê</span>' : ''}</div>
-                <div class="acoes-venda-box">
-                    ${bB}
-                    <button class="btn-novera btn-n-editar" onclick="window.abrirModalEditarVenda(${v.linha})" title="Editar venda">✏️</button>
-                    <button class="btn-novera btn-n-apagar" onclick="window.abrirConfirmacaoExclusao(${v.linha})" title="Excluir venda">🗑️</button>
-                </div>
-            </div>
-        </div>`;
-    }); 
-    lD.innerHTML = h; 
-    window.$('vendas-total-valor').innerText = window.fmt(sP + sPa); 
-    window.$('vendas-pendentes-valor').innerText = window.fmt(sP); 
-    window.$('vendas-pagas-valor').innerText = window.fmt(sPa); 
-    window.$('vendas-lucro-valor').innerText = window.fmt(sL); 
-    window.$('vendas-qtd-valor').innerText = sQ + " un"; 
-};
 
 window.executarPagamentoVenda = async function(){ 
     if(!window.linhaVendaPagamento) return; 
@@ -1009,12 +909,3 @@ window.executarExclusaoVenda = async function(){
         else throw new Error(res.erro); 
     }catch(e){window.mostrarAlerta("Erro",e.message,"error");} 
 };
-
-// ERP: DASHBOARD
-// Sempre busca de novo (antes ficava preso nos dados da primeira abertura até recarregar a página)
-window.dashBaixas = [];
-window.carregarDashboardERP = async function(){ window.$('loading-dashboard').style.display='block'; window.$('conteudo-dashboard').style.display='none'; try{ const [jV,jD,jB]=await Promise.all(["listar_vendas","listar_despesas","listar_baixas"].map(a=>window.apiFetch(API_PRECIFICACAO+"?acao="+a).then(r=>r.json()))); if(jV.sucesso&&jD.sucesso&&jB.sucesso){window.dashVendas=jV.vendas;window.dashDespesas=jD.despesas;window.dashBaixas=jB.baixas;}else throw new Error("Erro na API."); window.aplicarFiltrosDashboardERP(); }catch(e){window.mostrarAlerta("Erro Dashboard",e.message,"error");}finally{window.$('loading-dashboard').style.display='none';window.$('conteudo-dashboard').style.display='block';} };
-window.limparFiltrosDashboardERP = function(){ window.$('filtro-dash-mes').value="todos"; window.$('filtro-dash-ano').value="todos"; window.aplicarFiltrosDashboardERP(); };
-window.aplicarFiltrosDashboardERP = function(){ const m=window.$('filtro-dash-mes').value, a=window.$('filtro-dash-ano').value; const fD=(i)=>{ if(m==="todos"&&a==="todos")return true; let pt=[]; if(i.data.includes('/'))pt=i.data.split('/'); else if(i.data.includes('-')){let p=i.data.split('-');pt=[p[2],p[1],p[0]];} else if(i.data.includes(' ')){let td=new Date(i.data);if(!isNaN(td))pt=[td.getDate(),String(td.getMonth()+1).padStart(2,'0'),td.getFullYear()];} if(pt.length>=3){let mD=String(pt[1]).padStart(2,'0'),aD=String(pt[2]).substring(0,4); if(m!=="todos"&&mD!==m)return false; if(a!=="todos"&&aD!==a)return false; return true;} return false; }; const bPagas=window.dashBaixas.filter(b=>b.status==='Pago'&&fD({data:b.data_pgto||''})), bPeriodo=window.dashBaixas.filter(b=>fD({data:String(b.data_hora||'').slice(0,10)})); window.gerarGraficosERP(window.dashVendas.filter(fD),window.dashDespesas.filter(fD),bPagas,bPeriodo); };
-// bP = repasses RECEBIDOS no período (entram no caixa); bV = baixas feitas no período (entram nos rankings)
-window.gerarGraficosERP = function(v,d,bP=[],bV=[]){ let tR=0, tG=0; v.forEach(x=>{if(x.status.toLowerCase()==='pago')tR+=window.limparValorPlanilha(x.valor_venda);}); d.forEach(x=>{tG+=window.limparValorPlanilha(x.valor);}); const tRep=bP.reduce((s,b)=>s+(b.repasse_total||0),0), tAReceber=window.dashBaixas.filter(b=>b.status==='Pendente').reduce((s,b)=>s+(b.repasse_total||0),0); tR+=tRep; if(window.$('dash-repasses-valor')){window.$('dash-repasses-valor').innerText=window.fmt(tRep); window.$('dash-areceber-vend-valor').innerText=window.fmt(tAReceber);} let bl=tR-tG; window.$('dash-receita-valor').innerText=window.fmt(tR); window.$('dash-despesa-valor').innerText=window.fmt(tG); window.$('dash-balanco-valor').innerText=window.fmt(bl); window.$('dash-balanco-valor').style.color=bl<0?"#ef4444":"#10b981"; const cP={}; v.forEach(x=>{let p=x.produto||"Não Especificado", q=parseFloat(x.qtd)||1; cP[p]=(cP[p]||0)+q;}); bV.forEach(x=>{let p=x.produto_nome||"Não Especificado"; cP[p]=(cP[p]||0)+(parseFloat(x.qtd)||0);}); let aP=Object.keys(cP).map(k=>({nome:k,qtd:cP[k]})).sort((a,b)=>b.qtd-a.qtd); let t5P=aP.slice(0,5); const cPl={}; v.forEach(x=>{let p=x.plataforma||"Outros", vL=window.limparValorPlanilha(x.valor_venda); cPl[p]=(cPl[p]||0)+vL;}); bV.forEach(x=>{cPl["🤝 Vendedores (repasse)"]=(cPl["🤝 Vendedores (repasse)"]||0)+(x.repasse_total||0);}); const cC={}; v.forEach(x=>{let c=x.cliente||"Avulso", vL=window.limparValorPlanilha(x.valor_venda); cC[c]=(cC[c]||0)+vL;}); let aC=Object.keys(cC).map(k=>({nome:k,val:cC[k]})).sort((a,b)=>b.val-a.val); let t10C=aC.slice(0,10); if(window.chartProd)window.chartProd.destroy(); if(window.chartPlat)window.chartPlat.destroy(); if(window.chartCli)window.chartCli.destroy(); Chart.defaults.color='#78716c'; Chart.defaults.font.family='Inter'; window.chartCli=new Chart(window.$('chartClientes').getContext('2d'),{type:'bar',data:{labels:t10C.map(c=>c.nome),datasets:[{label:'Receita (R$)',data:t10C.map(c=>c.val),backgroundColor:'#10b981',borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+window.fmt(c.parsed.x)}}},scales:{x:{beginAtZero:true}}}}); window.chartProd=new Chart(window.$('chartProdutos').getContext('2d'),{type:'doughnut',data:{labels:t5P.map(p=>p.nome),datasets:[{data:t5P.map(p=>p.qtd),backgroundColor:['#d97706','#b45309','#f59e0b','#fde68a','#78716c'],borderWidth:2,borderColor:'#ffffff'}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},cutout:'65%'}}); window.chartPlat=new Chart(window.$('chartPlataformas').getContext('2d'),{type:'pie',data:{labels:Object.keys(cPl),datasets:[{data:Object.values(cPl),backgroundColor:['#1e3a8a','#3b82f6','#8b5cf6','#a7f3d0','#cbd5e1','#d97706','#10b981','#f43f5e'],borderWidth:2,borderColor:'#ffffff'}]},options:{responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>' '+window.fmt(c.parsed)}}}}}); };

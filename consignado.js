@@ -130,15 +130,11 @@ window.renderizarEstoque = function() {
     const aReceber = P.pendentes.reduce((s, x) => s + x.total, 0);
     const semRepasse = P.produtos.filter(p => p.ativo && !p.repasse).length;
     const baixos = P.produtos.filter(p => p.ativo && minimo > 0 && window.qtdEm(p.id, 0) > 0 && window.qtdEm(p.id, 0) <= minimo).length;
+    const kpi = (ic, rot, v, cor) => `<div class="kpi kpi-ic ${cor}"><span class="kpi-icone">${window.ic(ic)}</span><span class="kpi-rotulo">${rot}</span><span class="kpi-valor">${v}</span></div>`;
     window.$('estoque-resumo').innerHTML = `
-        <div class="mm-resumo">
-            <div class="mm-kpi"><h3>🏠 Peças no Ateliê</h3><span>${noAtelie}</span></div>
-            <div class="mm-kpi"><h3>👥 Com vendedores</h3><span>${comVend}</span></div>
-            <div class="mm-kpi"><h3>💼 Em repasse na rua</h3><span class="v-roxo">${window.fmt(valorComVend)}</span></div>
-            <div class="mm-kpi"><h3>⏳ A receber</h3><span class="v-laranja">${window.fmt(aReceber)}</span></div>
-        </div>
-        ${semRepasse ? `<div class="mm-alerta">⚠️ ${semRepasse} modelo(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. Defina em <b>Modelos</b> (✏️).</div>` : ''}
-        ${baixos ? `<div class="mm-alerta">🔔 ${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</div>` : ''}`;
+        <div class="kpis">${kpi('arquivo', 'Peças no Ateliê', noAtelie, '')}${kpi('usuarios', 'Com vendedores', comVend, 'roxo')}${kpi('dinheiro', 'Em repasse na rua', window.fmt(valorComVend), 'azul')}${kpi('relogio', 'A receber', window.fmt(aReceber), 'laranja')}</div>
+        ${semRepasse ? `<div class="mm-alerta">${window.ic('alerta')} <span>${semRepasse} produto(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. <a onclick="switchTab('modelos'); filtroProdutos('semrepasse')">Definir em Produtos</a></span></div>` : ''}
+        ${baixos ? `<div class="mm-alerta">${window.ic('alerta')} <span>${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</span></div>` : ''}`;
     // Por padrão só aparece o que tem peça (no Ateliê ou com vendedor); a chave mostra o resto
     const t = (window.$('busca-estoque').value || '').toLowerCase(), mostrarSem = window.$('estoque-mostrar-sem').checked;
     const totalDe = pid => P.estoque.filter(e => e.produto_id === pid).reduce((s, e) => s + e.qtd, 0);
@@ -157,13 +153,73 @@ window.renderizarEstoque = function() {
         const totalVend = comEles.reduce((s, e) => s + e.qtd, 0);
         const corAt = at <= 0 ? '' : (minimo > 0 && at <= minimo ? 'amarelo' : 'verde');
         const detalhe = comEles.map(e => `${window.nomeDoLocal(e.vendedor_id)}: ${e.qtd}`).join(' · ');
+        const kit = p.tipo === 'kit', da = kit ? window.kitsMontaveis(p) : 0;
         return `<div class="mm-card" style="${p.ativo ? '' : 'opacity:0.6;'}">${window.imgProduto(p.foto)}
-            <div class="mm-info"><h4>${window.esc(p.nome)} ${p.ativo ? '' : '<span class="tag-inativo">Inativo</span>'}</h4>
-                <div class="mm-chips"><span class="mm-chip ${corAt}">🏠 Ateliê: ${at}</span><span class="mm-chip azul">👥 Vendedores: ${totalVend}</span>
-                ${p.repasse ? `<span class="mm-chip">🤝 ${window.fmt(p.repasse)}</span>` : '<span class="mm-chip vermelho">⚠️ sem repasse</span>'}<span class="mm-chip">💲 custo ${window.fmt(p.custo)}</span></div>
+            <div class="mm-info"><h4>${window.esc(p.nome)} ${kit ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : ''} ${p.ativo ? '' : '<span class="tag-inativo">Inativo</span>'}</h4>
+                <div class="mm-chips"><span class="mm-chip ${corAt}">Ateliê: ${at}</span><span class="mm-chip azul">Vendedores: ${totalVend}</span>
+                ${p.repasse ? `<span class="mm-chip">Repasse ${window.fmt(p.repasse)}</span>` : '<span class="mm-chip vermelho">sem repasse</span>'}<span class="mm-chip">custo ${window.fmt(p.custo)}</span>
+                ${kit ? `<span class="mm-chip ${da > 0 ? 'verde' : ''}">dá para montar ${da}</span>` : ''}</div>
                 ${detalhe ? `<span class="mm-sub">${detalhe}</span>` : ''}</div>
-            <div class="mm-acoes"><button class="btn-novera btn-n-baixa" title="Registrar produção" onclick="window.abrirProducao(${p.id})">➕</button><button class="btn-novera btn-n-editar" title="Ajustar quantidade do Ateliê" onclick="window.abrirAjusteAtelie(${p.id})">✏️</button><button class="btn-novera" title="Histórico" onclick="window.abrirMovimentos({produto_id:${p.id}})">📜</button></div></div>`;
+            <div class="mm-acoes">${kit
+                ? `<button class="btn-ic verde" title="Montar kit" onclick="abrirMontarKit(${p.id})">${window.ic('camadas')}</button>${at > 0 ? `<button class="btn-ic" title="Desmontar kit (peças voltam soltas)" onclick="desmontarKit(${p.id})">${window.ic('desfazer')}</button>` : ''}`
+                : `<button class="btn-ic verde" title="Registrar produção" onclick="abrirProducao(${p.id})">${window.ic('mais')}</button>`}
+                <button class="btn-ic" title="Ajustar quantidade do Ateliê" onclick="abrirAjusteAtelie(${p.id})">${window.ic('lapis')}</button><button class="btn-ic" title="Histórico" onclick="abrirMovimentos({produto_id:${p.id}})">${window.ic('relogio')}</button></div></div>`;
     }).join('');
+};
+
+// ==========================================
+// 🧩 KITS: MONTAR (peças → kit) E DESMONTAR (kit → peças)
+// ==========================================
+window.kitsMontaveis = function(kit) {
+    if (!kit.itens || !kit.itens.length) return 0;
+    return Math.min(...kit.itens.map(i => Math.floor(Math.max(0, window.qtdEm(i.produto_id, 0)) / (i.qtd || 1))));
+};
+window.abrirMontarKit = function(kitId) {
+    const P = window.painelEstoque; if (!P) return;
+    const kits = P.produtos.filter(p => p.tipo === 'kit' && p.ativo);
+    if (!kits.length) return window.confirmarMM({ icone: '🧩', titulo: 'Nenhum kit cadastrado', texto: 'Primeiro cadastre o kit em Precificar → Kit, escolhendo as peças que vão nele.', ok: 'Cadastrar kit', cancelar: 'Agora não' }).then(s => { if (s) window.novoProduto('kit'); });
+    const sel = kitId || kits[0].id;
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic('camadas')} Montar kit</h3>
+        <p class="texto-ajuda" style="margin-top:0;">As peças saem do Ateliê e o kit pronto entra no Ateliê.</p>
+        <div class="row"><div class="col"><div class="input-group"><label>Kit</label><select id="mk-kit" onchange="atualizarMontarKit()">${kits.map(k => `<option value="${k.id}" ${k.id === sel ? 'selected' : ''}>${window.esc(k.nome)}</option>`).join('')}</select></div></div>
+            <div class="col" style="max-width:150px;"><div class="input-group"><label>Quantos kits?</label><input type="number" id="mk-qtd" value="1" min="1" oninput="atualizarMontarKit()"></div></div></div>
+        <div id="mk-tabela"></div>
+        <label class="chave" style="margin:14px 0 4px;"><input type="checkbox" id="mk-imprimir" onchange="atualizarMontarKit()"> Imprimir o que faltar (lança as peças que faltam como produção)</label>
+        <div class="input-group" style="margin-top:12px;"><label>Observação (opcional)</label><input type="text" id="mk-obs" placeholder="Ex: kits para a feira"></div>
+        <button class="btn-magic btn-global" id="btn-mk" onclick="confirmarMontarKit()">${window.ic('check')} Montar</button>`);
+    window.atualizarMontarKit();
+};
+window.atualizarMontarKit = function() {
+    const P = window.painelEstoque, kit = P.produtos.find(p => p.id === parseInt(window.$('mk-kit').value)); if (!kit) return;
+    const qtd = Math.max(1, parseInt(window.$('mk-qtd').value) || 1), imprimir = window.$('mk-imprimir').checked;
+    let falta = 0;
+    const linhas = (kit.itens || []).map(i => {
+        const p = P.produtos.find(x => x.id === i.produto_id) || { nome: '(peça removida)' }, precisa = i.qtd * qtd, tem = Math.max(0, window.qtdEm(i.produto_id, 0)), f = Math.max(0, precisa - tem);
+        falta += f;
+        return `<div class="mk-linha ${f ? 'falta' : ''}"><span class="mk-nome">${window.esc(p.nome)}<small>${i.qtd} por kit</small></span><span>${precisa}</span><span>${tem}</span><b>${f ? (imprimir ? `imprime ${f}` : `falta ${f}`) : 'ok'}</b></div>`;
+    }).join('');
+    window.$('mk-tabela').innerHTML = kit.itens && kit.itens.length
+        ? `<div class="mk-tabela"><div class="mk-linha cab"><span>Peça</span><span>Precisa</span><span>No Ateliê</span><span></span></div>${linhas}</div>
+           <p class="mk-resumo ${falta && !imprimir ? 'ruim' : ''}">${falta ? (imprimir ? `As ${falta} peça(s) que faltam entram como produção e já vão para o kit.` : `Faltam ${falta} peça(s). Ligue "Imprimir o que faltar" ou produza antes.`) : `Tudo certo: dá para montar ${qtd} kit(s) com o que tem no Ateliê.`}</p>`
+        : '<p class="mm-vazio">Esse kit não tem peças cadastradas. Edite em Produtos.</p>';
+    const b = window.$('btn-mk'); b.disabled = !kit.itens || !kit.itens.length || (falta > 0 && !imprimir);
+    b.innerHTML = `${window.ic('check')} Montar ${qtd} kit${qtd > 1 ? 's' : ''}`;
+};
+window.confirmarMontarKit = async function() {
+    const b = window.$('btn-mk'); b.disabled = true;
+    try {
+        const r = await window.apiAcao('montar_kit', { kit_id: parseInt(window.$('mk-kit').value), qtd: parseInt(window.$('mk-qtd').value), imprimir_faltas: window.$('mk-imprimir').checked, obs: window.$('mk-obs').value });
+        window.fecharModalMM(); window.toastMM(`Kit montado: ${r.kit}`);
+        window.carregarPainelEstoque(); window.carregarBancoDeCustos();
+    } catch (e) { window.mostrarAlerta('Não deu para montar', e.message, 'error'); b.disabled = false; }
+};
+window.desmontarKit = async function(kitId) {
+    const kit = window.painelEstoque.produtos.find(p => p.id === kitId); if (!kit) return;
+    const max = window.qtdEm(kitId, 0); if (max <= 0) return;
+    const n = await window.pedirQtd({ icone: '🧩', titulo: 'Desmontar kit', html: `Quantos <b>${window.esc(kit.nome)}</b> vão virar peças soltas de novo?<br><small>No Ateliê: ${max}</small>`, valor: '1', ok: 'Desmontar' }, max);
+    if (!n) return;
+    try { await window.apiAcao('desmontar_kit', { kit_id: kitId, qtd: n }); window.toastMM('Kit desmontado: as peças voltaram para o Ateliê'); window.carregarPainelEstoque(); window.carregarBancoDeCustos(); }
+    catch (e) { window.mostrarAlerta('Erro', e.message, 'error'); }
 };
 
 window.abrirProducao = function(pid) {
@@ -528,6 +584,7 @@ window.verComoVendedor = function(vid) {
     ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas'].forEach(id => { window.$(id).innerHTML = ''; });
     window.fecharModalMM();
     document.body.classList.add('modo-vendedor', 'vendo-como');
+    document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = false; });
     window.$('ver-como-nome').innerText = v.nome;
     window.$('subtitulo-app').innerText = `Visão de ${v.nome}`;
     window.switchTab('v_estoque', '📦 Meu Estoque');
@@ -536,6 +593,7 @@ window.sairVisaoVendedor = function() {
     const vid = window.vendedorVisto && window.vendedorVisto.id;
     window.vendedorVisto = null; window.painelVendedor = null;
     document.body.classList.remove('modo-vendedor', 'vendo-como');
+    document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = true; });
     window.$('subtitulo-app').innerText = "Central & ERP";
     window.switchTab('vendedores', '🤝 Vendedores');
     if (vid) window.abrirVendedor(vid);

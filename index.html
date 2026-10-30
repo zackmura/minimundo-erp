@@ -13,9 +13,55 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=4.1.0">
+    <link rel="stylesheet" href="style.css?v=5.0.0">
 </head>
 <body>
+
+<!-- Ícones desenhados (traço), usados com <svg class="ic"><use href="#i-nome"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-painel" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-carrinho" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+    <symbol id="i-calculadora" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></symbol>
+    <symbol id="i-pacote" viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></symbol>
+    <symbol id="i-carteira" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="i-arquivo" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></symbol>
+    <symbol id="i-usuarios" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-sacola" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+    <symbol id="i-ima" viewBox="0 0 24 24"><path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15"/><path d="m5 8 4 4M12 15l4 4"/></symbol>
+    <symbol id="i-megafone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+    <symbol id="i-barras" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></symbol>
+    <symbol id="i-controle" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></symbol>
+    <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-grade" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-sair" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-voltar" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+    <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.35-4.35"/></symbol>
+    <symbol id="i-camadas" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></symbol>
+    <symbol id="i-impressora" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+    <symbol id="i-mala" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2"/></symbol>
+    <symbol id="i-chave" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></symbol>
+    <symbol id="i-dinheiro" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-recibo" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+    <symbol id="i-lapis" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-tendencia" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-etiqueta" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></symbol>
+    <symbol id="i-presente" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-filtro" viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></symbol>
+    <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></symbol>
+    <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-cima" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-imagem" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+</svg>
 
 <!-- ========================================== -->
 <!-- 🔒 LOGIN                                    -->
@@ -46,40 +92,39 @@
         </div>
 
         <nav class="sb-nav" id="menu-abas">
-            <div class="sb-grupo">Visão geral</div>
-            <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="ic">📊</span>Dashboard</button>
+            <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg><span>Dashboard</span></button>
 
-            <div class="sb-grupo">Vendas & Produção</div>
-            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="ic">🛒</span>Vendas</button>
-            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar', '🧮 Precificar')"><span class="ic">🧮</span>Precificar</button>
-            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos', '📋 Modelos')"><span class="ic">📋</span>Modelos</button>
-            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos', '💳 Custos')"><span class="ic">💳</span>Custos</button>
+            <div class="sb-grupo">Vendas e produção</div>
+            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vendas</span></button>
+            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
+            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos</span></button>
+            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg><span>Custos</span></button>
 
             <div class="sb-grupo">Consignado</div>
-            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque', '📦 Estoque')"><span class="ic">📦</span>Estoque</button>
-            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="ic">🤝</span>Vendedores</button>
+            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Estoque</span></button>
+            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Vendedores</span></button>
 
-            <div class="sb-grupo">Loja & Marketing</div>
-            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja', '🛍️ Catálogo da Loja')"><span class="ic">🛍️</span>Catálogo</button>
-            <button id="btn-imas" class="tab-btn" onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="ic">🧲</span>Ímãs NFC</button>
-            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios', '📢 Anúncios')"><span class="ic">📢</span>Anúncios</button>
-            <button id="btn-analytics" class="tab-btn" onclick="switchTab('analytics', '📈 Analytics')"><span class="ic">📈</span>Analytics</button>
-            <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz', '🎮 Quiz')"><span class="ic">🎮</span>Quiz</button>
+            <div class="sb-grupo">Loja e marketing</div>
+            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Catálogo</span></button>
+            <button id="btn-imas" class="tab-btn" onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg><span>Ímãs NFC</span></button>
+            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg><span>Anúncios</span></button>
+            <button id="btn-analytics" class="tab-btn" onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg><span>Analytics</span></button>
+            <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz')"><svg class="ic"><use href="#i-controle"/></svg><span>Quiz</span></button>
 
             <div class="sb-grupo">Sistema</div>
-            <button id="btn-config" class="tab-btn" onclick="switchTab('config', '⚙️ Ajustes')"><span class="ic">⚙️</span>Ajustes</button>
+            <button id="btn-config" class="tab-btn" onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg><span>Ajustes</span></button>
         </nav>
 
         <nav class="sb-nav" id="menu-abas-vendedor">
             <div class="sb-grupo">Meu painel</div>
-            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="ic">📦</span>Meu Estoque</button>
-            <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="ic">💸</span>Meu Acerto</button>
-            <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="ic">🎁</span>Encomendas</button>
+            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Meu estoque</span></button>
+            <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg><span>Meu acerto</span></button>
+            <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg><span>Encomendas</span></button>
         </nav>
 
         <div class="sb-rodape">
-            <div class="sb-user"><span class="avatar" id="avatar-usuario">?</span><div><b id="nome-usuario-logado">—</b><small id="cargo-usuario">Diretoria</small></div></div>
-            <div class="sb-acoes"><span id="versao-header" class="badge-versao">v4</span><button class="btn-sair" onclick="fazerLogout()">Sair</button><button class="btn-voltar" onclick="sairVisaoVendedor()">⬅️ Voltar</button></div>
+            <div class="sb-user"><span class="avatar" id="avatar-usuario">?</span><div><b id="nome-usuario-logado">—</b><small id="cargo-usuario">Diretoria</small></div><span id="versao-header" class="badge-versao">v5</span></div>
+            <div class="sb-acoes"><button class="btn-sair" onclick="fazerLogout()"><svg class="ic"><use href="#i-sair"/></svg>Sair</button><button class="btn-voltar" hidden onclick="sairVisaoVendedor()"><svg class="ic"><use href="#i-voltar"/></svg>Voltar ao meu painel</button></div>
         </div>
     </aside>
 
@@ -89,46 +134,47 @@
     <main class="principal">
         <header class="topo">
             <img class="topo-logo" src="logo.png" alt="" onerror="this.src='logo.jpg'; this.onerror=null;">
-            <h1 id="titulo-modulo-ativo">📊 Dashboard</h1>
-            <button class="btn-sair topo-sair" onclick="fazerLogout()">Sair</button>
+            <span class="topo-ic" id="topo-ic"><svg class="ic"><use href="#i-painel"/></svg></span>
+            <div class="topo-titulos"><h1 id="titulo-modulo-ativo">Dashboard</h1><small id="topo-sub">Como está o negócio no período</small></div>
+            <button class="btn-sair topo-sair" onclick="fazerLogout()" title="Sair"><svg class="ic"><use href="#i-sair"/></svg></button>
         </header>
 
         <div class="area">
 
         <!-- 👀 Faixa do modo "ver como o vendedor" (só aparece pro Admin) -->
-        <div class="faixa-ver-como">
-            <span class="fvc-icone">👀</span>
-            <div class="fvc-texto"><b>Você está vendo o painel de <span id="ver-como-nome">—</span></b><small>É exatamente o que ele(a) vê. O que você fizer aqui fica registrado como lançado por você.</small></div>
-            <button class="btn-voltar" onclick="sairVisaoVendedor()">⬅️ Voltar ao meu painel</button>
+        <div class="faixa-ver-como" hidden>
+            <span class="fvc-icone"><svg class="ic"><use href="#i-olho"/></svg></span>
+            <div class="fvc-texto"><b>Você está vendo o painel de <span id="ver-como-nome">—</span></b><small>É exatamente o que a pessoa vê. O que você fizer aqui fica registrado como lançado por você.</small></div>
+            <button class="btn-voltar" onclick="sairVisaoVendedor()"><svg class="ic"><use href="#i-voltar"/></svg>Voltar ao meu painel</button>
         </div>
 
         <!-- ABA MENU (celular) -->
         <div id="tab-menu_mobile" class="tab-content">
-            <div class="menu-grupo">Vendas & Produção</div>
+            <div class="menu-grupo">Vendas e produção</div>
             <div class="grid-menu">
-                <button onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span>Dashboard</button>
-                <button onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span>Vendas</button>
-                <button onclick="switchTab('precificar', '🧮 Precificar')"><span class="icon">🧮</span>Precificar</button>
-                <button onclick="switchTab('modelos', '📋 Modelos')"><span class="icon">📋</span>Modelos</button>
-                <button onclick="switchTab('custos', '💳 Custos')"><span class="icon">💳</span>Custos</button>
+                <button onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Dashboard</button>
+                <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
+                <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
+                <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos</button>
+                <button onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg>Custos</button>
             </div>
             <div class="menu-grupo">Consignado</div>
             <div class="grid-menu">
-                <button onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span>Estoque</button>
-                <button onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span>Vendedores</button>
+                <button onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
+                <button onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg>Vendedores</button>
             </div>
-            <div class="menu-grupo">Loja & Marketing</div>
+            <div class="menu-grupo">Loja e marketing</div>
             <div class="grid-menu">
-                <button onclick="switchTab('loja', '🛍️ Catálogo da Loja')"><span class="icon">🛍️</span>Catálogo</button>
-                <button onclick="switchTab('imas', '🧲 Ímãs NFC')"><span class="icon">🧲</span>Ímãs NFC</button>
-                <button onclick="switchTab('anuncios', '📢 Anúncios')"><span class="icon">📢</span>Anúncios</button>
-                <button onclick="switchTab('analytics', '📈 Analytics')"><span class="icon">📈</span>Analytics</button>
-                <button onclick="switchTab('quiz', '🎮 Quiz')"><span class="icon">🎮</span>Quiz</button>
+                <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Catálogo</button>
+                <button onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg>Ímãs NFC</button>
+                <button onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg>Anúncios</button>
+                <button onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg>Analytics</button>
+                <button onclick="switchTab('quiz')"><svg class="ic"><use href="#i-controle"/></svg>Quiz</button>
             </div>
             <div class="menu-grupo">Sistema</div>
             <div class="grid-menu">
-                <button onclick="switchTab('config', '⚙️ Ajustes')"><span class="icon">⚙️</span>Ajustes</button>
-                <button onclick="fazerLogout()"><span class="icon">🚪</span>Sair</button>
+                <button onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button>
+                <button onclick="fazerLogout()"><svg class="ic"><use href="#i-sair"/></svg>Sair</button>
             </div>
         </div>
 
@@ -136,139 +182,220 @@
         <!-- 📊 DASHBOARD                               -->
         <!-- ========================================== -->
         <div id="tab-dashboard_erp" class="tab-content active">
-            <div class="filtros-box">
-                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">📅 Período</span><button class="btn-limpar" onclick="limparFiltrosDashboardERP()">Ver tudo</button></div>
-                <div class="row">
-                    <div class="col"><label>Mês</label><select id="filtro-dash-mes" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
-                    <div class="col"><label>Ano</label><select id="filtro-dash-ano" onchange="aplicarFiltrosDashboardERP()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+            <div class="barra-periodo">
+                <div class="chips-rolagem" id="dash-chips">
+                    <button class="chip-op active" data-p="mes" onclick="periodoDash('mes')">Este mês</button>
+                    <button class="chip-op" data-p="mesant" onclick="periodoDash('mesant')">Mês passado</button>
+                    <button class="chip-op" data-p="3m" onclick="periodoDash('3m')">3 meses</button>
+                    <button class="chip-op" data-p="ano" onclick="periodoDash('ano')">Este ano</button>
+                    <button class="chip-op" data-p="12m" onclick="periodoDash('12m')">12 meses</button>
+                    <button class="chip-op" data-p="tudo" onclick="periodoDash('tudo')">Tudo</button>
+                    <button class="chip-op" data-p="personalizado" onclick="periodoDash('personalizado')">Escolher datas</button>
                 </div>
+                <div class="linha-datas" id="dash-datas" hidden><input type="date" id="dash-de" onchange="renderizarDashboard()"><span>até</span><input type="date" id="dash-ate" onchange="renderizarDashboard()"></div>
             </div>
-            <div class="kpis">
-                <div class="kpi destaque"><span class="kpi-rotulo">Balanço do caixa (recebido − gasto)</span><span id="dash-balanco-valor" class="kpi-valor">R$ 0,00</span></div>
-                <div class="kpi"><span class="kpi-rotulo">💰 Entradas</span><span id="dash-receita-valor" class="kpi-valor v-verde">R$ 0,00</span><span class="kpi-sub">vendas pagas + repasses</span></div>
-                <div class="kpi"><span class="kpi-rotulo">💳 Saídas</span><span id="dash-despesa-valor" class="kpi-valor v-vermelho">R$ 0,00</span><span class="kpi-sub">despesas do período</span></div>
-                <div class="kpi"><span class="kpi-rotulo">🤝 Repasses recebidos</span><span id="dash-repasses-valor" class="kpi-valor v-roxo">R$ 0,00</span><span class="kpi-sub">já somados nas entradas</span></div>
-                <div class="kpi"><span class="kpi-rotulo">⏳ A receber de vendedores</span><span id="dash-areceber-vend-valor" class="kpi-valor v-laranja">R$ 0,00</span><span class="kpi-sub">total em aberto hoje</span></div>
-            </div>
-            <div id="loading-dashboard" class="loading-mm">⏳ Processando...</div>
-            <div id="conteudo-dashboard" style="display:none;">
-                <div class="card"><div class="card-titulo">👑 Top 10 clientes</div><p class="card-desc">Quem mais comprou no período.</p><canvas id="chartClientes"></canvas></div>
-                <div class="grade-2">
-                    <div class="card"><div class="card-titulo">🏆 Top 5 produtos</div><p class="card-desc">Peças mais vendidas (loja + vendedores).</p><canvas id="chartProdutos"></canvas></div>
-                    <div class="card"><div class="card-titulo">📱 Por canal</div><p class="card-desc">Valor vendido por plataforma.</p><canvas id="chartPlataformas"></canvas></div>
-                </div>
-            </div>
+            <div id="dash-carregando" class="carregando-box" hidden><span class="girando"></span>Carregando os números…</div>
+            <div id="dash-conteudo"></div>
         </div>
 
         <!-- ========================================== -->
         <!-- 🛒 VENDAS                                  -->
         <!-- ========================================== -->
         <div id="tab-vendas" class="tab-content">
-            <div class="kpis">
-                <div class="kpi"><span class="kpi-rotulo">Total vendido</span><span id="vendas-total-valor" class="kpi-valor">R$ 0,00</span><span class="kpi-sub">no filtro atual</span></div>
-                <div class="kpi"><span class="kpi-rotulo">🟢 Recebido</span><span id="vendas-pagas-valor" class="kpi-valor v-verde">R$ 0,00</span></div>
-                <div class="kpi"><span class="kpi-rotulo">🟡 A receber</span><span id="vendas-pendentes-valor" class="kpi-valor v-laranja">R$ 0,00</span></div>
-                <div class="kpi"><span class="kpi-rotulo">Lucro projetado</span><span id="vendas-lucro-valor" class="kpi-valor v-azul">R$ 0,00</span></div>
-                <div class="kpi"><span class="kpi-rotulo">Itens vendidos</span><span id="vendas-qtd-valor" class="kpi-valor">0 un</span></div>
+            <div class="sub-abas" id="vendas-abas">
+                <button class="active" data-aba="nova" onclick="abaVendas('nova')"><svg class="ic"><use href="#i-mais"/></svg>Nova venda</button>
+                <button data-aba="historico" onclick="abaVendas('historico')"><svg class="ic"><use href="#i-recibo"/></svg>Histórico<em id="vendas-badge-pend" class="badge-num"></em></button>
             </div>
 
-            <div class="card card-destaque">
-                <div class="card-titulo">➕ Registrar nova venda</div>
-                <p class="card-desc">Venda direta (loja, Shopee, Elo7...). Vendas dos vendedores entram pela baixa deles.</p>
-                <div id="loading-opcoes-venda" class="loading-mm" style="padding:6px;">Sincronizando listas...</div>
-                <div class="row">
-                    <div class="col"><label>Data da venda</label><input type="date" id="venda-data"></div>
-                    <div class="col"><label>Status</label><select id="venda-status" class="input-var"><option value="Pago">🟢 Pago</option><option value="Pendente">🟡 Pendente</option></select></div>
+            <section id="vendas-nova">
+                <div class="pdv">
+                    <div class="pdv-esq">
+                        <div class="pdv-card">
+                            <div class="pdv-cab"><span class="pdv-passo">1</span><b>Escolha os produtos</b><span class="info-lista" id="pdv-info"></span></div>
+                            <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="pdv-busca" placeholder="Buscar produto ou categoria…" autocomplete="off" oninput="renderizarCatalogoPDV()"></div>
+                            <div class="linha-opcao">
+                                <div class="seg-mini" id="pdv-tipos"><button class="active" data-t="todos" onclick="filtroTipoPDV('todos')">Todos</button><button data-t="peca" onclick="filtroTipoPDV('peca')">Peças</button><button data-t="kit" onclick="filtroTipoPDV('kit')">Kits</button></div>
+                                <label class="chave"><input type="checkbox" id="pdv-sem-estoque" onchange="renderizarCatalogoPDV()"> Mostrar também sem estoque</label>
+                            </div>
+                            <div id="pdv-grade" class="pdv-grade"></div>
+                        </div>
+                        <div class="pdv-card">
+                            <div class="pdv-cab"><span class="pdv-passo">2</span><b>Cliente e pagamento</b></div>
+                            <div class="row">
+                                <div class="col"><div class="input-group"><label>Cliente</label><input type="text" id="pdv-cliente" list="lista-clientes-venda" placeholder="Nome (vazio = cliente avulso)" autocomplete="off" onchange="preencherTelefonePDV()"></div></div>
+                                <div class="col"><div class="input-group"><label>WhatsApp (opcional)</label><input type="tel" id="pdv-telefone" placeholder="11999998888" autocomplete="off"></div></div>
+                            </div>
+                            <div class="row">
+                                <div class="col" style="max-width:210px;"><div class="input-group"><label>Data da venda</label><input type="date" id="pdv-data"></div></div>
+                                <div class="col"><div class="input-group"><label>Situação</label><div class="seg-mini largo" id="pdv-status"><button class="active" data-s="Pago" onclick="selecionarStatusPDV('Pago')">Pago</button><button data-s="Pendente" onclick="selecionarStatusPDV('Pendente')">A receber</button></div></div></div>
+                            </div>
+                            <label>Canal da venda</label><div class="chips-op" id="pdv-canais"></div>
+                            <label>Forma de pagamento</label><div class="chips-op" id="pdv-formas"></div>
+                            <div class="input-group"><label>Observação (opcional)</label><input type="text" id="pdv-obs" maxlength="255" placeholder="Ex: entregar sábado, cor azul…"></div>
+                        </div>
+                    </div>
+                    <div class="pdv-dir">
+                        <div class="pdv-card pdv-carrinho" id="pdv-carrinho">
+                            <div class="pdv-cab"><span class="pdv-passo">3</span><b>Conferir e finalizar</b><button class="btn-limpar" onclick="limparPDV()">Esvaziar</button></div>
+                            <div id="pdv-itens"></div>
+                            <div class="pdv-desconto"><label for="pdv-desconto">Desconto no pedido</label><input type="text" id="pdv-desconto" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(renderizarTotaisPDV)"></div>
+                            <div id="pdv-totais"></div>
+                            <button class="btn-magic btn-global btn-finalizar" id="pdv-finalizar" onclick="finalizarPedido()">Finalizar venda</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-group"><label>Cliente</label><input type="text" id="venda-cliente" class="input-var" list="lista-clientes-venda" placeholder="Ex: João Silva" autocomplete="off"><datalist id="lista-clientes-venda"></datalist></div>
-                <div class="input-group"><label>Produto vendido (custo automático)</label><input type="text" id="venda-produto" class="input-var" list="lista-produtos-venda" placeholder="Toque para ver os produtos com estoque" autocomplete="off" oninput="calcularSugestao()"><datalist id="lista-produtos-venda"></datalist><datalist id="lista-produtos-todos"></datalist>
-                    <div class="linha-opcao"><label class="chave"><input type="checkbox" id="venda-mostrar-sem-estoque" onchange="montarListaProdutosVenda()"> Mostrar também produtos sem estoque</label><span id="venda-info-lista" class="info-lista"></span></div></div>
-                <label id="box-baixa-atelie" class="check-estoque" style="display:none;"><input type="checkbox" id="venda-baixa-atelie"> 📦 Tirar do estoque do Ateliê (<span id="venda-atelie-qtd">0</span> disponíveis) — desmarque se for sob encomenda</label>
-                <div class="row">
-                    <div class="col"><label>Plataforma</label><select id="venda-plataforma" class="input-var" onchange="calcularSugestao()"></select></div>
-                    <div class="col"><label>Quantidade</label><input type="number" id="venda-qtd" class="input-var" value="1" min="1" oninput="calcularSugestao()"></div>
-                    <div class="col"><label>Markup desejado (%)</label><input type="number" id="venda-markup" class="input-var" value="100" oninput="calcularSugestao()"></div>
-                </div>
-                <div id="box-sugestao-preco" class="box-sugestao" onclick="aplicarPrecoSugerido()">
-                    <small>💡 Preço sugerido — toque para usar</small>
-                    <strong id="venda-sugestao-valor">R$ 0,00</strong>
-                    <span>Lucro garantido: <b id="venda-sugestao-lucro">R$ 0,00</b></span>
-                </div>
-                <div class="input-group"><label>Valor final a cobrar</label><input type="text" id="venda-valor" class="input-var mask-money campo-dinheiro" placeholder="R$ 0,00"></div>
-                <button class="btn-magic btn-global" id="btn-salvar-venda" onclick="salvarVenda()">✅ Lançar venda</button>
-            </div>
+                <div class="pdv-barra" id="pdv-barra" onclick="irParaCarrinhoPDV()"><span id="pdv-barra-txt"></span><b>Conferir <svg class="ic"><use href="#i-seta-dir"/></svg></b></div>
+            </section>
 
-            <div class="section-title">📊 Histórico de vendas</div>
-            <div class="filtros-box">
-                <div class="card-cabeca"><span class="filtros-title" style="margin:0;">Filtros</span>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn-limpar" onclick="abrirModalAcoesLote()">📦 Cobranças e recibos em lote</button><button class="btn-limpar" onclick="limparFiltrosVendas()">🧹 Limpar</button></div></div>
-                <div class="row">
-                    <div class="col"><label>Mês</label><select id="filtro-v-mes" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select></div>
-                    <div class="col"><label>Ano</label><select id="filtro-v-ano" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
-                    <div class="col"><label>Pagamento</label><select id="filtro-v-status" onchange="filtrarVendas()"><option value="todos">Todos</option><option value="pago">🟢 Pagos</option><option value="pendente">🟡 Pendentes</option></select></div>
+            <section id="vendas-historico" hidden>
+                <div class="hv-topo">
+                    <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="hv-busca" placeholder="Buscar cliente, produto ou nº do pedido…" list="lista-clientes-venda" autocomplete="off" oninput="HV.limite=30; filtrarVendas()"></div>
+                    <div class="chips-rolagem" id="hv-chips">
+                        <button class="chip-op" data-p="tudo" onclick="periodoHV('tudo')">Tudo</button>
+                        <button class="chip-op" data-p="hoje" onclick="periodoHV('hoje')">Hoje</button>
+                        <button class="chip-op" data-p="7d" onclick="periodoHV('7d')">7 dias</button>
+                        <button class="chip-op active" data-p="mes" onclick="periodoHV('mes')">Este mês</button>
+                        <button class="chip-op" data-p="mesant" onclick="periodoHV('mesant')">Mês passado</button>
+                        <button class="chip-op" data-p="ano" onclick="periodoHV('ano')">Este ano</button>
+                        <button class="chip-op destaque" data-p="areceber" onclick="periodoHV('areceber')">A receber</button>
+                    </div>
+                    <div class="hv-acoes">
+                        <button class="btn-limpar" id="hv-btn-filtros" onclick="toggleFiltrosHV()"><svg class="ic"><use href="#i-filtro"/></svg>Filtros</button>
+                        <button class="btn-limpar" id="hv-extrato" hidden onclick="copiarExtratoCliente()"></button>
+                        <button class="btn-limpar" onclick="abrirModalAcoesLote()"><svg class="ic"><use href="#i-recibo"/></svg>Cobranças e recibos em lote</button>
+                    </div>
+                    <div class="hv-filtros" id="hv-filtros" hidden>
+                        <div class="row">
+                            <div class="col"><label>Canal</label><select id="hv-canal" onchange="filtrarVendas()"></select></div>
+                            <div class="col"><label>Pagamento</label><select id="hv-forma" onchange="filtrarVendas()"><option value="">Todas as formas</option><option>Pix</option><option>Dinheiro</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Pela plataforma</option><option>Outro</option></select></div>
+                            <div class="col"><label>Situação</label><select id="hv-status" onchange="filtrarVendas()"><option value="">Todas</option><option value="Pago">Pago</option><option value="Pendente">A receber</option></select></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><label>De</label><input type="date" id="hv-de" onchange="periodoHV('personalizado')"></div>
+                            <div class="col"><label>Até</label><input type="date" id="hv-ate" onchange="periodoHV('personalizado')"></div>
+                            <div class="col" style="display:flex;align-items:flex-end;"><button class="btn-limpar" style="width:100%;margin-bottom:14px;" onclick="limparFiltrosVendas()">Limpar filtros</button></div>
+                        </div>
+                    </div>
                 </div>
-                <input type="text" id="busca-venda" class="search-bar" style="margin-bottom:0;" placeholder="🔍 Buscar cliente ou produto..." list="lista-clientes-busca" autocomplete="off" onkeyup="filtrarVendas()">
-                <datalist id="lista-clientes-busca"></datalist>
-                <datalist id="lista-plataformas-venda"></datalist>
-            </div>
-            <div id="loading-vendas" class="loading-mm">⏳ Carregando vendas...</div>
-            <div id="lista-vendas"></div>
+                <div class="kpis" id="hv-kpis"></div>
+                <div id="loading-vendas" class="loading-mm">⏳ Carregando vendas...</div>
+                <div id="lista-vendas"></div>
+            </section>
+            <datalist id="lista-clientes-venda"></datalist><datalist id="lista-produtos-todos"></datalist><datalist id="lista-plataformas-venda"></datalist>
         </div>
 
         <!-- ========================================== -->
-        <!-- 🧮 PRECIFICAR                              -->
+        <!-- 🧮 PRECIFICAR (cadastro de peça e kit)     -->
         <!-- ========================================== -->
         <div id="tab-precificar" class="tab-content">
-            <div class="grade-2">
-                <div>
+            <form id="pf-form" onsubmit="return false" autocomplete="off">
+            <div class="pf-topo">
+                <div class="seg-mini largo" id="pf-tipo"><button type="button" class="active" data-t="peca" onclick="pfTipo('peca')"><svg class="ic"><use href="#i-impressora"/></svg>Peça impressa</button><button type="button" data-t="kit" onclick="pfTipo('kit')"><svg class="ic"><use href="#i-camadas"/></svg>Kit</button></div>
+                <div class="pf-editando" id="pf-editando" hidden><span>Editando <b id="pf-editando-nome"></b></span><button type="button" class="btn-limpar" onclick="pfLimpar()"><svg class="ic"><use href="#i-mais"/></svg>Novo produto</button></div>
+            </div>
+            <div class="pf-grade">
+                <div class="pf-esq">
                     <div class="card">
-                        <div class="card-cabeca"><div class="card-titulo">📝 Novo projeto</div><button class="btn-limpar" onclick="toggleConfig()">⚙️ Custos da impressora</button></div>
-                        <div id="area-config" style="display:none; background:#fafaf9; padding:14px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:14px;">
-                            <div class="row"><div class="col"><label>Consumo (Watts)</label><input type="number" id="v-watts" value="175" oninput="calcular()"></div><div class="col"><label>Energia (R$/kWh)</label><input type="number" id="v-kwh" value="0.70" step="0.01" oninput="calcular()"></div></div>
-                            <div class="row"><div class="col"><label>Máquina/hora (R$)</label><input type="number" id="v-maq" value="0.75" step="0.01" oninput="calcular()"></div><div class="col"><label>Sua hora (R$)</label><input type="number" id="v-hora" value="10.00" step="0.50" oninput="calcular()"></div></div>
+                        <div class="card-titulo" id="pf-titulo-form">Novo produto</div>
+                        <div class="pf-ident">
+                            <label class="pf-foto" title="Escolher foto"><img id="pf-foto-img" src="logo.png" alt="" onerror="this.src='logo.png'"><span><svg class="ic"><use href="#i-imagem"/></svg>Foto</span><input type="file" id="pf-foto" accept="image/*" onchange="pfPreviaFoto()" hidden></label>
+                            <div class="pf-ident-campos">
+                                <div class="input-group"><label for="pf-nome">Nome *</label><input type="text" id="pf-nome" placeholder="Ex: Placa profissões"></div>
+                                <div class="input-group"><label for="pf-categoria">Categoria</label><input type="text" id="pf-categoria" list="pf-categorias" placeholder="Ex: Decoração, Chaveiros…"><datalist id="pf-categorias"></datalist></div>
+                            </div>
                         </div>
-                        <div class="input-group"><label>Nome do modelo</label><input type="text" id="v-modelo" class="input-var" placeholder="Ex: Placa profissões"></div>
-                        <div class="row"><div class="col"><label>Filamento (R$/kg)</label><input type="number" id="v-filamento" class="input-var" value="100" step="1" oninput="calcular()"></div><div class="col"><label>Peso (g)</label><input type="number" id="v-peso" class="input-var" value="126" step="1" oninput="calcular()"></div></div>
-                        <div class="row"><div class="col"><label>Tempo de impressão (h)</label><input type="number" id="v-tempo-imp" class="input-var" value="9" step="0.1" oninput="calcular()"></div><div class="col"><label>Mão de obra (h)</label><input type="number" id="v-tempo-mao" class="input-var" value="0" step="0.1" oninput="calcular()"></div></div>
-                        <div class="input-group"><label>Custos extras (embalagem, ímãs etc.)</label><input type="number" id="v-insumos" class="input-var" value="0" step="0.50" oninput="calcular()"></div>
+                        <div class="row">
+                            <div class="col"><div class="input-group"><label for="pf-catalogo">Item da vitrine (Catálogo)</label><select id="pf-catalogo"></select></div></div>
+                            <div class="col" id="pf-ativo-box" hidden><div class="input-group"><label>Situação</label><label class="chave" style="margin-top:10px;"><input type="checkbox" id="pf-ativo" checked> Produto ativo</label></div></div>
+                        </div>
                     </div>
-                    <div class="resumo-box">
-                        <h3>💲 Custo real de produção</h3>
-                        <div class="custo-linha"><span>Material (filamento)</span> <span id="r-material">R$ 0,00</span></div>
-                        <div class="custo-linha"><span>Energia elétrica</span> <span id="r-energia">R$ 0,00</span></div>
-                        <div class="custo-linha"><span>Manutenção/depreciação</span> <span id="r-deprec">R$ 0,00</span></div>
-                        <div class="custo-linha"><span>Mão de obra</span> <span id="r-humano">R$ 0,00</span></div>
-                        <div class="custo-linha"><span>Taxa de falha (10%)</span> <span id="r-falha">R$ 0,00</span></div>
-                        <div class="custo-linha" style="border-bottom:none;"><span>Insumos extras</span> <span id="r-insumos">R$ 0,00</span></div>
-                        <div class="custo-total"><span>Custo total</span> <span id="r-total">R$ 0,00</span></div>
+
+                    <div id="pf-bloco-peca">
+                        <div class="card">
+                            <div class="card-titulo">Produção</div><p class="card-desc">Dados da impressão desta peça.</p>
+                            <div class="row">
+                                <div class="col"><div class="input-group"><label for="pf-peso">Peso (g)</label><input type="number" id="pf-peso" step="1" min="0" placeholder="0" oninput="pfCalcular()"></div></div>
+                                <div class="col"><div class="input-group"><label for="pf-filamento">Filamento (R$/kg)</label><input type="number" id="pf-filamento" step="1" min="0" oninput="this.dataset.mexeu='1'; pfCalcular()"></div></div>
+                            </div>
+                            <div class="row">
+                                <div class="col"><div class="input-group"><label for="pf-tempo">Tempo de impressão (h)</label><input type="number" id="pf-tempo" step="0.1" min="0" placeholder="0" oninput="pfCalcular()"></div></div>
+                                <div class="col"><div class="input-group"><label for="pf-mao">Mão de obra (h)</label><input type="number" id="pf-mao" step="0.1" min="0" value="0" oninput="pfCalcular()"></div></div>
+                            </div>
+                            <div class="input-group"><label for="pf-extras">Extras (embalagem, ímã, argola…)</label><input type="text" id="pf-extras" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"></div>
+                            <details class="pf-impressora"><summary>Custos da impressora e taxa de falha</summary>
+                                <div class="row">
+                                    <div class="col"><label for="pf-watts">Consumo (W)</label><input type="number" id="pf-watts" oninput="pfCalcular()"></div>
+                                    <div class="col"><label for="pf-kwh">Energia (R$/kWh)</label><input type="number" id="pf-kwh" step="0.01" oninput="pfCalcular()"></div>
+                                    <div class="col"><label for="pf-maq">Máquina (R$/h)</label><input type="number" id="pf-maq" step="0.01" oninput="pfCalcular()"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col"><label for="pf-hora">Sua hora (R$)</label><input type="number" id="pf-hora" step="0.5" oninput="pfCalcular()"></div>
+                                    <div class="col"><label for="pf-falha">Taxa de falha (%)</label><input type="number" id="pf-falha" step="1" oninput="pfCalcular()"></div>
+                                    <div class="col" style="display:flex;align-items:flex-end;"><button type="button" class="btn-limpar" style="width:100%;margin-bottom:14px;" onclick="pfSalvarImpressora()">Salvar como padrão</button></div>
+                                </div>
+                            </details>
+                            <label class="chave" style="margin-top:14px;"><input type="checkbox" id="pf-fixo-on" onchange="pfCalcular()"> Usar um custo fixo (em vez do cálculo)</label>
+                            <div id="pf-fixo-box" hidden class="pf-fixo"><input type="text" id="pf-fixo" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"><small id="pf-fixo-info"></small></div>
+                        </div>
+                    </div>
+
+                    <div id="pf-bloco-kit" hidden>
+                        <div class="card">
+                            <div class="card-titulo">Peças do kit</div><p class="card-desc">Escolha as peças que vão juntas. O custo do kit é a soma delas.</p>
+                            <div class="pf-kit-add"><select id="pf-kit-add" aria-label="Peça"></select><input type="number" id="pf-kit-add-qtd" value="1" min="1" aria-label="Quantidade"><button type="button" class="btn-magic btn-pequeno" onclick="pfAddKit()"><svg class="ic"><use href="#i-mais"/></svg>Adicionar</button></div>
+                            <div id="pf-kit-lista"></div>
+                            <p class="texto-ajuda" id="pf-kit-montaveis" style="margin:10px 0 0;"></p>
+                            <div class="input-group" style="margin-top:14px;"><label for="pf-kit-extras">Extras do kit (caixa, fita, cartão…)</label><input type="text" id="pf-kit-extras" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"></div>
+                        </div>
                     </div>
                 </div>
-                <div>
+
+                <div class="pf-dir">
+                    <div class="card pf-custo">
+                        <div class="card-cabeca" style="margin-bottom:10px;"><div class="card-titulo">Custo de produção</div><b class="pf-custo-topo" id="pf-custo-topo">R$ 0,00</b></div>
+                        <div id="pf-resumo"></div>
+                    </div>
                     <div class="card">
-                        <div class="card-titulo">💰 Preços sugeridos</div>
-                        <p class="card-desc">Referências para venda direta ao cliente.</p>
-                        <div class="markup-box"><p class="markup-title">Peças simples / reposição (2x a 3x)</p><p class="markup-preco" id="m-simples-preco">R$ 0,00</p><p class="markup-lucro" id="m-simples-lucro">Lucro: R$ 0,00</p></div>
-                        <div class="markup-box decor"><p class="markup-title">Decorativos / colecionáveis (4x a 6x)</p><p class="markup-preco" id="m-decor-preco">R$ 0,00</p><p class="markup-lucro" id="m-decor-lucro">Lucro: R$ 0,00</p></div>
-                        <div class="markup-box repasse">
-                            <p class="markup-title">🤝 Preço de repasse (vendedores)</p>
-                            <p class="texto-ajuda">Sugestão: custo × <b id="m-repasse-fator">2,00</b> (ajuste o % em Ajustes). Pode digitar outro valor.</p>
-                            <input type="text" id="v-repasse" class="mask-money" placeholder="R$ 0,00" style="font-size:1.15rem; font-weight:800; color:#1d4ed8;">
-                            <p class="markup-lucro" id="m-repasse-lucro">Seu lucro por peça vendida pelo vendedor: R$ 0,00</p>
-                        </div>
-                        <button id="btn-salvar-custo" class="btn-magic btn-global" onclick="salvarBancoModelos()">💾 Salvar modelo</button>
+                        <div class="card-titulo">Preço de venda</div><p class="card-desc">Para o cliente final (loja, Shopee, Elo7…).</p>
+                        <input type="text" id="pf-venda" class="mask-money campo-dinheiro" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)" aria-label="Preço de venda">
+                        <div class="chips-op pf-mults" id="pf-mults"></div>
+                        <p class="pf-info" id="pf-venda-info"></p>
+                        <div class="pf-canais" id="pf-canais"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-titulo">Vendedores (consignado)</div><p class="card-desc">Repasse = o que o vendedor te paga por peça vendida.</p>
+                        <label for="pf-repasse">Preço de repasse</label>
+                        <input type="text" id="pf-repasse" class="mask-money campo-dinheiro azul" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)">
+                        <button type="button" class="btn-limpar" id="pf-repasse-sug" style="margin-top:8px;" onclick="pfUsarRepasse()"></button>
+                        <p class="pf-info" id="pf-repasse-info"></p>
+                        <div class="input-group" style="margin:12px 0 0;"><label for="pf-sugerido">Preço sugerido ao vendedor (opcional)</label><input type="text" id="pf-sugerido" class="mask-money"></div>
+                    </div>
+                    <div class="pf-botoes">
+                        <button type="button" class="btn-magic btn-global" id="pf-salvar" onclick="pfSalvar()">Cadastrar produto</button>
+                        <button type="button" class="btn-magic btn-excluir" id="pf-excluir" hidden onclick="pfExcluir()"><svg class="ic"><use href="#i-lixo"/></svg>Excluir</button>
                     </div>
                 </div>
             </div>
+            </form>
         </div>
 
         <!-- ========================================== -->
-        <!-- 📋 MODELOS                                 -->
+        <!-- 📋 PRODUTOS (peças e kits)                 -->
         <!-- ========================================== -->
         <div id="tab-modelos" class="tab-content">
-            <p class="texto-ajuda">Seus produtos com custo, preço de repasse e estoque. Toque no ✏️ para definir o repasse, a foto ou desativar.</p>
-            <input type="text" id="busca-banco" class="search-bar" placeholder="🔍 Buscar modelo pelo nome..." onkeyup="filtrarBanco()">
-            <div id="loading-banco" class="loading-mm">⏳ Lendo modelos...</div>
-            <div id="lista-banco"></div>
+            <div class="pl-topo">
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="busca-banco" placeholder="Buscar produto ou categoria…" oninput="renderizarProdutos()"></div>
+                <button class="btn-magic btn-pequeno" onclick="novoProduto()"><svg class="ic"><use href="#i-mais"/></svg>Novo produto</button>
+            </div>
+            <div class="chips-rolagem" id="pl-filtros">
+                <button class="chip-op active" data-f="todos" onclick="filtroProdutos('todos')">Todos <em></em></button>
+                <button class="chip-op" data-f="peca" onclick="filtroProdutos('peca')">Peças <em></em></button>
+                <button class="chip-op" data-f="kit" onclick="filtroProdutos('kit')">Kits <em></em></button>
+                <button class="chip-op" data-f="semrepasse" onclick="filtroProdutos('semrepasse')">Sem repasse <em></em></button>
+                <button class="chip-op" data-f="inativos" onclick="filtroProdutos('inativos')">Inativos <em></em></button>
+            </div>
+            <div id="loading-banco" class="loading-mm">⏳ Carregando produtos...</div>
+            <div id="lista-produtos"></div>
         </div>
 
         <!-- ========================================== -->
@@ -312,9 +439,10 @@
         <div id="tab-estoque" class="tab-content">
             <div id="estoque-resumo"></div>
             <div class="barra-acoes">
-                <button class="btn-magic btn-global" onclick="abrirProducao()">🖨️ Registrar produção</button>
-                <button class="btn-magic" onclick="abrirMala()">🧳 Enviar mala</button>
-                <button class="btn-magic btn-secundario" onclick="abrirMovimentos()">📜 Histórico</button>
+                <button class="btn-magic btn-global" onclick="abrirProducao()"><svg class="ic"><use href="#i-impressora"/></svg>Registrar produção</button>
+                <button class="btn-magic btn-roxo" onclick="abrirMontarKit()"><svg class="ic"><use href="#i-camadas"/></svg>Montar kit</button>
+                <button class="btn-magic" onclick="abrirMala()"><svg class="ic"><use href="#i-mala"/></svg>Enviar mala</button>
+                <button class="btn-magic btn-secundario" onclick="abrirMovimentos()"><svg class="ic"><use href="#i-relogio"/></svg>Histórico</button>
             </div>
             <div class="filtros-box" style="padding:14px;">
                 <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
@@ -460,41 +588,64 @@
         <div id="tab-config" class="tab-content">
             <div class="grade-2">
                 <div class="card">
-                    <div class="card-titulo">🛒 Taxas de plataformas</div>
-                    <p class="card-desc">Usadas para sugerir o preço de venda (Shopee, Elo7...).</p>
-                    <div class="input-group"><label>Nome da plataforma</label><input type="text" id="config-plat-nome" placeholder="Ex: Shopee"></div>
+                    <div class="card-titulo"><svg class="ic"><use href="#i-usuarios"/></svg>Consignado (vendedores)</div>
+                    <p class="card-desc">Ex.: custo R$ 10 com markup 100% → repasse sugerido R$ 20. Com margem 50% → preço sugerido ao vendedor R$ 30 (ele vende pelo preço que quiser).</p>
                     <div class="row">
-                        <div class="col"><div class="input-group"><label>Comissão (%)</label><input type="number" id="config-plat-pct" placeholder="Ex: 20"></div></div>
-                        <div class="col"><div class="input-group"><label>Taxa fixa (R$)</label><input type="number" id="config-plat-fixa" placeholder="Ex: 4.00" step="0.50"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-markup-repasse">Markup do repasse sobre o custo (%)</label><input type="number" id="cfg-markup-repasse" placeholder="100"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-margem-vendedor">Margem sugerida ao vendedor (%)</label><input type="number" id="cfg-margem-vendedor" placeholder="50"></div></div>
                     </div>
-                    <button class="btn-magic btn-global" style="margin:0 0 14px;" onclick="salvarPlataforma()">➕ Adicionar</button>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="cfg-estoque-minimo">Alerta de estoque baixo (un)</label><input type="number" id="cfg-estoque-minimo" placeholder="2"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-telefone-admin">Seu WhatsApp (avisos)</label><input type="text" id="cfg-telefone-admin" placeholder="11999998888"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM(this)">Salvar</button>
+                </div>
+                <div class="card">
+                    <div class="card-titulo"><svg class="ic"><use href="#i-calculadora"/></svg>Precificação e impressora</div>
+                    <p class="card-desc">Usados no Precificar e no preço sugerido das vendas (quando o produto não tem preço de venda).</p>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="cfg-multiplicador">Preço de venda = custo ×</label><input type="number" id="cfg-multiplicador" step="0.1" placeholder="3"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-filamento">Filamento (R$/kg)</label><input type="number" id="cfg-filamento" placeholder="100"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-falha">Taxa de falha (%)</label><input type="number" id="cfg-falha" placeholder="10"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="cfg-watts">Consumo (W)</label><input type="number" id="cfg-watts" placeholder="175"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-kwh">Energia (R$/kWh)</label><input type="number" id="cfg-kwh" step="0.01" placeholder="0.70"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-maq">Máquina (R$/h)</label><input type="number" id="cfg-maq" step="0.01" placeholder="0.75"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-hora">Sua hora (R$)</label><input type="number" id="cfg-hora" step="0.5" placeholder="10"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM(this)">Salvar</button>
+                </div>
+            </div>
+            <div class="grade-2">
+                <div class="card">
+                    <div class="card-titulo"><svg class="ic"><use href="#i-etiqueta"/></svg>Plataformas e taxas</div>
+                    <p class="card-desc">A taxa é descontada do lucro nas vendas desse canal (Shopee, Elo7…).</p>
+                    <div class="input-group"><label for="config-plat-nome">Nome da plataforma</label><input type="text" id="config-plat-nome" placeholder="Ex: Shopee"></div>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="config-plat-pct">Comissão (%)</label><input type="number" id="config-plat-pct" placeholder="Ex: 20"></div></div>
+                        <div class="col"><div class="input-group"><label for="config-plat-fixa">Taxa fixa por pedido (R$)</label><input type="number" id="config-plat-fixa" placeholder="Ex: 4.00" step="0.50"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin:0 0 14px;" onclick="salvarPlataforma()">Adicionar plataforma</button>
                     <div id="lista-plataformas"></div>
                 </div>
                 <div class="card">
-                    <div class="card-titulo">🤝 Consignado (vendedores)</div>
-                    <p class="card-desc">Ex.: custo R$ 10 com markup 100% → repasse sugerido R$ 20. Com margem 50% → preço sugerido ao vendedor R$ 30 (ele vende pelo preço que quiser).</p>
-                    <div class="row">
-                        <div class="col"><div class="input-group"><label>Markup do repasse sobre o custo (%)</label><input type="number" id="cfg-markup-repasse" placeholder="100"></div></div>
-                        <div class="col"><div class="input-group"><label>Margem sugerida ao vendedor (%)</label><input type="number" id="cfg-margem-vendedor" placeholder="50"></div></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><div class="input-group"><label>Alerta de estoque baixo (un)</label><input type="number" id="cfg-estoque-minimo" placeholder="2"></div></div>
-                        <div class="col"><div class="input-group"><label>Seu WhatsApp (avisos)</label><input type="text" id="cfg-telefone-admin" placeholder="11999998888"></div></div>
-                    </div>
-                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM()">💾 Salvar parâmetros</button>
+                    <div class="card-titulo"><svg class="ic"><use href="#i-chave"/></svg>Chaves de acesso</div>
+                    <p class="card-desc">Ficam guardadas no servidor e valem em todos os aparelhos. Depois de salva, ninguém consegue ver a chave inteira.</p>
+                    <div id="lista-chaves"></div>
                 </div>
             </div>
-            <div class="grade-2" style="margin-top:20px;">
+            <div class="grade-2">
                 <div class="card">
-                    <div class="card-titulo">🔑 Chaves de integração</div>
-                    <div class="input-group" style="margin-top:12px;"><label>🧠 Chave privada (Gemini)</label><input type="password" id="api-key" onchange="salvarChaves()"></div>
-                    <p class="texto-ajuda" style="margin:0;">📸 O envio de fotos (OnionSys + backup ImgBB) usa as chaves guardadas no servidor.</p>
+                    <div class="card-titulo"><svg class="ic"><use href="#i-escudo"/></svg>Segurança</div>
+                    <p class="card-desc">Troque sua senha e veja quem fez o quê no sistema.</p>
+                    <button class="btn-magic btn-secundario" style="margin-top:0;" onclick="abrirTrocarSenha()">Trocar minha senha</button>
+                    <button class="btn-magic btn-secundario" onclick="abrirLogs()">Registro de atividades</button>
                 </div>
                 <div class="card">
-                    <div class="card-titulo">🔒 Segurança</div>
-                    <p class="card-desc">Troque sua senha e veja quem fez o quê no sistema.</p>
-                    <button class="btn-magic btn-secundario" style="margin-top:0;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
-                    <button class="btn-magic btn-secundario" onclick="abrirLogs()">📜 Registro de atividades</button>
+                    <div class="card-titulo"><svg class="ic"><use href="#i-painel"/></svg>Sobre o sistema</div>
+                    <p class="card-desc">Versões em uso agora.</p>
+                    <div class="mini-kpis tres" id="sobre-versoes"></div>
                 </div>
             </div>
         </div>
@@ -741,25 +892,30 @@
     </div>
 </div>
 
-<button class="fab-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Voltar ao topo">⬆️</button>
+<button class="fab-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Voltar ao topo"><svg class="ic"><use href="#i-cima"/></svg></button>
+<div class="toast-mm" id="toast-mm" role="status" aria-live="polite"></div>
 
 <!-- BARRA DE BAIXO (celular) -->
 <nav class="bottom-nav" id="bottom-nav-admin">
-    <button id="nav-dashboard_erp" class="bottom-nav-btn active" onclick="switchTab('dashboard_erp', '📊 Dashboard')"><span class="icon">📊</span>Início</button>
-    <button id="nav-vendas" class="bottom-nav-btn" onclick="switchTab('vendas', '🛒 Vendas')"><span class="icon">🛒</span>Vendas</button>
-    <button id="nav-estoque" class="bottom-nav-btn" onclick="switchTab('estoque', '📦 Estoque')"><span class="icon">📦</span>Estoque</button>
-    <button id="nav-vendedores" class="bottom-nav-btn" onclick="switchTab('vendedores', '🤝 Vendedores')"><span class="icon">🤝</span>Vendedores</button>
-    <button id="nav-menu_mobile" class="bottom-nav-btn" onclick="switchTab('menu_mobile', '☰ Menu')"><span class="icon">☰</span>Menu</button>
+    <button id="nav-dashboard_erp" class="bottom-nav-btn active" onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Início</button>
+    <button id="nav-vendas" class="bottom-nav-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
+    <button id="nav-estoque" class="bottom-nav-btn" onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
+    <button id="nav-vendedores" class="bottom-nav-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg>Vendedores</button>
+    <button id="nav-menu_mobile" class="bottom-nav-btn" onclick="switchTab('menu_mobile')"><svg class="ic"><use href="#i-grade"/></svg>Menu</button>
 </nav>
 
 <nav class="bottom-nav" id="bottom-nav-vendedor">
-    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque', '📦 Meu Estoque')"><span class="icon">📦</span>Estoque</button>
-    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto', '💸 Meu Acerto')"><span class="icon">💸</span>Acerto</button>
-    <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas', '🎁 Encomendas')"><span class="icon">🎁</span>Pedidos</button>
+    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
+    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg>Acerto</button>
+    <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="app.js?v=4.2.0"></script>
-<script src="consignado.js?v=4.2.0"></script>
+<script src="app.js?v=5.0.0"></script>
+<script src="consignado.js?v=5.0.0"></script>
+<script src="vendas.js?v=5.0.0"></script>
+<script src="produtos.js?v=5.0.0"></script>
+<script src="dashboard.js?v=5.0.0"></script>
+<script src="ajustes.js?v=5.0.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
