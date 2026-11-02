@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.6.0">
+    <link rel="stylesheet" href="style.css?v=5.7.0">
 </head>
 <body>
 
@@ -112,6 +112,7 @@
             <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Vendedores</span></button>
 
             <div class="sb-grupo">Loja e marketing</div>
+            <button id="btn-paginas" class="tab-btn" onclick="switchTab('paginas')"><svg class="ic"><use href="#i-sacola"/></svg><span>Páginas de venda</span></button>
             <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Catálogo</span></button>
             <button id="btn-imas" class="tab-btn" onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg><span>Ímãs NFC</span></button>
             <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg><span>Anúncios</span></button>
@@ -174,6 +175,7 @@
             </div>
             <div class="menu-grupo">Loja e marketing</div>
             <div class="grid-menu">
+                <button onclick="switchTab('paginas')"><svg class="ic"><use href="#i-sacola"/></svg>Páginas de venda</button>
                 <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Catálogo</button>
                 <button onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg>Ímãs NFC</button>
                 <button onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg>Anúncios</button>
@@ -607,6 +609,18 @@
         <!-- ========================================== -->
         <!-- 👥 USUÁRIOS E ACESSOS                      -->
         <!-- ========================================== -->
+        <div id="tab-paginas" class="tab-content">
+            <div id="pg-lista-box">
+                <div class="pg-topo">
+                    <p class="texto-ajuda">Uma página por data especial (Natal, Dia das Mães…), com kits e peças avulsas. O cliente monta a sacola e manda o pedido no seu WhatsApp.</p>
+                    <div class="pg-topo-bt"><button class="btn-magic btn-pequeno" onclick="novaPagina()"><svg class="ic"><use href="#i-mais"/></svg>Nova página</button><button class="btn-limpar" onclick="abrirAjustesPaginas()"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button></div>
+                </div>
+                <div id="pg-aviso"></div>
+                <div id="pg-lista" class="pg-grade"></div>
+            </div>
+            <div id="pg-editor" hidden></div>
+        </div>
+
         <div id="tab-kits" class="tab-content">
             <div class="kt-pagina" id="kt-pagina"></div>
             <div class="pl-topo">
@@ -616,8 +630,8 @@
             </div>
             <div class="chips-rolagem" id="kt-filtros">
                 <button class="chip-op active" data-f="todos" onclick="filtroKits('todos')">Todos <em></em></button>
-                <button class="chip-op" data-f="pagina" onclick="filtroKits('pagina')">Na página <em></em></button>
-                <button class="chip-op" data-f="fora" onclick="filtroKits('fora')">Fora da página <em></em></button>
+                <button class="chip-op" data-f="pagina" onclick="filtroKits('pagina')">À venda <em></em></button>
+                <button class="chip-op" data-f="fora" onclick="filtroKits('fora')">Fora das páginas <em></em></button>
                 <button class="chip-op" data-f="pronta" onclick="filtroKits('pronta')">Pronta entrega <em></em></button>
                 <button class="chip-op" data-f="inativos" onclick="filtroKits('inativos')">Inativos <em></em></button>
             </div>
@@ -966,16 +980,18 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.6.0"></script>
-<script src="app.js?v=5.6.0"></script>
-<script src="consignado.js?v=5.6.0"></script>
-<script src="vendas.js?v=5.6.0"></script>
-<script src="produtos.js?v=5.6.0"></script>
-<script src="dashboard.js?v=5.6.0"></script>
-<script src="ajustes.js?v=5.6.0"></script>
-<script src="rascunho.js?v=5.6.0"></script>
-<script src="usuarios.js?v=5.6.0"></script>
-<script src="kits.js?v=5.6.0"></script>
+<script src="galeria.js?v=5.7.0"></script>
+<script src="app.js?v=5.7.0"></script>
+<script src="consignado.js?v=5.7.0"></script>
+<script src="vendas.js?v=5.7.0"></script>
+<script src="produtos.js?v=5.7.0"></script>
+<script src="dashboard.js?v=5.7.0"></script>
+<script src="ajustes.js?v=5.7.0"></script>
+<script src="rascunho.js?v=5.7.0"></script>
+<script src="usuarios.js?v=5.7.0"></script>
+<script src="temas.js?v=5.7.0"></script>
+<script src="kits.js?v=5.7.0"></script>
+<script src="paginas.js?v=5.7.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

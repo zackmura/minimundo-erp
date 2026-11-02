@@ -525,7 +525,8 @@ window.abrirEdicaoProduto = function(id) {
         <p class="texto-ajuda" id="ep-info" style="margin:0 0 14px;"></p>
         <button class="btn-magic btn-global" id="btn-ep" onclick="salvarEdicaoProduto()">${window.ic('check')} Salvar</button>
         <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>
-        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); duplicarProduto(${id})">${window.ic('copiar')} Criar ${kit ? 'outro kit parecido' : 'outra peça parecida'}</button>`);
+        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); duplicarProduto(${id})">${window.ic('copiar')} Criar ${kit ? 'outro kit parecido' : 'outra peça parecida'}</button>
+        <button type="button" class="btn-limpar ep-link" onclick="paginasDoProduto(${id})">${window.ic('sacola')} Páginas de venda (onde aparece para os clientes)</button>`);
     window.epInfo();
 };
 window.epInfo = function() {
