@@ -10,7 +10,6 @@ const esc = s => window.esc(s);
 const val = v => window.limparValorPlanilha(v);
 const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? 0 : n; };
 const n2 = v => Math.round((parseFloat(v) || 0) * 100) / 100;
-const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const PADRAO = { imp_watts: 175, imp_kwh: 0.70, imp_maq_hora: 0.75, imp_hora: 10, filamento_kg: 100, taxa_falha: 10, multiplicador_venda: 3, markup_repasse: 100, margem_vendedor: 50 };
 const cfg = k => { const v = (window.configMM || {})[k]; return v === undefined || v === '' ? PADRAO[k] : num(v); };
 const fotoDe = p => String((p && (p.foto || p.foto_catalogo)) || '').split(',')[0].trim();
@@ -41,23 +40,26 @@ window.filtroProdutos = function(f) { PL.filtro = f; document.querySelectorAll('
 window.filtrarBanco = () => window.renderizarProdutos(); // nome antigo
 window.renderizarProdutos = function() {
     const box = $('lista-produtos'); if (!box) return;
-    const todos = window.arrayBancoCustos || [], t = norm($('busca-banco').value);
-    const conta = { todos: todos.filter(p => p.ativo !== false).length, peca: todos.filter(p => p.ativo !== false && p.tipo !== 'kit').length, kit: todos.filter(p => p.ativo !== false && p.tipo === 'kit').length, semrepasse: todos.filter(p => p.ativo !== false && !p.preco_repasse).length, inativos: todos.filter(p => p.ativo === false).length };
+    const todos = window.arrayBancoCustos || [], t = $('busca-banco').value;
+    window.montarFiltroCategoria('pl-categoria', todos); const cat = $('pl-categoria').value;
+    const conta ={ todos: todos.filter(p => p.ativo !== false).length, peca: todos.filter(p => p.ativo !== false && p.tipo !== 'kit').length, kit: todos.filter(p => p.ativo !== false && p.tipo === 'kit').length, semrepasse: todos.filter(p => p.ativo !== false && !p.preco_repasse).length, inativos: todos.filter(p => p.ativo === false).length };
     document.querySelectorAll('#pl-filtros button').forEach(b => { const n = conta[b.dataset.f]; b.querySelector('em').innerText = n || ''; });
     const lista = todos.filter(p => {
         if (PL.filtro === 'inativos' ? p.ativo !== false : p.ativo === false) return false;
         if (PL.filtro === 'peca' && p.tipo === 'kit') return false;
         if (PL.filtro === 'kit' && p.tipo !== 'kit') return false;
         if (PL.filtro === 'semrepasse' && p.preco_repasse) return false;
-        return !t || norm(p.modelo).includes(t) || norm(p.categoria).includes(t);
+        return window.categoriaBate(p, cat) && window.produtoBate(p, t);
     });
     if (!lista.length) { box.innerHTML = `<div class="vazio-box">${window.ic('pacote')}<b>${todos.length ? 'Nenhum produto nesse filtro' : 'Nenhum produto ainda'}</b><span>${todos.length ? '' : 'Cadastre o primeiro em <a onclick="novoProduto()">Precificar</a>.'}</span></div>`; return; }
     box.innerHTML = `<div class="tabela-prod"><div class="tp-cab"><span>Produto</span><span>Custo</span><span>Venda</span><span>Repasse</span><span>Margem</span><span>Estoque</span></div>`
         + lista.map(p => {
             const custo = val(p.custo_total), venda = p.preco_venda || 0, margem = venda > 0 ? Math.round((venda - custo) / venda * 100) : null;
             const sub = p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`;
-            return `<div class="tp-linha ${p.ativo === false ? 'inativo' : ''}" onclick="editarProduto(${p.linha})" role="button" tabindex="0">
-                <div class="tp-prod">${window.fotoRapida(p.linha, fotoDe(p))}<div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small></div></div>
+            // No celular as colunas somem e o resumo (venda · repasse · margem) aparece embaixo do nome
+            const resumo = `${venda ? 'Venda ' + window.fmt(venda) : 'sem preço'} · ${p.preco_repasse ? 'repasse ' + window.fmt(p.preco_repasse) : '<b class="neg">sem repasse</b>'}${margem !== null ? ` · <span class="${margem < 30 ? 'neg' : ''}">${margem}%</span>` : ''}`;
+            return `<div class="tp-linha ${p.ativo === false ? 'inativo' : ''}" onclick="abrirEdicaoProduto(${p.linha})" role="button" tabindex="0" title="Editar">
+                <div class="tp-prod">${window.fotoRapida(p.linha, fotoDe(p))}<div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small><small class="tp-resumo">${resumo}</small></div></div>
                 <span class="tp-num" data-rot="Custo">${window.fmt(custo)}</span>
                 <span class="tp-num" data-rot="Venda">${venda ? window.fmt(venda) : '<i>—</i>'}</span>
                 <span class="tp-num" data-rot="Repasse">${p.preco_repasse ? window.fmt(p.preco_repasse) : '<span class="mm-chip vermelho">sem repasse</span>'}</span>
@@ -73,7 +75,10 @@ window.renderizarProdutos = function() {
 window.pfMontarListas = function() {
     const ps = window.arrayBancoCustos || [];
     if ($('pf-categorias')) $('pf-categorias').innerHTML = [...new Set(ps.map(p => p.categoria).filter(Boolean))].sort().map(c => `<option value="${esc(c)}">`).join('');
-    if ($('pf-kit-add')) $('pf-kit-add').innerHTML = '<option value="">Escolha uma peça…</option>' + ps.filter(p => p.tipo !== 'kit' && p.ativo !== false && p.linha !== PF.editando).map(p => `<option value="${p.linha}">${esc(p.modelo)} · ${window.fmt(val(p.custo_total))}</option>`).join('');
+    if ($('pf-kit-add')) {
+        $('pf-kit-add').innerHTML = '<option value="">Escolha uma peça…</option>' + ps.filter(p => p.tipo !== 'kit' && p.ativo !== false && p.linha !== PF.editando).map(p => `<option value="${p.linha}">${esc(p.modelo)}${p.categoria ? ` (${esc(p.categoria)})` : ''} · ${window.fmt(val(p.custo_total))}</option>`).join('');
+        window.filtrarSelect('pf-kit-add', $('pf-kit-busca').value, true);
+    }
     if ($('pf-catalogo')) { const sel = $('pf-catalogo').value; $('pf-catalogo').innerHTML = '<option value="0">— não aparece na vitrine —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${String(k.linha) === sel ? 'selected' : ''}>${esc(k.nome)}</option>`).join(''); }
     if (window.PF.tipo === 'kit') window.pfRenderKit();
 };
@@ -168,7 +173,7 @@ window.pfSalvarImpressora = async function() {
 window.pfAddKit = function() {
     const id = parseInt($('pf-kit-add').value), q = Math.max(1, parseInt($('pf-kit-add-qtd').value) || 1); if (!id) return;
     const ja = PF.kit.find(i => i.produto_id === id); if (ja) ja.qtd += q; else PF.kit.push({ produto_id: id, qtd: q });
-    $('pf-kit-add').value = ''; $('pf-kit-add-qtd').value = 1; window.pfRenderKit();
+    $('pf-kit-busca').value = ''; window.filtrarSelect('pf-kit-add', ''); $('pf-kit-add').value = ''; $('pf-kit-add-qtd').value = 1; window.pfRenderKit();
 };
 window.pfKitQtd = function(i, d) { const it = PF.kit[i]; if (!it) return; it.qtd = Math.max(1, it.qtd + d); window.pfRenderKit(); };
 window.pfKitTirar = function(i) { PF.kit.splice(i, 1); window.pfRenderKit(); };
@@ -278,8 +283,8 @@ window.pfExcluir = async function() {
     try { await window.apiAcao('excluir_registro', { aba: 'CustosProdutos', linha: id }); window.pfLimpar(); window.toastMM('Produto excluído'); window.carregarBancoDeCustos(); window.switchTab('modelos'); }
     catch (e) { window.mostrarAlerta('Não deu para excluir', e.message, 'warning'); }
 };
-// O ✏️ antigo (estoque, vendedores) agora abre o formulário completo
-window.abrirModalEditarModelo = id => { window.fecharModalMM(); window.editarProduto(id); };
+// O ✏️ antigo (vendedores) agora abre a edição rápida
+window.abrirModalEditarModelo = id => window.abrirEdicaoProduto(id);
 
 // ==========================================
 // 📷 FOTO RÁPIDA (lista de Produtos e Estoque)
@@ -310,11 +315,71 @@ async function enviarFotoRapida(id, arq) {
         if (window.painelEstoque && window.renderizarEstoque) window.renderizarEstoque();
         if (window.renderizarCatalogoPDV) window.renderizarCatalogoPDV();
         if (PF.editando === id && !PF.fotoUrl && !PF.fotoEnvio) { $('pf-foto-img').src = url; pfFotoEstado(); }
+        document.querySelectorAll(`.foto-rapida[data-id="${id}"]`).forEach(b => { b.outerHTML = window.fotoRapida(id, url); }); // a janela de edição, se aberta
         window.toastMM(`Foto salva${p ? ': ' + p.modelo : ''}`);
     } catch (e) {
         window.mostrarAlerta('A foto não foi salva', e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga. Atualize o server.js na alwaysdata.' : e.message, 'error');
     } finally { marcar(false); }
 }
+
+// ==========================================
+// ✏️ EDIÇÃO RÁPIDA (lista de Produtos e Estoque)
+// ==========================================
+// Nome, categoria, preços, vitrine e ativo a qualquer momento, sem refazer a conta do custo.
+// O custo da peça e as peças do kit continuam sendo mudados no Precificar (botão no fim da janela).
+let epId = null;
+window.abrirEdicaoProduto = function(id) {
+    const p = produtoPorId(id);
+    if (!p) return window.mostrarAlerta('Produto não encontrado', 'Atualize a página e tente de novo.', 'warning');
+    epId = id;
+    const kit = p.tipo === 'kit', dm = v => v ? window.fmt(v) : '';
+    const cats = [...new Set((window.arrayBancoCustos || []).map(x => x.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const pecas = kit ? (p.itens || []).map(i => { const x = produtoPorId(i.produto_id); return `${i.qtd}x ${x ? x.modelo : '(peça removida)'}`; }).join(', ') : `${p.peso || 0}g · ${p.tempo || 0}h de impressão`;
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic('lapis')} Editar produto</h3>
+        <div class="ep-topo">${window.fotoRapida(id, fotoDe(p))}<div><b>${kit ? 'Kit' : 'Peça'} · custo ${window.fmt(val(p.custo_total))}</b><small>${esc(pecas)}</small><small>${p.est_atelie || 0} no Ateliê${p.est_vendedores ? ` · ${p.est_vendedores} com vendedores` : ''}</small></div></div>
+        <div class="input-group"><label for="ep-nome">Nome *</label><input type="text" id="ep-nome" value="${esc(p.modelo)}" autocomplete="off"></div>
+        <div class="input-group"><label for="ep-categoria">Categoria</label><input type="text" id="ep-categoria" list="ep-categorias" value="${esc(p.categoria || '')}" placeholder="Ex: Decoração, Chaveiros…" autocomplete="off"><datalist id="ep-categorias">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
+        <div class="row">
+            <div class="col"><div class="input-group"><label for="ep-venda">Preço de venda</label><input type="text" id="ep-venda" class="mask-money" inputmode="numeric" value="${dm(p.preco_venda)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>
+            <div class="col"><div class="input-group"><label for="ep-repasse">Repasse (vendedores)</label><input type="text" id="ep-repasse" class="mask-money" inputmode="numeric" value="${dm(p.preco_repasse)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>
+        </div>
+        <div class="row">
+            <div class="col"><div class="input-group"><label for="ep-sugerido">Sugerido ao vendedor</label><input type="text" id="ep-sugerido" class="mask-money" inputmode="numeric" value="${dm(p.preco_sugerido)}" placeholder="Vazio = automático"></div></div>
+            <div class="col"><div class="input-group"><label for="ep-catalogo">Item da vitrine</label><select id="ep-catalogo"><option value="0">— não aparece na vitrine —</option>${(window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${String(k.linha) === String(p.catalogo_id) ? 'selected' : ''}>${esc(k.nome)}</option>`).join('')}</select></div></div>
+        </div>
+        <label class="chave" style="margin:0 0 12px;"><input type="checkbox" id="ep-ativo" ${p.ativo !== false ? 'checked' : ''}> Produto ativo (aparece para vender e para a mala)</label>
+        <p class="texto-ajuda" id="ep-info" style="margin:0 0 14px;"></p>
+        <button class="btn-magic btn-global" id="btn-ep" onclick="salvarEdicaoProduto()">${window.ic('check')} Salvar</button>
+        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>`);
+    window.epInfo();
+};
+window.epInfo = function() {
+    const p = produtoPorId(epId), box = $('ep-info'); if (!p || !box) return;
+    const custo = val(p.custo_total), venda = dinheiroCampo('ep-venda'), rep = dinheiroCampo('ep-repasse');
+    box.innerHTML = [venda > 0 ? `Na venda direta sobra <b class="${venda < custo ? 'neg' : ''}">${window.fmt(venda - custo)}</b> (${Math.round((venda - custo) / venda * 100)}%).` : '',
+        rep > 0 ? `Cada peça vendida pelo vendedor te dá <b class="${rep < custo ? 'neg' : ''}">${window.fmt(rep - custo)}</b>.` : 'Sem repasse o produto não vai na mala dos vendedores.'].filter(Boolean).join(' ');
+};
+window.salvarEdicaoProduto = async function() {
+    const id = epId, p = produtoPorId(id); if (!p) return;
+    const nome = $('ep-nome').value.trim();
+    if (!nome) { $('ep-nome').focus(); return window.mostrarAlerta('Falta o nome', 'Dê um nome para o produto.', 'warning'); }
+    const custo = val(p.custo_total), venda = dinheiroCampo('ep-venda'), repasse = dinheiroCampo('ep-repasse'), sugerido = dinheiroCampo('ep-sugerido');
+    const abaixo = [venda > 0 && venda < custo ? 'o preço de venda' : '', repasse > 0 && repasse < custo ? 'o repasse' : ''].filter(Boolean);
+    if (abaixo.length && !await window.confirmarMM({ icone: '⚠️', titulo: 'Preço abaixo do custo', texto: `${abaixo.join(' e ')} ${abaixo.length > 1 ? 'estão' : 'está'} menor que o custo (${window.fmt(custo)}). Você teria prejuízo.\nSalvar mesmo assim?`, ok: 'Salvar assim' })) return;
+    const b = $('btn-ep'), txt = b.innerHTML; b.disabled = true; b.innerText = '⏳ Salvando…';
+    const dinheiro = v => v > 0 ? window.fmtPlanilha(v) : '';
+    try {
+        await window.apiAcao('editar_produto', { linha: id, modelo: nome, categoria: $('ep-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), catalogo_id: parseInt($('ep-catalogo').value) || 0, ativo: $('ep-ativo').checked });
+        window.fecharModalMM();
+        await window.carregarBancoDeCustos();
+        if (window.painelEstoque) window.carregarPainelEstoque();
+        // Se o mesmo produto está aberto no Precificar, mostra lá os dados novos (senão um "Salvar" lá desfaria esta edição)
+        if (PF.editando === id && produtoPorId(id)) { apagarRascunho(); window.pfCarregarProduto(produtoPorId(id)); }
+        window.toastMM(`${nome} salvo`);
+    } catch (e) {
+        window.mostrarAlerta('Não deu para salvar', e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga. Atualize o server.js na alwaysdata.' : e.message, 'error');
+    } finally { b.disabled = false; b.innerHTML = txt; }
+};
 
 document.addEventListener('DOMContentLoaded', () => { if ($('pf-form')) window.pfLimpar(true); });
 })();

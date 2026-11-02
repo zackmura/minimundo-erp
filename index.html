@@ -13,7 +13,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.1.0">
+    <link rel="stylesheet" href="style.css?v=5.2.0">
 </head>
 <body>
 
@@ -213,12 +213,12 @@
                     <div class="pdv-esq">
                         <div class="pdv-card">
                             <div class="pdv-cab"><span class="pdv-passo">1</span><b>Escolha os produtos</b><span class="info-lista" id="pdv-info"></span></div>
-                            <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="pdv-busca" placeholder="Buscar produto ou categoria…" autocomplete="off" oninput="renderizarCatalogoPDV()"></div>
+                            <div class="busca-linha"><div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pdv-busca" placeholder="Buscar produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarCatalogoPDV()"></div><select id="pdv-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarCatalogoPDV()" hidden></select></div>
                             <div class="linha-opcao">
                                 <div class="seg-mini" id="pdv-tipos"><button class="active" data-t="todos" onclick="filtroTipoPDV('todos')">Todos</button><button data-t="peca" onclick="filtroTipoPDV('peca')">Peças</button><button data-t="kit" onclick="filtroTipoPDV('kit')">Kits</button></div>
                                 <label class="chave"><input type="checkbox" id="pdv-sem-estoque" onchange="renderizarCatalogoPDV()"> Mostrar também sem estoque</label>
                             </div>
-                            <div id="pdv-grade" class="pdv-grade"></div>
+                            <div id="pdv-grade" class="pdv-lista"></div>
                         </div>
                         <div class="pdv-card">
                             <div class="pdv-cab"><span class="pdv-passo">2</span><b>Cliente e pagamento</b></div>
@@ -343,7 +343,7 @@
                     <div id="pf-bloco-kit" hidden>
                         <div class="card">
                             <div class="card-titulo">Peças do kit</div><p class="card-desc">Escolha as peças que vão juntas. O custo do kit é a soma delas.</p>
-                            <div class="pf-kit-add"><select id="pf-kit-add" aria-label="Peça"></select><input type="number" id="pf-kit-add-qtd" value="1" min="1" aria-label="Quantidade"><button type="button" class="btn-magic btn-pequeno" onclick="pfAddKit()"><svg class="ic"><use href="#i-mais"/></svg>Adicionar</button></div>
+                            <input type="search" id="pf-kit-busca" class="busca-select" placeholder="Buscar peça…" autocomplete="off" oninput="filtrarSelect('pf-kit-add', this.value)"><div class="pf-kit-add"><select id="pf-kit-add" aria-label="Peça"></select><input type="number" id="pf-kit-add-qtd" value="1" min="1" aria-label="Quantidade"><button type="button" class="btn-magic btn-pequeno" onclick="pfAddKit()"><svg class="ic"><use href="#i-mais"/></svg>Adicionar</button></div>
                             <div id="pf-kit-lista"></div>
                             <p class="texto-ajuda" id="pf-kit-montaveis" style="margin:10px 0 0;"></p>
                             <div class="input-group" style="margin-top:14px;"><label for="pf-kit-extras">Extras do kit (caixa, fita, cartão…)</label><input type="text" id="pf-kit-extras" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"></div>
@@ -385,7 +385,7 @@
         <!-- ========================================== -->
         <div id="tab-modelos" class="tab-content">
             <div class="pl-topo">
-                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="busca-banco" placeholder="Buscar produto ou categoria…" oninput="renderizarProdutos()"></div>
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="busca-banco" placeholder="Buscar produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarProdutos()"></div><select id="pl-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarProdutos()" hidden></select>
                 <button class="btn-magic btn-pequeno" onclick="novoProduto()"><svg class="ic"><use href="#i-mais"/></svg>Novo produto</button>
             </div>
             <div class="chips-rolagem" id="pl-filtros">
@@ -446,7 +446,7 @@
                 <button class="btn-magic btn-secundario" onclick="abrirMovimentos()"><svg class="ic"><use href="#i-relogio"/></svg>Histórico</button>
             </div>
             <div class="filtros-box" style="padding:14px;">
-                <input type="text" id="busca-estoque" class="search-bar" placeholder="🔍 Buscar produto..." onkeyup="renderizarEstoque()">
+                <div class="busca-linha"><div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="busca-estoque" placeholder="Buscar produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarEstoque()"></div><select id="estoque-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarEstoque()" hidden></select></div>
                 <div class="linha-opcao" style="margin:0;"><label class="chave"><input type="checkbox" id="estoque-mostrar-sem" onchange="renderizarEstoque()"> Mostrar também produtos sem estoque</label><span id="estoque-info-lista" class="info-lista"></span></div>
             </div>
             <div id="loading-estoque" class="loading-mm">⏳ Carregando estoque...</div>
@@ -656,7 +656,7 @@
         <!-- ========================================== -->
         <div id="tab-v_estoque" class="tab-content">
             <div id="v-resumo"></div>
-            <input type="text" id="v-busca-estoque" class="search-bar" placeholder="🔍 Buscar peça..." onkeyup="renderizarVendedorEstoque()">
+            <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="v-busca-estoque" placeholder="Buscar peça…" autocomplete="off" enterkeyhint="search" oninput="renderizarVendedorEstoque()"></div>
             <div id="loading-v" class="loading-mm">⏳ Carregando suas peças...</div>
             <div id="v-lista-estoque"></div>
             <div id="v-vitrine"></div>
@@ -669,7 +669,7 @@
             <div class="card card-destaque">
                 <div class="card-titulo">🎁 Pedir peça para a fábrica</div>
                 <p class="card-desc">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
-                <div class="input-group"><label>Produto (opcional)</label><select id="ve-produto"></select></div>
+                <div class="input-group"><label>Produto (opcional)</label><input type="search" id="ve-busca" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('ve-produto', this.value)"><select id="ve-produto"></select></div>
                 <div class="input-group"><label>Descrição / personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
                 <div class="row">
                     <div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="ve-qtd" value="1" min="1"></div></div>
@@ -911,13 +911,13 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="app.js?v=5.1.0"></script>
-<script src="consignado.js?v=5.1.0"></script>
-<script src="vendas.js?v=5.1.0"></script>
-<script src="produtos.js?v=5.1.0"></script>
-<script src="dashboard.js?v=5.1.0"></script>
-<script src="ajustes.js?v=5.1.0"></script>
-<script src="rascunho.js?v=5.1.0"></script>
+<script src="app.js?v=5.2.0"></script>
+<script src="consignado.js?v=5.2.0"></script>
+<script src="vendas.js?v=5.2.0"></script>
+<script src="produtos.js?v=5.2.0"></script>
+<script src="dashboard.js?v=5.2.0"></script>
+<script src="ajustes.js?v=5.2.0"></script>
+<script src="rascunho.js?v=5.2.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

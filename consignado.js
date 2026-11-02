@@ -136,14 +136,15 @@ window.renderizarEstoque = function() {
         ${semRepasse ? `<div class="mm-alerta">${window.ic('alerta')} <span>${semRepasse} produto(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. <a onclick="switchTab('modelos'); filtroProdutos('semrepasse')">Definir em Produtos</a></span></div>` : ''}
         ${baixos ? `<div class="mm-alerta">${window.ic('alerta')} <span>${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</span></div>` : ''}`;
     // Por padrão só aparece o que tem peça (no Ateliê ou com vendedor); a chave mostra o resto
-    const t = (window.$('busca-estoque').value || '').toLowerCase(), mostrarSem = window.$('estoque-mostrar-sem').checked;
+    const t = window.$('busca-estoque').value || '', mostrarSem = window.$('estoque-mostrar-sem').checked;
     const totalDe = pid => P.estoque.filter(e => e.produto_id === pid).reduce((s, e) => s + e.qtd, 0);
     const visiveis = P.produtos.filter(p => p.ativo || totalDe(p.id) > 0), comPecas = visiveis.filter(p => totalDe(p.id) > 0);
-    const lista = (mostrarSem ? visiveis : comPecas).filter(p => !t || p.nome.toLowerCase().includes(t));
+    window.montarFiltroCategoria('estoque-categoria', visiveis); const cat = window.$('estoque-categoria').value;
+    const lista = (mostrarSem ? visiveis : comPecas).filter(p => window.categoriaBate(p, cat) && window.produtoBate(p, t));
     window.$('estoque-info-lista').innerText = mostrarSem ? `${visiveis.length} produtos` : `${comPecas.length} de ${visiveis.length} com peças`;
     if (!lista.length) {
         window.$('lista-estoque').innerHTML = !visiveis.length ? `<p class="mm-vazio">Nenhum produto. Cadastre modelos em <b>Precificar</b>.</p>`
-            : t ? `<p class="mm-vazio">Nada encontrado para "${window.esc(t)}".${mostrarSem ? '' : ' Ligue <b>Mostrar também produtos sem estoque</b> para procurar em todos.'}</p>`
+            : t || cat ? `<p class="mm-vazio">Nada encontrado${t ? ` para "${window.esc(t)}"` : ' nessa categoria'}.${mostrarSem ? '' : ' Ligue <b>Mostrar também produtos sem estoque</b> para procurar em todos.'}</p>`
             : `<p class="mm-vazio">Nenhuma peça em estoque agora. Use <b>🖨️ Registrar produção</b> ou ligue <b>Mostrar também produtos sem estoque</b>.</p>`;
         return;
     }
@@ -163,7 +164,7 @@ window.renderizarEstoque = function() {
             <div class="mm-acoes">${kit
                 ? `<button class="btn-ic verde" title="Montar kit" onclick="abrirMontarKit(${p.id})">${window.ic('camadas')}</button>${at > 0 ? `<button class="btn-ic" title="Desmontar kit (peças voltam soltas)" onclick="desmontarKit(${p.id})">${window.ic('desfazer')}</button>` : ''}`
                 : `<button class="btn-ic verde" title="Registrar produção" onclick="abrirProducao(${p.id})">${window.ic('mais')}</button>`}
-                <button class="btn-ic" title="Ajustar quantidade do Ateliê" onclick="abrirAjusteAtelie(${p.id})">${window.ic('lapis')}</button><button class="btn-ic" title="Histórico" onclick="abrirMovimentos({produto_id:${p.id}})">${window.ic('relogio')}</button></div></div>`;
+                <button class="btn-ic" title="Editar nome, categoria e preços" onclick="abrirEdicaoProduto(${p.id})">${window.ic('etiqueta')}</button><button class="btn-ic" title="Ajustar quantidade do Ateliê" onclick="abrirAjusteAtelie(${p.id})">${window.ic('lapis')}</button><button class="btn-ic" title="Histórico" onclick="abrirMovimentos({produto_id:${p.id}})">${window.ic('relogio')}</button></div></div>`;
     }).join('');
 };
 
@@ -228,7 +229,7 @@ window.abrirProducao = function(pid) {
     if (!opts) return window.mostrarAlerta("Atenção", "Cadastre um modelo em Precificar primeiro.", "warning");
     window.abrirModalMM(`<h3 class="modal-title">🖨️ Registrar Produção</h3>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-top:-8px;">Peças prontas que saíram da impressora entram no estoque do Ateliê.</p>
-        <div class="input-group"><label>Produto</label><select id="pr-produto">${opts}</select></div>
+        <div class="input-group"><label>Produto</label><input type="search" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('pr-produto', this.value)"><select id="pr-produto">${opts}</select></div>
         <div class="row"><div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="pr-qtd" value="1" min="1"></div></div><div class="col"><div class="input-group"><label>Observação</label><input type="text" id="pr-obs" placeholder="Ex: lote azul"></div></div></div>
         <button class="btn-magic btn-global" id="btn-pr" onclick="window.confirmarProducao()">✅ Entrar no Ateliê</button>`);
 };
@@ -267,7 +268,7 @@ window.abrirMala = function(vidPre) {
         <input type="text" id="mala-busca" class="search-bar" placeholder="🔍 Filtrar produtos..." onkeyup="window.filtrarMala()" style="margin-bottom:10px;">
         <div class="linha-opcao"><label class="chave"><input type="checkbox" id="mala-mostrar-sem" onchange="window.filtrarMala()" ${atelieVazio ? 'checked' : ''}> Mostrar também sem estoque</label><span id="mala-info" class="info-lista"></span></div>
         <div id="mala-lista" class="lista-escolha">${prods.map(p => { const at = window.qtdEm(p.id, 0); return `
-            <div class="mm-linha${at > 0 ? '' : ' sem-estoque'}" data-nome="${window.esc(p.nome.toLowerCase())}" data-atelie="${at}">${window.imgProduto(p.foto)}<span class="mm-nome">${window.esc(p.nome)}<span class="mm-sub">${at > 0 ? `🏠 Ateliê: ${at}` : '🏠 Sem peças no Ateliê'} · <span id="mala-rep-${p.id}"></span></span></span>
+            <div class="mm-linha${at > 0 ? '' : ' sem-estoque'}" data-nome="${window.esc(p.nome + ' ' + (p.categoria || '') + (p.tipo === 'kit' ? ' kit' : ''))}" data-atelie="${at}">${window.imgProduto(p.foto)}<span class="mm-nome">${window.esc(p.nome)}<span class="mm-sub">${at > 0 ? `🏠 Ateliê: ${at}` : '🏠 Sem peças no Ateliê'} · <span id="mala-rep-${p.id}"></span></span></span>
             <input type="number" class="mala-qtd" data-pid="${p.id}" min="0" value="0" inputmode="numeric" oninput="window.atualizarMalaTotal()"></div>`; }).join('')}
             <p class="mm-vazio" id="mala-vazio" style="display:none;">Nenhum produto aqui.</p></div>
         <div class="mm-total" id="mala-total">0 peças</div>
@@ -281,10 +282,10 @@ window.atualizarMala = function() {
     window.atualizarMalaTotal();
 };
 window.filtrarMala = function() {
-    const t = window.$('mala-busca').value.toLowerCase(), todos = window.$('mala-mostrar-sem').checked; let n = 0;
+    const t = window.$('mala-busca').value, todos = window.$('mala-mostrar-sem').checked; let n = 0;
     document.querySelectorAll('#mala-lista .mm-linha').forEach(l => {
         const temQtd = (parseInt(l.querySelector('.mala-qtd').value) || 0) > 0; // o que já foi marcado nunca some
-        const ver = temQtd || (l.dataset.nome.includes(t) && (todos || parseInt(l.dataset.atelie) > 0));
+        const ver = temQtd || (window.buscaBate(t, l.dataset.nome) && (todos || parseInt(l.dataset.atelie) > 0));
         l.style.display = ver ? '' : 'none'; if (ver) n++;
     });
     window.$('mala-vazio').style.display = n ? 'none' : 'block';
@@ -612,8 +613,8 @@ window.renderizarVendedorEstoque = function() {
         <div class="mm-kpi"><h3>📦 Peças com você</h3><span>${pecas}</span></div>
         <div class="mm-kpi" style="cursor:pointer;" onclick="window.switchTab('v_acerto','💸 Meu Acerto')"><h3>💰 Você me deve</h3><span class="v-laranja">${window.fmt(d.pendente_total)}</span></div></div>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;text-align:center;margin:-5px 0 15px;">Vendeu? Toque em <b>✅ Vendi</b> na peça. Repasse total se vender tudo: <b>${window.fmt(valor)}</b></p>`;
-    const t = (window.$('v-busca-estoque').value || '').toLowerCase();
-    const lista = d.estoque.filter(e => !t || e.nome.toLowerCase().includes(t));
+    const t = window.$('v-busca-estoque').value || '';
+    const lista = d.estoque.filter(e => window.buscaBate(t, e.nome));
     window.$('v-lista-estoque').innerHTML = d.estoque.length ? lista.map(e => `<div class="mm-card">${window.imgProduto(e.foto)}
         <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">📦 Com você: ${e.qtd}</span><span class="mm-chip amarelo">🤝 Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">💡 Sugerido ${window.fmt(e.preco_sugerido)}</span></div></div>
         <div class="mm-acoes"><button class="btn-vendi" onclick="window.abrirBaixa(${e.produto_id})">✅ Vendi</button></div></div>`).join('')
@@ -679,6 +680,7 @@ window.renderizarVendedorEncomendas = function() {
     const d = window.painelVendedor; if (!d) return;
     const sel = window.$('ve-produto'), atual = sel.value;
     sel.innerHTML = '<option value="">✏️ Peça personalizada / outra</option>' + d.produtos.map(p => `<option value="${p.id}">${window.esc(p.nome)}</option>`).join(''); sel.value = atual;
+    window.filtrarSelect('ve-produto', window.$('ve-busca') ? window.$('ve-busca').value : '', true);
     const cor = { Pendente: 'amarelo', Produzindo: 'azul', Pronta: 'verde', Entregue: 'verde', Cancelada: 'vermelho' };
     window.$('v-lista-encomendas').innerHTML = d.encomendas.length ? d.encomendas.map(e => `<div class="mm-card"><div class="mm-info"><h4>${e.qtd}x ${window.esc(e.descricao)}</h4>
         <div class="mm-chips"><span class="mm-chip ${cor[e.status] || ''}">${window.esc(e.status)}</span><span class="mm-chip">📅 ${window.fmtDataHora(e.data_hora)}</span>${e.prazo ? `<span class="mm-chip">⏰ até ${window.fmtDataHora(e.prazo)}</span>` : ''}</div>

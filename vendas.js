@@ -85,24 +85,26 @@ window.preencherTelefonePDV = function() {
 window.filtroTipoPDV = function(t) { PDV.tipo = t; document.querySelectorAll('#pdv-tipos button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); window.renderizarCatalogoPDV(); };
 window.renderizarCatalogoPDV = function() {
     const grade = $('pdv-grade'); if (!grade) return;
-    const t = norm($('pdv-busca').value), todos = $('pdv-sem-estoque').checked;
+    const t = $('pdv-busca').value, todos = $('pdv-sem-estoque').checked;
     const ativos = (window.arrayBancoCustos || []).filter(p => p.ativo !== false);
     const comEstoque = ativos.filter(p => (p.est_atelie || 0) > 0);
-    const lista = (todos ? ativos : comEstoque).filter(p => (PDV.tipo === 'todos' || p.tipo === PDV.tipo) && (!t || norm(p.modelo).includes(t) || norm(p.categoria).includes(t)));
+    window.montarFiltroCategoria('pdv-categoria', ativos); const cat = $('pdv-categoria').value;
+    const lista = (todos ? ativos : comEstoque).filter(p => (PDV.tipo === 'todos' || p.tipo === PDV.tipo) && window.categoriaBate(p, cat) && window.produtoBate(p, t));
     $('pdv-info').innerText = ativos.length ? (todos ? `${ativos.length} produtos` : `${comEstoque.length} com estoque`) : '';
     if (!lista.length) {
-        grade.innerHTML = `<div class="vazio-box">${window.ic('busca')}<b>${!ativos.length ? 'Nenhum produto cadastrado' : t ? `Nada encontrado para "${esc($('pdv-busca').value)}"` : 'Nenhum produto com estoque no Ateliê'}</b>
-            <span>${!ativos.length ? 'Cadastre em <a onclick="switchTab(\'precificar\')">Precificar</a>.' : todos ? '' : 'Ligue <b>Mostrar também produtos sem estoque</b> para vender sob encomenda.'}</span></div>`;
+        grade.innerHTML = `<div class="vazio-box">${window.ic('busca')}<b>${!ativos.length ? 'Nenhum produto cadastrado' : t.trim() ? `Nada encontrado para "${esc(t)}"` : cat ? 'Nada nessa categoria' : 'Nenhum produto com estoque no Ateliê'}</b>
+            <span>${!ativos.length ? 'Cadastre em <a onclick="switchTab(\'precificar\')">Precificar</a>.' : todos ? '' : 'Ligue <b>Mostrar também sem estoque</b> para vender sob encomenda.'}</span></div>`;
         return;
     }
+    // Lista compacta: foto pequena, nome, estoque e preço numa linha. Tocar soma 1; no carrinho aparece − quantidade +
     grade.innerHTML = lista.map(p => {
         const noCar = PDV.itens.find(i => i.produto_id === p.linha), est = p.est_atelie || 0, preco = window.precoVendaDe(p);
-        return `<button type="button" class="pdv-prod ${noCar ? 'no-carrinho' : ''} ${est > 0 ? '' : 'sem'}" onclick="addPDV(${p.linha})">
-            ${noCar ? `<span class="pp-badge">${noCar.qtd}</span>` : ''}
-            <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
-            <b>${esc(p.modelo)}</b>
-            <span class="pp-linha"><span class="pp-preco">${preco ? window.fmt(preco) : 'sem preço'}</span><span class="pp-est ${est > 0 ? '' : 'zero'}">${p.tipo === 'kit' ? 'Kit · ' : ''}${est > 0 ? `${est} no Ateliê` : 'sem estoque'}</span></span>
-        </button>`;
+        return `<div class="pdv-lin ${noCar ? 'no-carrinho' : ''} ${est > 0 ? '' : 'sem'}" onclick="addPDV(${p.linha})" role="button" tabindex="0">
+            <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">
+            <div class="pl-info"><b>${p.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${esc(p.modelo)}</b><small><span class="pl-preco">${preco ? window.fmt(preco) : '<i>sem preço</i>'}</span> · <span class="pp-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sem estoque'}</span>${p.categoria ? ` · ${esc(p.categoria)}` : ''}</small></div>
+            ${noCar ? `<span class="pl-qtd" onclick="event.stopPropagation()"><button type="button" onclick="menosPDV(${p.linha})" aria-label="Tirar um">−</button><b>${noCar.qtd}</b><button type="button" onclick="addPDV(${p.linha})" aria-label="Mais um">+</button></span>`
+                : `<span class="pl-add" aria-hidden="true">${window.ic('mais')}</span>`}
+        </div>`;
     }).join('');
 };
 
@@ -112,7 +114,12 @@ window.addPDV = function(id) {
     const ja = PDV.itens.find(i => i.produto_id === id);
     if (ja) ja.qtd++; else PDV.itens.push({ produto_id: id, nome: p.modelo, qtd: 1, unit: window.precoVendaDe(p), sugerido: !p.preco_venda });
     window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV();
-    window.toastMM(`${p.modelo} no carrinho`);
+    if (!ja) window.toastMM(`${p.modelo} no carrinho`);
+};
+window.menosPDV = function(id) {
+    const i = PDV.itens.findIndex(it => it.produto_id === id); if (i < 0) return;
+    if (PDV.itens[i].qtd > 1) PDV.itens[i].qtd--; else PDV.itens.splice(i, 1);
+    window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV();
 };
 window.qtdPDV = function(i, d) { const it = PDV.itens[i]; if (!it) return; it.qtd = Math.max(1, it.qtd + d); window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV(); };
 window.qtdPDVSet = function(i, v) { const it = PDV.itens[i]; if (!it) return; it.qtd = Math.max(1, parseInt(v) || 1); window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV(); };
@@ -283,7 +290,7 @@ window.filtrarVendas = function() {
         if (canal && p.plataforma !== canal) return false;
         if (forma && p.forma !== forma) return false;
         if (status && p.status !== status) return false;
-        if (t && !(norm(p.cliente).includes(t) || String(p.id) === t || p.linhas.some(l => norm(l.produto).includes(t)) || norm(p.obs).includes(t))) return false;
+        if (t && String(p.id) !== t && !window.buscaBate(t, p.cliente, p.obs, p.plataforma, ...p.linhas.map(l => l.produto))) return false;
         return true;
     });
     const ativos = !!(canal || forma || status || HV.periodo === 'personalizado');

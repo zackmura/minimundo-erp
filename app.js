@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.1.0";
+const VERSAO_APP = "v5.2.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -163,6 +163,39 @@ window.toastMM = function(msg) {
     let t = window.$('toast-mm'); if (!t) return;
     t.innerHTML = `${window.ic('check')}<span>${window.esc(msg)}</span>`; t.classList.add('visivel');
     clearTimeout(window.toastMM.timer); window.toastMM.timer = setTimeout(() => t.classList.remove('visivel'), 2600);
+};
+
+// 🔎 Busca de produto igual em todas as telas: não liga para acento nem maiúscula, e cada palavra pode estar
+// no nome, na categoria ou no tipo, em qualquer ordem. Ex.: "kit cori" acha "Kit festa Corinthians".
+window.normMM = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+window.buscaBate = function(termo, ...campos) {
+    const palavras = window.normMM(termo).split(/\s+/).filter(Boolean);
+    if (!palavras.length) return true;
+    const texto = window.normMM(campos.join(' '));
+    return palavras.every(w => texto.includes(w));
+};
+window.produtoBate = (p, termo) => window.buscaBate(termo, p.modelo || p.nome, p.categoria, p.tipo === 'kit' ? 'kit' : '');
+// Filtro de categoria (<select>): opções vindas dos próprios produtos; some quando ninguém tem categoria
+window.montarFiltroCategoria = function(id, produtos) {
+    const sel = window.$(id); if (!sel) return;
+    const atual = sel.value, cats = [...new Set(produtos.map(p => String(p.categoria || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const semCat = cats.length && produtos.some(p => !String(p.categoria || '').trim());
+    sel.innerHTML = '<option value="">Todas as categorias</option>' + cats.map(c => `<option value="${window.esc(c)}">${window.esc(c)}</option>`).join('') + (semCat ? '<option value="-">Sem categoria</option>' : '');
+    sel.value = [...sel.options].some(o => o.value === atual) ? atual : '';
+    sel.hidden = !cats.length;
+};
+window.categoriaBate = (p, cat) => !cat || (cat === '-' ? !String(p.categoria || '').trim() : String(p.categoria || '').trim() === cat);
+// Lista de escolha com busca: o campo de cima filtra as opções do <select> (funciona igual no iPhone e no Android).
+// "recarregou" = as opções acabaram de ser montadas de novo e precisam ser guardadas outra vez.
+window.filtrarSelect = function(id, termo, recarregou) {
+    const sel = window.$(id); if (!sel) return;
+    if (recarregou || !sel._todas) sel._todas = [...sel.options].map(o => ({ v: o.value, t: o.text }));
+    const atual = sel.value, tem = String(termo || '').trim();
+    const fixas = sel._todas.filter(o => o.v === ''), bate = sel._todas.filter(o => o.v !== '' && window.buscaBate(termo, o.t));
+    const opc = o => `<option value="${window.esc(o.v)}">${window.esc(o.t)}</option>`;
+    sel.innerHTML = fixas.map(opc).join('') + bate.map(opc).join('') + (tem && !bate.length ? '<option value="" disabled>Nada encontrado</option>' : '');
+    // Digitou algo: já deixa escolhido o primeiro que bate (é só confirmar)
+    sel.value = bate.some(o => o.v === atual) ? atual : tem && bate.length ? bate[0].v : (fixas[0] ? '' : (bate[0] || {}).v || '');
 };
 
 window.switchTab = function(tabName, tituloAba = null) {
@@ -599,7 +632,7 @@ window.renderListaCatalogo = function(aP){
     lE.innerHTML=h; 
 };
 
-window.filtrarCatalogo = function(){ const t=window.$('busca-catalogo').value.toLowerCase(); window.renderListaCatalogo(window.catalogoAdminArray.filter(p=>p.nome.toLowerCase().includes(t)||p.categoria.toLowerCase().includes(t)||String(p.preco).toLowerCase().includes(t))); };
+window.filtrarCatalogo = function(){ const t=window.$('busca-catalogo').value; window.renderListaCatalogo(window.catalogoAdminArray.filter(p=>window.buscaBate(t, p.nome, p.categoria, p.preco))); };
 window.abrirModalEditarProduto = function(l){ const p=window.catalogoAdminArray.find(x=>x.linha===l); if(!p)return; window.$('edit-prod-linha').value=p.linha; window.$('edit-prod-nome').value=p.nome; window.$('edit-prod-preco').value=window.formatarPreco(p.preco); window.$('edit-prod-categoria').value=p.categoria; window.$('edit-prod-desc').value=p.descricao; window.$('edit-prod-status').value=p.ativo?"true":"false"; window.$('edit-prod-foto-antiga').value=p.foto||""; window.$('edit-prod-img-preview').src=(p.foto&&p.foto.split(',')[0])?p.foto.split(',')[0]:"logo.png"; window.$('edit-prod-fotos-novas').value=""; window.$('modal-editar-produto').style.display='flex'; };
 
 window.confirmarExclusaoProduto = async function(){
