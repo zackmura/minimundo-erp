@@ -200,7 +200,7 @@ window.atualizarMontarKit = function() {
     const linhas = (kit.itens || []).map(i => {
         const p = P.produtos.find(x => x.id === i.produto_id) || { nome: '(peça removida)' }, precisa = i.qtd * qtd, tem = Math.max(0, window.qtdEm(i.produto_id, 0)), f = Math.max(0, precisa - tem);
         falta += f;
-        return `<div class="mk-linha ${f ? 'falta' : ''}"><span class="mk-nome">${window.esc(p.nome)}<small>${i.qtd} por kit</small></span><span>${precisa}</span><span>${tem}</span><b>${f ? (imprimir ? `imprime ${f}` : `falta ${f}`) : 'ok'}</b></div>`;
+        return `<div class="mk-linha ${f ? 'falta' : ''}"><span class="mk-nome"><img src="${window.esc(p.foto || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy"><span>${window.esc(p.nome)}<small>${i.qtd} por kit</small></span></span><span>${precisa}</span><span>${tem}</span><b>${f ? (imprimir ? `imprime ${f}` : `falta ${f}`) : 'ok'}</b></div>`;
     }).join('');
     window.$('mk-tabela').innerHTML = kit.itens && kit.itens.length
         ? `<div class="mk-tabela"><div class="mk-linha cab"><span>Peça</span><span>Precisa</span><span>No Ateliê</span><span></span></div>${linhas}</div>

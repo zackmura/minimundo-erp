@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.4.0">
+    <link rel="stylesheet" href="style.css?v=5.5.0">
 </head>
 <body>
 
@@ -352,10 +352,14 @@
 
                     <div id="pf-bloco-kit" hidden>
                         <div class="card">
-                            <div class="card-titulo">Peças do kit</div><p class="card-desc">Escolha as peças que vão juntas. O custo do kit é a soma delas.</p>
-                            <input type="search" id="pf-kit-busca" class="busca-select" placeholder="Buscar peça…" autocomplete="off" oninput="filtrarSelect('pf-kit-add', this.value)"><div class="pf-kit-add"><select id="pf-kit-add" aria-label="Peça"></select><input type="number" id="pf-kit-add-qtd" value="1" min="1" aria-label="Quantidade"><button type="button" class="btn-magic btn-pequeno" onclick="pfAddKit()"><svg class="ic"><use href="#i-mais"/></svg>Adicionar</button></div>
+                            <div class="card-cabeca"><div class="card-titulo">Peças do kit</div><b class="kit-conta" id="pf-kit-conta"></b></div>
+                            <p class="card-desc">Toque nas peças que vão juntas. As que têm estoque no Ateliê aparecem primeiro. O custo do kit é a soma delas.</p>
+                            <div class="busca-linha"><div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pf-kit-busca" placeholder="Buscar peça…" autocomplete="off" enterkeyhint="search" oninput="pfRenderEscolha()"></div><select id="pf-kit-categoria" class="filtro-cat" aria-label="Categoria" onchange="pfRenderEscolha()" hidden></select></div>
+                            <div class="seg-mini largo" id="pf-kit-filtros"><button type="button" class="active" data-f="todas" onclick="pfKitFiltro('todas')">Todas <em></em></button><button type="button" data-f="estoque" onclick="pfKitFiltro('estoque')">Com estoque <em></em></button><button type="button" data-f="nokit" onclick="pfKitFiltro('nokit')">No kit <em></em></button></div>
+                            <div id="pf-kit-escolha" class="pdv-lista kit-escolha"></div>
                             <div id="pf-kit-lista"></div>
-                            <p class="texto-ajuda" id="pf-kit-montaveis" style="margin:10px 0 0;"></p>
+                            <p class="ks-montar" id="pf-kit-montaveis"></p>
+                            <button type="button" class="btn-limpar ep-link" id="pf-kit-usar-fotos" hidden onclick="pfKitUsarFotos()"><svg class="ic"><use href="#i-imagem"/></svg>Kit sem foto? Usar as fotos das peças</button>
                             <div class="input-group" style="margin-top:14px;"><label for="pf-kit-extras">Extras do kit (caixa, fita, cartão…)</label><input type="text" id="pf-kit-extras" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"></div>
                         </div>
                     </div>
@@ -378,6 +382,7 @@
                         <label for="pf-repasse">Preço de repasse</label>
                         <input type="text" id="pf-repasse" class="mask-money campo-dinheiro azul" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)">
                         <button type="button" class="btn-limpar" id="pf-repasse-sug" style="margin-top:8px;" onclick="pfUsarRepasse()"></button>
+                        <button type="button" class="btn-limpar" id="pf-repasse-soma" style="margin-top:8px;" hidden onclick="pfAplicarValor('pf-repasse', +this.dataset.v)"></button>
                         <p class="pf-info" id="pf-repasse-info"></p>
                         <div class="input-group" style="margin:12px 0 0;"><label for="pf-sugerido">Preço sugerido ao vendedor (opcional)</label><input type="text" id="pf-sugerido" class="mask-money"></div>
                     </div>
@@ -941,15 +946,15 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.4.0"></script>
-<script src="app.js?v=5.4.0"></script>
-<script src="consignado.js?v=5.4.0"></script>
-<script src="vendas.js?v=5.4.0"></script>
-<script src="produtos.js?v=5.4.0"></script>
-<script src="dashboard.js?v=5.4.0"></script>
-<script src="ajustes.js?v=5.4.0"></script>
-<script src="rascunho.js?v=5.4.0"></script>
-<script src="usuarios.js?v=5.4.0"></script>
+<script src="galeria.js?v=5.5.0"></script>
+<script src="app.js?v=5.5.0"></script>
+<script src="consignado.js?v=5.5.0"></script>
+<script src="vendas.js?v=5.5.0"></script>
+<script src="produtos.js?v=5.5.0"></script>
+<script src="dashboard.js?v=5.5.0"></script>
+<script src="ajustes.js?v=5.5.0"></script>
+<script src="rascunho.js?v=5.5.0"></script>
+<script src="usuarios.js?v=5.5.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

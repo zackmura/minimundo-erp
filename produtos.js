@@ -76,10 +76,6 @@ window.renderizarProdutos = function() {
 window.pfMontarListas = function() {
     const ps = window.arrayBancoCustos || [];
     if ($('pf-categorias')) $('pf-categorias').innerHTML = [...new Set(ps.map(p => p.categoria).filter(Boolean))].sort().map(c => `<option value="${esc(c)}">`).join('');
-    if ($('pf-kit-add')) {
-        $('pf-kit-add').innerHTML = '<option value="">Escolha uma peça…</option>' + ps.filter(p => p.tipo !== 'kit' && p.ativo !== false && p.linha !== PF.editando).map(p => `<option value="${p.linha}">${esc(p.modelo)}${p.categoria ? ` (${esc(p.categoria)})` : ''} · ${window.fmt(val(p.custo_total))}</option>`).join('');
-        window.filtrarSelect('pf-kit-add', $('pf-kit-busca').value, true);
-    }
     if ($('pf-catalogo')) { const sel = $('pf-catalogo').value; $('pf-catalogo').innerHTML = '<option value="0">— não aparece na vitrine —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${String(k.linha) === sel ? 'selected' : ''}>${esc(k.nome)}</option>`).join(''); }
     if (window.PF.tipo === 'kit') window.pfRenderKit();
 };
@@ -89,7 +85,7 @@ window.pfTipo = function(tipo) {
     document.querySelectorAll('#pf-tipo button').forEach(b => b.classList.toggle('active', b.dataset.t === tipo));
     $('pf-bloco-peca').hidden = tipo !== 'peca'; $('pf-bloco-kit').hidden = tipo !== 'kit';
     $('pf-nome').placeholder = tipo === 'kit' ? 'Ex: Kit festa Corinthians' : 'Ex: Placa profissões';
-    window.pfCalcular();
+    if (tipo === 'kit') window.pfRenderKit(); else window.pfCalcular();
 };
 window.pfCarregarImpressora = function() {
     $('pf-watts').value = cfg('imp_watts'); $('pf-kwh').value = cfg('imp_kwh'); $('pf-maq').value = cfg('imp_maq_hora'); $('pf-hora').value = cfg('imp_hora'); $('pf-falha').value = cfg('taxa_falha');
@@ -122,10 +118,13 @@ window.pfCalcular = function() {
         ${fixo ? '' : `<div class="barra-custo">${linhas.filter(l => l[1] > 0).map((l, i) => `<span style="width:${l[1] / soma * 100}%;background:${l[2] || cores[i % cores.length]}" title="${esc(l[0])}"></span>`).join('')}</div>`}
         ${fixo ? `<div class="custo-linha"><span>Custo informado manualmente</span><span>${window.fmt(custo)}</span></div>` : linhas.map((l, i) => `<div class="custo-linha"><span><i class="ponto" style="background:${l[2] || cores[i % cores.length]}"></i>${esc(l[0])}</span><span>${window.fmt(l[1])}</span></div>`).join('') || '<p class="texto-ajuda">Escolha as peças do kit.</p>'}
         <div class="custo-total"><span>Custo de produção</span><span>${window.fmt(custo)}</span></div>`;
-    // Atalhos de preço (custo × N)
-    $('pf-mults').innerHTML = [2, 2.5, 3, 4, 5].map(m => `<button type="button" class="chip-op" onclick="pfAplicarMult(${m})">×${String(m).replace('.', ',')} <small>${window.fmt(Math.ceil(custo * m))}</small></button>`).join('');
+    // Atalhos de preço (custo × N). No kit vêm antes: o preço das peças separadas e com desconto
+    const sep = PF.tipo === 'kit' ? somaSeparadas('preco_venda') : { soma: 0, sem: 0 };
+    $('pf-mults').innerHTML = (sep.soma > 0 ? [[0, 'Separadas'], [10, '−10%'], [15, '−15%']].map(([d, r]) => `<button type="button" class="chip-op ${d ? '' : 'kit-sep'}" onclick="pfAplicarValor('pf-venda', ${Math.ceil(sep.soma * (1 - d / 100))})">${r} <small>${window.fmt(Math.ceil(sep.soma * (1 - d / 100)))}</small></button>`).join('') : '')
+        + (PF.tipo === 'kit' && sep.soma > 0 ? [2, 3] : [2, 2.5, 3, 4, 5]).map(m => `<button type="button" class="chip-op" onclick="pfAplicarMult(${m})">×${String(m).replace('.', ',')} <small>${window.fmt(Math.ceil(custo * m))}</small></button>`).join('');
     const venda = dinheiroCampo('pf-venda');
-    $('pf-venda-info').innerHTML = venda > 0 ? `Lucro na venda direta: <b class="${venda - custo < 0 ? 'neg' : ''}">${window.fmt(venda - custo)}</b> · margem ${Math.round((venda - custo) / venda * 100)}%` : `Sugestão: ${window.fmt(Math.ceil(custo * cfg('multiplicador_venda')))} (custo × ${String(cfg('multiplicador_venda')).replace('.', ',')})`;
+    const notaSep = sep.soma > 0 ? `<br>Peças vendidas separadas: ${window.fmt(sep.soma)}${sep.sem ? ` (${sep.sem} sem preço de venda)` : ''}${venda > 0 && venda < sep.soma ? ` · o kit sai <b>${window.fmt(sep.soma - venda)}</b> mais barato` : ''}.` : '';
+    $('pf-venda-info').innerHTML = (venda > 0 ? `Lucro na venda direta: <b class="${venda - custo < 0 ? 'neg' : ''}">${window.fmt(venda - custo)}</b> · margem ${Math.round((venda - custo) / venda * 100)}%` : `Sugestão: ${window.fmt(Math.ceil(custo * cfg('multiplicador_venda')))} (custo × ${String(cfg('multiplicador_venda')).replace('.', ',')})`) + notaSep;
     // Quanto sobra em cada canal (tira a taxa da plataforma)
     const canais = [{ nome: 'Venda direta', pct: 0, fixa: 0 }, ...(window.arrayPlataformas || [])];
     $('pf-canais').innerHTML = venda > 0 ? `<div class="pf-canal cab"><span>Canal</span><span>Taxa</span><span>Você recebe</span><span>Lucro</span></div>` + canais.map(c => {
@@ -135,6 +134,9 @@ window.pfCalcular = function() {
     // Repasse para vendedores
     const sugRep = Math.ceil(custo * (1 + cfg('markup_repasse') / 100)), rep = dinheiroCampo('pf-repasse');
     $('pf-repasse-sug').innerHTML = `Usar sugestão: ${window.fmt(sugRep)}`; $('pf-repasse-sug').dataset.v = sugRep;
+    const sepRep = PF.tipo === 'kit' ? somaSeparadas('preco_repasse') : { soma: 0, sem: 0 };
+    $('pf-repasse-soma').hidden = !(sepRep.soma > 0); $('pf-repasse-soma').dataset.v = sepRep.soma;
+    $('pf-repasse-soma').innerHTML = `Somar os repasses das peças: ${window.fmt(sepRep.soma)}${sepRep.sem ? ` <small>(${sepRep.sem} sem repasse)</small>` : ''}`;
     $('pf-repasse-info').innerHTML = rep > 0 ? `Você ganha <b class="${rep - custo < 0 ? 'neg' : ''}">${window.fmt(rep - custo)}</b> por peça vendida pelo vendedor.` : 'Sem repasse o produto não pode ir na mala dos vendedores.';
     $('pf-sugerido').placeholder = `Vazio = ${window.fmt((rep || sugRep) * (1 + cfg('margem_vendedor') / 100))} (margem dos Ajustes)`;
     $('pf-custo-topo').innerText = window.fmt(custo);
@@ -172,6 +174,7 @@ function pfFotoEstado(enviando) {
     $('pf-foto-n').innerText = fotos.length > 1 ? fotos.length : ''; $('pf-foto-n').hidden = fotos.length < 2;
     $('pf-ver-fotos').hidden = !fotos.length;
     $('pf-ver-fotos').innerHTML = `${window.ic('imagem')} Ver ${fotos.length > 1 ? `as ${fotos.length} fotos` : 'a foto'}`;
+    pfKitFotosBotao();
 }
 window.pfFotoEstado = pfFotoEstado;
 // Galeria do formulário: produto salvo usa as fotos guardadas; produto novo mexe só no rascunho
@@ -190,27 +193,99 @@ window.pfSalvarImpressora = async function() {
 };
 
 // ---------- KIT ----------
-window.pfAddKit = function() {
-    const id = parseInt($('pf-kit-add').value), q = Math.max(1, parseInt($('pf-kit-add-qtd').value) || 1); if (!id) return;
-    const ja = PF.kit.find(i => i.produto_id === id); if (ja) ja.qtd += q; else PF.kit.push({ produto_id: id, qtd: q });
-    $('pf-kit-busca').value = ''; window.filtrarSelect('pf-kit-add', ''); $('pf-kit-add').value = ''; $('pf-kit-add-qtd').value = 1; window.pfRenderKit();
+// Escolher as peças: lista com foto, busca e categoria; as que têm peça no Ateliê vêm primeiro.
+// Tocar na linha põe 1 no kit, − e + ajustam e tocar no número deixa digitar a quantidade.
+window.PK = { filtro: 'todas' };
+const pecasParaKit = () => (window.arrayBancoCustos || []).filter(p => p.tipo !== 'kit' && p.ativo !== false && p.linha !== PF.editando);
+const noKit = id => PF.kit.find(i => i.produto_id === id);
+const estAtelie = p => Math.max(0, parseInt(p && p.est_atelie) || 0);
+const mudouKit = () => { window.pfRenderKit(); guardarRascunho(); };
+window.pfKitMais = function(id) { const it = noKit(id); if (it) it.qtd++; else PF.kit.push({ produto_id: id, qtd: 1 }); mudouKit(); };
+window.pfKitMenos = function(id) { const it = noKit(id); if (!it) return; if (--it.qtd < 1) PF.kit = PF.kit.filter(i => i !== it); mudouKit(); };
+window.pfKitTirar = function(id) { PF.kit = PF.kit.filter(i => i.produto_id !== id); mudouKit(); };
+window.pfKitDigitar = async function(id) {
+    const it = noKit(id), p = produtoPorId(id); if (!it) return;
+    const v = await window.pedirValorMM({ icone: '🧩', titulo: 'Quantas vão no kit?', texto: p ? p.modelo : '', campo: 'number', valor: String(it.qtd), min: 0, ok: 'Usar',
+        validar: x => { const n = parseInt(x); return n >= 0 && n <= 999 ? null : 'Digite um número de 0 a 999 (0 tira do kit).'; } });
+    if (v === null) return;
+    it.qtd = parseInt(v); if (it.qtd < 1) PF.kit = PF.kit.filter(i => i !== it); mudouKit();
 };
-window.pfKitQtd = function(i, d) { const it = PF.kit[i]; if (!it) return; it.qtd = Math.max(1, it.qtd + d); window.pfRenderKit(); };
-window.pfKitTirar = function(i) { PF.kit.splice(i, 1); window.pfRenderKit(); };
+window.pfKitFiltro = function(f) { PK.filtro = f; document.querySelectorAll('#pf-kit-filtros button').forEach(b => b.classList.toggle('active', b.dataset.f === f)); window.pfRenderEscolha(); };
+window.pfRenderEscolha = function() {
+    const box = $('pf-kit-escolha'); if (!box) return;
+    const todas = pecasParaKit(), t = $('pf-kit-busca').value;
+    window.montarFiltroCategoria('pf-kit-categoria', todas); const cat = $('pf-kit-categoria').value;
+    const conta = { todas: todas.length, estoque: todas.filter(p => estAtelie(p) > 0).length, nokit: PF.kit.length };
+    document.querySelectorAll('#pf-kit-filtros button').forEach(b => { b.querySelector('em').innerText = conta[b.dataset.f] || ''; });
+    const lista = todas.filter(p => (PK.filtro !== 'estoque' || estAtelie(p) > 0) && (PK.filtro !== 'nokit' || noKit(p.linha)) && window.categoriaBate(p, cat) && window.produtoBate(p, t))
+        .sort((a, b) => (estAtelie(b) > 0) - (estAtelie(a) > 0) || String(a.modelo).localeCompare(String(b.modelo), 'pt-BR'));
+    if (!lista.length) {
+        box.innerHTML = `<div class="vazio-box pequeno">${window.ic('busca')}<b>${!todas.length ? 'Nenhuma peça cadastrada' : t.trim() ? `Nada encontrado para "${esc(t)}"` : PK.filtro === 'nokit' ? 'Nenhuma peça no kit ainda' : PK.filtro === 'estoque' ? 'Nenhuma peça com estoque no Ateliê' : 'Nada nessa categoria'}</b>
+            <span>${!todas.length ? 'Cadastre as peças primeiro (Precificar → Peça).' : PK.filtro !== 'todas' ? '<a onclick="pfKitFiltro(\'todas\')">Ver todas as peças</a>' : ''}</span></div>`;
+        return;
+    }
+    // Quem não tem peça no Ateliê vem depois de um aviso (ainda dá para escolher: na hora de montar dá para imprimir)
+    const primeiraSem = estAtelie(lista[0]) > 0 ? lista.findIndex(p => !estAtelie(p)) : -1;
+    box.innerHTML = lista.map((p, i) => {
+        const est = estAtelie(p), it = noKit(p.linha), nf = window.fotosDe(p).length;
+        return (i === primeiraSem ? '<div class="ke-divisor">Sem peça no Ateliê agora</div>' : '')
+            + `<div class="pdv-lin ${it ? 'no-carrinho' : ''} ${est ? '' : 'sem'}" onclick="pfKitMais(${p.linha})" role="button" tabindex="0">
+            ${nf ? `<span class="pl-foto" data-n="${nf > 1 ? nf : ''}" onclick="event.stopPropagation(); tocarFotoProduto(${p.linha})" title="Ver as fotos">` : ''}<img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">${nf ? '</span>' : ''}
+            <div class="pl-info"><b>${esc(p.modelo)}</b><small><span class="pp-est ${est ? '' : 'zero'}">${est ? `${est} no Ateliê` : 'sem estoque'}</span> · custo ${window.fmt(val(p.custo_total))}${p.categoria ? ` · ${esc(p.categoria)}` : ''}</small></div>
+            ${it ? `<span class="pl-qtd" onclick="event.stopPropagation()"><button type="button" onclick="pfKitMenos(${p.linha})" aria-label="Tirar uma">−</button><b onclick="pfKitDigitar(${p.linha})" title="Digitar a quantidade">${it.qtd}</b><button type="button" onclick="pfKitMais(${p.linha})" aria-label="Mais uma">+</button></span>`
+                : `<span class="pl-add">${window.ic('mais')}</span>`}
+        </div>`;
+    }).join('');
+};
+// O que já está no kit: quantidades, custo e quantos kits dá para montar com o Ateliê (e o que falta)
 window.pfRenderKit = function() {
     const box = $('pf-kit-lista'); if (!box) return;
-    if (!PF.kit.length) { box.innerHTML = `<div class="vazio-box pequeno">${window.ic('camadas')}<b>Nenhuma peça no kit</b><span>Escolha acima as peças que vão juntas.</span></div>`; $('pf-kit-montaveis').innerText = ''; return window.pfCalcular(); }
-    box.innerHTML = PF.kit.map((it, i) => {
-        const p = produtoPorId(it.produto_id) || { modelo: '(peça removida)', custo_total: 0, est_atelie: 0 };
+    window.pfRenderEscolha();
+    const pecas = PF.kit.reduce((s, i) => s + i.qtd, 0), custo = PF.kit.reduce((s, i) => s + val((produtoPorId(i.produto_id) || {}).custo_total) * i.qtd, 0);
+    $('pf-kit-conta').innerHTML = pecas ? `${pecas} peça${pecas > 1 ? 's' : ''} · ${window.fmt(custo)}` : '';
+    pfKitFotosBotao();
+    if (!PF.kit.length) { box.innerHTML = `<div class="vazio-box pequeno">${window.ic('camadas')}<b>Nenhuma peça no kit</b><span>Toque nas peças da lista acima para pôr no kit.</span></div>`; $('pf-kit-montaveis').innerHTML = ''; return window.pfCalcular(); }
+    box.innerHTML = `<div class="ks-cab">No kit</div>` + PF.kit.map(it => {
+        const p = produtoPorId(it.produto_id) || { modelo: '(peça removida)', custo_total: 0, est_atelie: 0 }, c = val(p.custo_total);
         return `<div class="kit-linha"><img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
-            <div class="kl-info"><b>${esc(p.modelo)}</b><small>${window.fmt(val(p.custo_total))} cada · ${p.est_atelie || 0} no Ateliê</small></div>
-            <div class="pi-qtd"><button type="button" onclick="pfKitQtd(${i},-1)">−</button><span>${it.qtd}</span><button type="button" onclick="pfKitQtd(${i},1)">+</button></div>
-            <button type="button" class="pi-x" onclick="pfKitTirar(${i})" title="Tirar do kit">${window.ic('x')}</button></div>`;
+            <div class="kl-info"><b>${esc(p.modelo)}</b><small>${it.qtd > 1 ? `${it.qtd} × ${window.fmt(c)} = ${window.fmt(c * it.qtd)}` : window.fmt(c)} · ${estAtelie(p)} no Ateliê</small></div>
+            <div class="pi-qtd"><button type="button" onclick="pfKitMenos(${it.produto_id})" aria-label="Tirar uma">−</button><span onclick="pfKitDigitar(${it.produto_id})" title="Digitar a quantidade">${it.qtd}</span><button type="button" onclick="pfKitMais(${it.produto_id})" aria-label="Mais uma">+</button></div>
+            <button type="button" class="pi-x" onclick="pfKitTirar(${it.produto_id})" title="Tirar do kit">${window.ic('x')}</button></div>`;
     }).join('');
-    const da = Math.min(...PF.kit.map(it => { const p = produtoPorId(it.produto_id); return p ? Math.floor((p.est_atelie || 0) / it.qtd) : 0; }));
-    $('pf-kit-montaveis').innerHTML = da > 0 ? `Com as peças do Ateliê dá para montar <b>${da}</b> kit${da > 1 ? 's' : ''} agora.` : 'Ainda não há peças suficientes no Ateliê para montar um kit.';
+    const conta = PF.kit.map(it => { const p = produtoPorId(it.produto_id); return { p, it, da: p ? Math.floor(estAtelie(p) / it.qtd) : 0 }; });
+    const da = Math.min(...conta.map(c => c.da));
+    if (da > 0) {
+        const limita = conta.filter(c => c.da === da);
+        $('pf-kit-montaveis').className = 'ks-montar ok';
+        $('pf-kit-montaveis').innerHTML = `${window.ic('check')}<span>Com as peças do Ateliê dá para montar <b>${da}</b> kit${da > 1 ? 's' : ''} agora.`
+            + (conta.length > 1 && limita.length < conta.length ? `<small>Quem limita: ${limita.map(c => `${esc(c.p.modelo)} (${estAtelie(c.p)} no Ateliê, vão ${c.it.qtd} por kit)`).join(', ')}.</small>` : '') + '</span>';
+    } else {
+        const faltam = conta.filter(c => !c.da).map(c => c.p ? `${c.it.qtd - estAtelie(c.p)} ${esc(c.p.modelo)}` : 'uma peça que foi removida');
+        $('pf-kit-montaveis').className = 'ks-montar';
+        $('pf-kit-montaveis').innerHTML = `${window.ic('alerta')}<span>Para montar 1 kit falta: ${faltam.join(', ')}.<small>Dá para cadastrar assim mesmo. Na hora de montar (Estoque) dá para imprimir o que faltar.</small></span>`;
+    }
     window.pfCalcular();
 };
+// Kit sem foto própria: dá para usar as fotos das peças até tirar a foto do kit pronto
+function pfKitFotosBotao() {
+    const b = $('pf-kit-usar-fotos'); if (!b) return;
+    const temFoto = PF.editando ? fotosProprias(produtoPorId(PF.editando)).length > 0 : PF.fotos.length > 0;
+    b.hidden = temFoto || !!PF.fotoEnvio || !PF.kit.some(i => window.fotosDe(produtoPorId(i.produto_id)).length);
+}
+window.pfKitUsarFotos = async function() {
+    const fotos = [...new Set(PF.kit.map(i => window.fotosDe(produtoPorId(i.produto_id))[0]).filter(Boolean))].slice(0, MAX_FOTOS);
+    if (!fotos.length) return;
+    if (PF.editando) await salvarFotosProduto(PF.editando, fotos, 0, 'O kit agora mostra as fotos das peças');
+    else { PF.fotos = fotos; guardarRascunho(); pfFotoEstado(); window.toastMM('O kit agora mostra as fotos das peças'); }
+    pfKitFotosBotao();
+};
+// Preço do kit comparado com as peças vendidas separadas (venda e repasse)
+const somaSeparadas = campo => {
+    let soma = 0, sem = 0;
+    PF.kit.forEach(i => { const v = parseFloat((produtoPorId(i.produto_id) || {})[campo]) || 0; if (v > 0) soma += v * i.qtd; else sem++; });
+    return { soma: n2(soma), sem };
+};
+window.pfAplicarValor = function(campo, v) { $(campo).value = window.fmt(v); window.pfCalcular(); };
 
 // ---------- NOVO / EDITAR ----------
 window.novoProduto = function(tipo) { window.switchTab('precificar'); apagarRascunho(); window.pfLimpar(true); if (tipo) window.pfTipo(tipo); };
@@ -218,6 +293,7 @@ window.novoProduto = function(tipo) { window.switchTab('precificar'); apagarRasc
 window.pfLimpar = function(silencioso) {
     if (!silencioso) apagarRascunho();
     PF.editando = null; PF.kit = []; $('pf-form').reset();
+    PK.filtro = 'todas'; document.querySelectorAll('#pf-kit-filtros button').forEach(b => b.classList.toggle('active', b.dataset.f === 'todas'));
     PF.fotos = []; PF.fotoEnvio = null; PF.fotoSeq++;
     pfFotoEstado(); $('pf-filamento').dataset.mexeu = '';
     $('pf-editando').hidden = true; $('pf-excluir').hidden = true; $('pf-ativo-box').hidden = true;
@@ -287,15 +363,39 @@ window.pfSalvar = async function() {
             const dados = Object.assign(comum, { peso: calculo.peso, tempo: calculo.tempo, insumos: window.fmtPlanilha(calculo.extras), custo_total: window.fmtPlanilha(custo), calculo });
             r = PF.editando ? await window.apiAcao('atualizar_custo', Object.assign(dados, { linha: PF.editando })) : await window.apiAcao('salvar_custo', dados);
         }
-        const novo = !PF.editando;
+        const novo = !PF.editando, eraKit = PF.tipo === 'kit';
         await window.carregarBancoDeCustos();
         if (window.painelEstoque) window.carregarPainelEstoque();
         apagarRascunho(); window.pfLimpar(true);
-        window.mostrarAlerta(novo ? 'Produto cadastrado!' : 'Alterações salvas!', `${nome} · custo ${window.fmt(custo)}${repasse ? ` · repasse ${window.fmt(repasse)}` : ''}`, 'success');
-        void r;
+        const resumo = `${nome} · custo ${window.fmt(custo)}${repasse ? ` · repasse ${window.fmt(repasse)}` : ''}`;
+        // Kit com peças no Ateliê: já oferece montar (as peças saem do Ateliê e o kit pronto entra)
+        const kit = eraKit && r && r.id ? produtoPorId(r.id) : null;
+        const da = kit && kit.itens && kit.itens.length ? Math.min(...kit.itens.map(i => Math.floor(estAtelie(produtoPorId(i.produto_id)) / (i.qtd || 1)))) : 0;
+        if (da > 0) {
+            if (await window.confirmarMM({ icone: '🧩', titulo: novo ? 'Kit cadastrado!' : 'Kit salvo!', texto: `${resumo}\n\nCom as peças do Ateliê dá para montar ${da} kit${da > 1 ? 's' : ''} agora. Quer montar?`, ok: 'Montar agora', cancelar: 'Depois' })) window.pfMontarAgora(r.id);
+        } else window.mostrarAlerta(novo ? (eraKit ? 'Kit cadastrado!' : 'Produto cadastrado!') : 'Alterações salvas!', resumo, 'success');
     } catch (e) {
         window.mostrarAlerta('Não deu para salvar', e.message === 'DUPLICADO' ? 'Já existe um produto com esse nome.' : e.message, 'error');
     } finally { b.disabled = false; b.innerHTML = txt; }
+};
+window.pfMontarAgora = async function(id) {
+    await window.carregarPainelEstoque();
+    window.switchTab('estoque');
+    if (window.painelEstoque) window.abrirMontarKit(id);
+};
+// Criar outro parecido: mesmas peças (ou a mesma conta), categoria e preços; nome e fotos novos
+window.duplicarProduto = function(id) {
+    const p = produtoPorId(id); if (!p) return;
+    window.switchTab('precificar'); apagarRascunho();
+    window.pfCarregarProduto(p);
+    PF.editando = null; PF.fotos = [];
+    $('pf-nome').value = `${p.modelo} (cópia)`; $('pf-catalogo').value = '0';
+    $('pf-editando').hidden = true; $('pf-excluir').hidden = true; $('pf-ativo-box').hidden = true;
+    $('pf-titulo-form').innerText = PF.tipo === 'kit' ? 'Novo kit (cópia)' : 'Nova peça (cópia)';
+    $('pf-salvar').innerHTML = `${window.ic('check')} Cadastrar produto`;
+    pfFotoEstado(); window.pfRenderKit(); guardarRascunho();
+    window.scrollTo(0, 0); $('pf-nome').focus(); $('pf-nome').select();
+    window.toastMM('Cópia pronta: troque o nome e o que mudar');
 };
 window.pfExcluir = async function() {
     if (!PF.editando) return;
@@ -421,7 +521,8 @@ window.abrirEdicaoProduto = function(id) {
         <label class="chave" style="margin:0 0 12px;"><input type="checkbox" id="ep-ativo" ${p.ativo !== false ? 'checked' : ''}> Produto ativo (aparece para vender e para a mala)</label>
         <p class="texto-ajuda" id="ep-info" style="margin:0 0 14px;"></p>
         <button class="btn-magic btn-global" id="btn-ep" onclick="salvarEdicaoProduto()">${window.ic('check')} Salvar</button>
-        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>`);
+        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>
+        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); duplicarProduto(${id})">${window.ic('copiar')} Criar ${kit ? 'outro kit parecido' : 'outra peça parecida'}</button>`);
     window.epInfo();
 };
 window.epInfo = function() {
