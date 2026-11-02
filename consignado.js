@@ -558,7 +558,11 @@ window.abrirTrocarSenha = function() {
 };
 window.confirmarTrocaSenha = async function() {
     const nova = window.$('ts-nova').value; if (nova !== window.$('ts-nova2').value) return window.mostrarAlerta("Atenção", "As senhas novas não são iguais.", "warning");
-    try { await window.apiAcao("alterar_senha", { senha_atual: window.$('ts-atual').value, senha_nova: nova }); window.fecharModalMM(); window.mostrarAlerta("Pronto!", "Senha alterada.", "success"); }
+    try {
+        const r = await window.apiAcao("alterar_senha", { senha_atual: window.$('ts-atual').value, senha_nova: nova });
+        if (r.token) localStorage.setItem('mm_token', r.token); // os outros aparelhos saem; este continua conectado
+        window.fecharModalMM(); window.mostrarAlerta("Pronto!", "Senha alterada. Se você estava conectado em outro aparelho, lá vai pedir a senha nova.", "success");
+    }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
 };
 window.abrirLogs = async function() {

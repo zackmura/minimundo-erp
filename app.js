@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.3.0";
+const VERSAO_APP = "v5.4.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -151,6 +151,7 @@ window.TELAS = {
     anuncios: ['megafone', 'Anúncios', 'Patrocinadores do site'],
     analytics: ['barras', 'Analytics', 'Toques nos chaveiros NFC'],
     quiz: ['controle', 'Quiz', 'Perguntas geradas pela IA'],
+    usuarios: ['escudo', 'Usuários', 'Admins e vendedores: acessos e senhas'],
     config: ['ajustes', 'Ajustes', 'Parâmetros, taxas e chaves de acesso'],
     menu_mobile: ['grade', 'Menu', 'Todas as telas do sistema'],
     v_estoque: ['arquivo', 'Meu estoque', 'Peças que estão com você'],
@@ -226,6 +227,7 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(tabName==='vendas'){ window.carregarOpcoesVenda(); window.carregarVendas(); window.carregarBancoDeCustos(); }
     if(tabName==='precificar'){ window.pfMontarListas(); window.pfCalcular(); }
     if(tabName==='config') window.abrirAjustes();
+    if(tabName==='usuarios') window.carregarUsuarios();
     if(tabName==='dashboard_erp') window.carregarDashboardERP();
     if(tabName==='imas') window.carregarImas();
     if (window.atualizarBarraPDV) window.atualizarBarraPDV();

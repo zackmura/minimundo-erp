@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.3.0">
+    <link rel="stylesheet" href="style.css?v=5.4.0">
 </head>
 <body>
 
@@ -118,6 +118,7 @@
             <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz')"><svg class="ic"><use href="#i-controle"/></svg><span>Quiz</span></button>
 
             <div class="sb-grupo">Sistema</div>
+            <button id="btn-usuarios" class="tab-btn" onclick="switchTab('usuarios')"><svg class="ic"><use href="#i-escudo"/></svg><span>Usuários</span></button>
             <button id="btn-config" class="tab-btn" onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg><span>Ajustes</span></button>
         </nav>
 
@@ -179,6 +180,7 @@
             </div>
             <div class="menu-grupo">Sistema</div>
             <div class="grid-menu">
+                <button onclick="switchTab('usuarios')"><svg class="ic"><use href="#i-escudo"/></svg>Usuários</button>
                 <button onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button>
                 <button onclick="fazerLogout()"><svg class="ic"><use href="#i-sair"/></svg>Sair</button>
             </div>
@@ -594,6 +596,25 @@
         <!-- ========================================== -->
         <!-- ⚙️ AJUSTES                                 -->
         <!-- ========================================== -->
+        <!-- ========================================== -->
+        <!-- 👥 USUÁRIOS E ACESSOS                      -->
+        <!-- ========================================== -->
+        <div id="tab-usuarios" class="tab-content">
+            <div class="us-conta" id="us-minha-conta"></div>
+            <div class="pl-topo">
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="us-busca" placeholder="Buscar usuário…" autocomplete="off" enterkeyhint="search" oninput="renderizarUsuarios()"></div>
+                <button class="btn-magic btn-pequeno" onclick="abrirNovoUsuario()"><svg class="ic"><use href="#i-mais"/></svg>Novo usuário</button>
+            </div>
+            <div class="chips-rolagem" id="us-filtros">
+                <button class="chip-op active" data-f="todos" onclick="filtroUsuarios('todos')">Todos <em></em></button>
+                <button class="chip-op" data-f="Admin" onclick="filtroUsuarios('Admin')">Admins <em></em></button>
+                <button class="chip-op" data-f="Vendedor" onclick="filtroUsuarios('Vendedor')">Vendedores <em></em></button>
+                <button class="chip-op" data-f="inativos" onclick="filtroUsuarios('inativos')">Desativados <em></em></button>
+            </div>
+            <div id="lista-usuarios"></div>
+            <p class="texto-ajuda us-rodape">Admin vê e muda tudo. Vendedor vê só as peças dele e o acerto. Sempre fica pelo menos um Admin ativo.</p>
+        </div>
+
         <div id="tab-config" class="tab-content">
             <div class="grade-2">
                 <div class="card">
@@ -647,8 +668,9 @@
             <div class="grade-2">
                 <div class="card">
                     <div class="card-titulo"><svg class="ic"><use href="#i-escudo"/></svg>Segurança</div>
-                    <p class="card-desc">Troque sua senha e veja quem fez o quê no sistema.</p>
-                    <button class="btn-magic btn-secundario" style="margin-top:0;" onclick="abrirTrocarSenha()">Trocar minha senha</button>
+                    <p class="card-desc">Usuários, sua senha e quem fez o quê no sistema.</p>
+                    <button class="btn-magic btn-secundario" style="margin-top:0;" onclick="switchTab('usuarios')">Usuários e acessos</button>
+                    <button class="btn-magic btn-secundario" onclick="abrirTrocarSenha()">Trocar minha senha</button>
                     <button class="btn-magic btn-secundario" onclick="abrirLogs()">Registro de atividades</button>
                 </div>
                 <div class="card">
@@ -919,14 +941,15 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.3.0"></script>
-<script src="app.js?v=5.3.0"></script>
-<script src="consignado.js?v=5.3.0"></script>
-<script src="vendas.js?v=5.3.0"></script>
-<script src="produtos.js?v=5.3.0"></script>
-<script src="dashboard.js?v=5.3.0"></script>
-<script src="ajustes.js?v=5.3.0"></script>
-<script src="rascunho.js?v=5.3.0"></script>
+<script src="galeria.js?v=5.4.0"></script>
+<script src="app.js?v=5.4.0"></script>
+<script src="consignado.js?v=5.4.0"></script>
+<script src="vendas.js?v=5.4.0"></script>
+<script src="produtos.js?v=5.4.0"></script>
+<script src="dashboard.js?v=5.4.0"></script>
+<script src="ajustes.js?v=5.4.0"></script>
+<script src="rascunho.js?v=5.4.0"></script>
+<script src="usuarios.js?v=5.4.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
