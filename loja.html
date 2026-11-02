@@ -193,27 +193,98 @@
         .aviso p { margin:0 0 20px; }
 
         /* ---------- Acompanhar pedido ---------- */
-        .acomp { max-width:620px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+        .acomp { max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
         .bloco { background:var(--papel); border:1px solid var(--linha); border-radius:24px; padding:22px; box-shadow:var(--sombra); }
         .bloco h2 { margin:0 0 14px; font-family:var(--serif); font-weight:500; font-size:1.35rem; color:var(--tinta); }
+        /* Cartão grande com a etapa de agora (nos temas escuros, com as cores do topo) */
+        .st-card { position:relative; overflow:hidden; padding:24px 22px 20px; }
+        .hero-escuro .st-card { background:radial-gradient(700px 360px at 50% 0%, var(--hero-fundo), var(--hero-fundo2)); border-color:transparent; }
+        .st-card > *:not(.enfeite) { position:relative; z-index:1; }
+        .st-card > .enfeite i { font-size:calc(11px * var(--s)); }
+        .st-topo { display:flex; gap:16px; align-items:center; }
+        .st-emoji { width:64px; height:64px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.9rem; background:var(--ouro3); box-shadow:0 0 0 6px var(--fundo); }
+        .hero-escuro .st-emoji { background:rgba(255,255,255,.12); box-shadow:0 0 0 6px rgba(255,255,255,.06); }
+        .st-topo small { display:block; font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ouro); }
+        .st-topo h2 { margin:3px 0 3px; font-size:1.75rem; line-height:1.1; }
+        .st-topo p { margin:0; font-size:.92rem; color:var(--suave); }
+        .hero-escuro .st-topo small { color:var(--hero-ouro); } .hero-escuro .st-topo h2 { color:var(--hero-tinta); } .hero-escuro .st-topo p { color:var(--hero-suave); }
+        .st-barra { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:6px; margin:20px 0 12px; }
+        .st-barra i { height:6px; border-radius:6px; background:var(--linha); }
+        .st-barra i.on { background:var(--ok); }
+        .st-barra i.agora { background:linear-gradient(90deg, var(--ok), var(--ouro2)); animation:pulsar 1.8s ease-in-out infinite; }
+        .hero-escuro .st-barra i { background:rgba(255,255,255,.18); } .hero-escuro .st-barra i.on { background:var(--hero-ouro); } .hero-escuro .st-barra i.agora { background:linear-gradient(90deg, var(--hero-ouro), rgba(255,255,255,.5)); }
+        .st-card.cancel .st-barra i { background:#e9c5c2; }
+        @keyframes pulsar { 50% { opacity:.5; } }
+        .st-rodape { display:flex; flex-wrap:wrap; gap:8px 14px; justify-content:space-between; align-items:center; font-size:.8rem; color:var(--suave); }
+        .hero-escuro .st-rodape { color:var(--hero-suave); }
+        .st-prev { display:inline-flex; gap:6px; align-items:center; font-weight:600; color:var(--tinta); background:var(--ouro3); padding:7px 13px; border-radius:999px; }
+        .hero-escuro .st-prev { background:rgba(255,255,255,.12); color:var(--hero-tinta); }
+        .st-card.atualizou { animation:destacar 1.4s ease; }
+        @keyframes destacar { 30% { transform:scale(1.015); box-shadow:0 0 0 6px var(--ouro2); } }
+        .recado { display:flex; gap:12px; align-items:flex-start; background:var(--papel); border:1px solid var(--ouro2); border-radius:20px; padding:16px 18px; box-shadow:var(--sombra); }
+        .recado > span { width:40px; height:40px; flex-shrink:0; border-radius:50%; background:var(--ouro3); display:flex; align-items:center; justify-content:center; font-size:1.15rem; }
+        .recado b { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ouro); }
+        .recado p { margin:3px 0 4px; white-space:pre-line; color:var(--tinta); font-size:.96rem; }
+        .recado small { color:var(--suave); font-size:.76rem; }
+        /* Avisos no celular */
+        .avisos { display:flex; gap:14px; align-items:center; padding:16px 18px; }
+        .avisos > span { font-size:1.6rem; line-height:1; }
+        .avisos > div { flex:1; min-width:0; }
+        .avisos b { display:block; color:var(--tinta); font-size:.95rem; }
+        .avisos small { display:block; color:var(--suave); font-size:.8rem; line-height:1.4; }
+        .avisos .pilula { padding:11px 18px; flex-shrink:0; }
+        .avisos.ligado b { color:var(--ok); }
+        .avisos a { font-size:.8rem; color:var(--suave); cursor:pointer; text-decoration:underline; flex-shrink:0; }
+        /* Linha do tempo com as datas */
         .etapas { list-style:none; margin:0; padding:0; display:grid; gap:0; }
-        .etapas li { position:relative; display:flex; gap:14px; align-items:flex-start; padding:0 0 18px; color:var(--suave); }
+        .etapas li { position:relative; display:flex; gap:14px; align-items:flex-start; padding:0 0 20px; color:var(--suave); }
         .etapas li:last-child { padding-bottom:0; }
-        .etapas li::before { content:''; position:absolute; left:13px; top:28px; bottom:0; width:2px; background:var(--linha); }
+        .etapas li::before { content:''; position:absolute; left:15px; top:32px; bottom:0; width:2px; background:var(--linha); }
         .etapas li:last-child::before { display:none; }
-        .etapas .bola { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--fundo); border:2px solid var(--linha); font-size:.8rem; font-weight:700; position:relative; z-index:1; }
-        .etapas li.feita { color:var(--texto); } .etapas li.feita .bola { background:var(--ok); border-color:var(--ok); color:#fff; } .etapas li.feita::before { background:var(--ok); }
+        .etapas .bola { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--fundo); border:2px solid var(--linha); font-size:.95rem; position:relative; z-index:1; }
+        .etapas li.feita { color:var(--texto); } .etapas li.feita .bola { background:var(--ok); border-color:var(--ok); color:#fff; font-size:.8rem; font-weight:700; } .etapas li.feita::before { background:var(--ok); }
         .etapas li.agora { color:var(--tinta); } .etapas li.agora .bola { background:var(--botao); border-color:var(--botao); color:var(--botaoTxt); box-shadow:0 0 0 5px var(--ouro3); }
-        .etapas b { display:block; font-size:.95rem; } .etapas small { font-size:.8rem; }
-        .cancelado { text-align:center; color:#b42318; font-weight:600; }
+        .etapas li > span:last-child { flex:1; min-width:0; padding-top:4px; }
+        .etapas b { display:block; font-size:.98rem; } .etapas small { display:block; font-size:.82rem; }
+        .etapas small.quando { font-weight:600; color:var(--ouro); margin-top:1px; }
+        .ev { margin-top:8px; padding:10px 13px; border-radius:14px; background:var(--fundo); color:var(--texto); font-size:.87rem; white-space:pre-line; overflow-wrap:anywhere; }
+        .ev em { display:block; font-style:normal; font-size:.72rem; color:var(--suave); margin-top:3px; }
+        .ev.pago { background:var(--okBg); color:var(--ok); font-weight:600; }
+        .cancelado { margin:0; color:#b42318; font-weight:600; }
+        /* Itens com foto, texto e peças (iguais ao site) */
+        .ped-item { display:flex; gap:14px; padding:14px 0; border-bottom:1px dashed var(--linha); }
+        .bloco h2 + .ped-item { padding-top:2px; }
+        .ped-foto { position:relative; width:78px; height:78px; flex-shrink:0; border-radius:18px; overflow:hidden; border:none; padding:0; background:var(--ouro3); cursor:zoom-in; }
+        .ped-foto:disabled { cursor:default; }
+        .ped-foto img { width:100%; height:100%; object-fit:cover; }
+        .ped-foto span { position:absolute; right:5px; bottom:5px; background:rgba(0,0,0,.55); color:#fff; font-size:.64rem; font-weight:600; padding:1px 6px; border-radius:999px; }
+        .ped-info { flex:1; min-width:0; }
+        .ped-nome { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+        .ped-nome b { font-family:var(--serif); font-weight:500; font-size:1.08rem; color:var(--tinta); line-height:1.25; overflow-wrap:anywhere; }
+        .ped-nome span { white-space:nowrap; font-weight:600; font-variant-numeric:tabular-nums; color:var(--tinta); font-size:.92rem; }
+        .ped-qtd { font-size:.78rem; color:var(--suave); margin-top:2px; }
+        .ped-desc { margin:6px 0 0; font-size:.85rem; color:var(--suave); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-line; cursor:pointer; }
+        .ped-desc.aberta { display:block; }
+        .ped-pecas { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+        .ped-pecas span { display:inline-flex; align-items:center; gap:6px; max-width:100%; font-size:.76rem; background:var(--fundo); border:1px solid var(--linha); border-radius:999px; padding:3px 10px 3px 3px; color:var(--tinta2); }
+        .ped-pecas img { width:22px; height:22px; border-radius:50%; object-fit:cover; flex-shrink:0; }
         .linha-item { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px dashed var(--linha); font-size:.92rem; }
-        .linha-item:last-child { border-bottom:none; }
         .linha-item span:last-child { white-space:nowrap; font-variant-numeric:tabular-nums; }
-        .linha-total { display:flex; justify-content:space-between; margin-top:12px; font-weight:600; }
-        .linha-total strong { font-family:var(--serif); font-weight:500; font-size:1.5rem; color:var(--tinta); }
-        .info-p { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; font-size:.88rem; }
+        .linha-total { display:flex; justify-content:space-between; align-items:baseline; margin-top:14px; font-weight:600; }
+        .linha-total strong { font-family:var(--serif); font-weight:500; font-size:1.6rem; color:var(--tinta); }
+        .info-p { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; font-size:.9rem; }
         .info-p b { display:block; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--suave); font-weight:600; margin-bottom:2px; }
         .tag-pago { display:inline-block; font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--okBg); color:var(--ok); margin-left:6px; }
+        .tag-pagar { display:inline-block; font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--ouro3); color:var(--ouro); margin-left:6px; }
+        .pix { margin-top:16px; padding:16px; border-radius:18px; background:var(--fundo); border:1px dashed var(--ouro2); }
+        .pix b { display:block; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ouro); }
+        .pix code { display:block; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.98rem; color:var(--tinta); overflow-wrap:anywhere; margin:6px 0 12px; }
+        .pix .pilula { width:100%; }
+        .pix small { display:block; text-align:center; color:var(--suave); font-size:.8rem; margin-top:8px; }
+        .acomp-bt { display:flex; flex-direction:column; gap:10px; }
+        .acomp-bt .pilula { width:100%; }
+        .st-mini { flex-shrink:0; font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--ouro3); color:var(--ouro); white-space:nowrap; }
+        .st-mini.st-entregue, .st-mini.st-pronto { background:var(--okBg); color:var(--ok); } .st-mini.st-cancelado { background:#fbe9e7; color:#b42318; }
 
         footer { position:relative; z-index:1; overflow:hidden; text-align:center; padding:40px 20px calc(110px + env(safe-area-inset-bottom)); border-top:1px solid var(--linha); background:var(--ouro3); }
         .hero-escuro footer { background:radial-gradient(900px 400px at 50% 100%, var(--hero-fundo), var(--hero-fundo2)); color:var(--hero-tinta); border-top:none; border-radius:40px 40px 0 0; margin-top:20px; }
@@ -284,7 +355,13 @@
             .corpo { padding:20px 18px 18px; }
             .card h3 { font-size:1.4rem; }
             .acoes { width:100%; } .btn-add, .passo { flex:1; } .passo { justify-content:space-between; }
-            .info-p { grid-template-columns:minmax(0, 1fr); }
+            .info-p { grid-template-columns:minmax(0, 1fr); gap:10px; }
+            .bloco { padding:18px; border-radius:22px; }
+            .st-card { padding:20px 18px 18px; }
+            .st-emoji { width:54px; height:54px; font-size:1.6rem; }
+            .st-topo { gap:14px; } .st-topo h2 { font-size:1.5rem; }
+            .avisos { flex-wrap:wrap; } .avisos .pilula { width:100%; }
+            .ped-foto { width:64px; height:64px; border-radius:15px; }
             .hero-escuro footer { border-radius:30px 30px 0 0; }
         }
         @media (prefers-reduced-motion:reduce) {
@@ -328,8 +405,8 @@
     <div id="sacola-box"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="temas.js?v=5.8.0"></script>
-<script src="galeria.js?v=5.8.0"></script>
+<script src="temas.js?v=5.9.0"></script>
+<script src="galeria.js?v=5.9.0"></script>
 <script>
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
@@ -610,36 +687,159 @@
             <p>Obrigado, ${esc(nome.split(' ')[0])}! A gente vai confirmar tudo com você pelo WhatsApp.</p>
             <p><b>Total: ${real(r.total)}</b>${r.sem_preco ? ' + itens a combinar' : ''}</p>
             <a class="pilula" href="${esc(link)}">Acompanhar meu pedido</a>
+            ${PUSH_OK && r.push ? `<button class="pilula clara" type="button" onclick="ativarAvisos('${esc(r.codigo)}', '${esc(r.push)}', this)">🔔 Me avise quando o pedido mudar</button>` : ''}
             ${z ? `<a class="pilula zap" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Avisar no WhatsApp (opcional)</a>` : ''}
             <button class="pilula clara" type="button" onclick="fecharSacola()">Continuar olhando</button></div>`);
     }
     function fecharSacola() { $('sacola-box').innerHTML = ''; ETAPA = 'sacola'; }
+    // Pedidos feitos neste aparelho, com a etapa de agora de cada um
     function meusPedidos() {
         const meus = ler('mm_pedidos', []);
         gaveta(`<h2>Meus pedidos <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
-            ${meus.map(m => `<a class="s-item" href="${esc(linkPedido(m.codigo))}" style="text-decoration:none"><div class="s-info"><b>Pedido #${m.numero}</b><small>${esc(m.pagina || '')} · ${esc(String(m.data || '').split('-').reverse().join('/'))}</small></div><span>→</span></a>`).join('')}
+            ${meus.map((m, n) => `<a class="s-item" href="${esc(linkPedido(m.codigo))}" style="text-decoration:none"><img id="mp-foto-${n}" src="logo.png" alt="" onerror="this.src='logo.png'"><div class="s-info"><b>Pedido #${m.numero}</b><small>${esc(m.pagina || '')}${m.pagina ? ' · ' : ''}${esc(String(m.data || '').split('-').reverse().join('/'))}</small></div><span class="st-mini" id="mp-st-${n}">…</span></a>`).join('')}
             <p class="s-nota">Ficam guardados só neste aparelho.</p>`);
+        meus.slice(0, 10).forEach(async (m, n) => {
+            let p = null; try { p = (await post({ acao: 'acompanhar_pedido', c: m.codigo })).pedido; } catch (e) { /* pedido apagado ou sem internet */ }
+            const st = $('mp-st-' + n), foto = $('mp-foto-' + n); if (!st) return;
+            const e = p && ETAPAS.find(x => x[0] === p.status);
+            st.textContent = !p ? '' : p.status === 'cancelado' ? 'Cancelado' : e ? e[1] : ''; st.className = 'st-mini st-' + (p ? p.status : '');
+            const f = p && ((p.itens || []).find(i => i.fotos && i.fotos.length) || {}).fotos; if (f && foto) foto.src = f[0];
+        });
+        meus.slice(10).forEach((m, n) => { const st = $('mp-st-' + (n + 10)); if (st) st.remove(); });
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('sacola') && !galeriaAberta()) fecharSacola(); });
 
     // ---------- Acompanhar pedido (loja?pedido=CODIGO) ----------
-    const ETAPAS = [['novo', 'Pedido recebido', 'A gente já viu o seu pedido'], ['confirmado', 'Confirmado', 'Combinamos tudo com você'], ['producao', 'Em produção', 'As peças estão sendo feitas'], ['pronto', 'Pronto', 'Já pode retirar ou vai sair para entrega'], ['entregue', 'Entregue', 'Aproveite o seu presente!']];
+    // Mostra a etapa de agora, a linha do tempo com as datas, os recados da Mini Mundo e os itens iguais ao site.
+    // Confere sozinho de tempos em tempos; quem ativar os avisos recebe notificação no celular a cada mudança.
+    const ETAPAS = [['novo', 'Pedido recebido', 'Recebemos o seu pedido e vamos confirmar tudo com você.', '📝'], ['confirmado', 'Confirmado', 'Tudo certo! Seu pedido entrou na fila de produção.', '✅'],
+        ['producao', 'Em produção', 'As peças estão sendo feitas, camada por camada.', '🖨️'], ['pronto', 'Pronto', '', '🎁'], ['entregue', 'Entregue', 'Aproveite! Obrigado por comprar com a gente.', '💛']];
+    const fraseEtapa = (e, p) => e[0] === 'pronto' ? (p.entrega === 'entrega' ? 'Prontinho! Logo sai para a entrega.' : 'Prontinho! Já pode retirar.') : e[2];
+    const partesData = s => String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?/);
+    const quandoBR = s => { const m = partesData(s); if (!m) return ''; const h = new Date(); h.setHours(0, 0, 0, 0); const dias = Math.round((h - new Date(+m[1], m[2] - 1, +m[3])) / 864e5);
+        return `${dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : `${m[3]}/${m[2]}`}${m[4] ? ` às ${m[4]}:${m[5]}` : ''}`; };
+    const diaSemana = s => { const m = partesData(s); return m ? new Date(+m[1], m[2] - 1, +m[3]).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' }) : ''; };
+    const marcaPedido = p => JSON.stringify([p.status, p.pago, (p.historico || []).length, p.atualizado_em, p.data_entrega, p.total]);
+    let PEDIDO = null, PUSH = '', VISTO = '', ULTIMA_OLHADA = 0;
     function mostrarPedido(r) {
-        DADOS = { loja: r.loja }; const p = r.pedido, tema = p.pagina ? p.pagina.tema : 'padrao';
+        DADOS = { loja: r.loja }; PUSH = r.push || ''; PEDIDO = r.pedido; VISTO = marcaPedido(PEDIDO);
+        const p = PEDIDO, tema = p.pagina ? p.pagina.tema : 'padrao';
         if (p.pagina && p.pagina.slug) SLUG = p.pagina.slug;
-        montarTopo({ titulo: `Pedido #${p.numero}`, texto: `Olá, ${p.cliente || 'tudo bem'}! Aqui você acompanha o andamento do seu pedido.` }, tema);
+        montarTopo({ titulo: `Pedido #${p.numero}`, texto: `Olá, ${p.cliente || 'tudo bem'}! Aqui você acompanha o seu pedido, passo a passo.` }, tema);
+        // Guarda em "Meus pedidos" (também quando abriu pelo link do WhatsApp em outro aparelho)
+        const meus = ler('mm_pedidos', []);
+        if (!meus.some(m => m.codigo === CODIGO)) { meus.unshift({ codigo: CODIGO, numero: p.numero, pagina: p.pagina ? p.pagina.titulo : '', data: String(p.criado_em).slice(0, 10) }); guardar('mm_pedidos', meus.slice(0, 20)); }
         montarContato();
-        const atual = ETAPAS.findIndex(e => e[0] === p.status), data = s => String(s || '').slice(0, 10).split('-').reverse().join('/');
-        const z = zap((r.loja || {}).whatsapp, `Olá! Queria falar sobre o meu pedido *#${p.numero}*.\n${linkPedido(CODIGO)}`);
+        $('zap-flutuante').style.display = 'none'; // aqui já tem o botão "Falar sobre o pedido" (o redondo cobria os preços)
+        // No iPhone, os avisos só funcionam com a página na tela de início
+        if (!document.querySelector('link[rel="manifest"]')) document.head.insertAdjacentHTML('beforeend', '<link rel="manifest" href="loja.webmanifest">');
+        desenharPedido(false); vigiarPedido();
+    }
+    function desenharPedido(mudou) {
+        const p = PEDIDO, hist = p.historico || [], cancel = p.status === 'cancelado', L = DADOS.loja || {};
+        const atual = ETAPAS.findIndex(e => e[0] === p.status), entregue = p.status === 'entregue';
+        // Datas de cada etapa e os recados/pagamento que vieram depois dela
+        const datas = {}, eventos = {}; let ultima = 0;
+        hist.forEach(h => {
+            const i = ETAPAS.findIndex(e => e[0] === h.status);
+            if (i >= 0) { datas[i] = h.quando; ultima = i; }
+            if (h.status === 'pago') (eventos[ultima] = eventos[ultima] || []).push({ pago: true, quando: h.quando });
+            else if (h.recado) (eventos[ultima] = eventos[ultima] || []).push({ texto: h.recado, quando: h.quando });
+        });
+        const recados = hist.filter(h => h.recado), ultimo = hist[hist.length - 1];
+        const e = cancel ? ['cancelado', 'Pedido cancelado', 'Se tiver alguma dúvida, é só falar com a gente.', '🚫'] : ETAPAS[Math.max(0, atual)];
+        const semPreco = p.itens.some(i => !i.preco), subtotal = p.itens.reduce((s, i) => s + (i.preco || 0) * i.qtd, 0);
+        const z = zap(L.whatsapp, `Olá! Queria falar sobre o meu pedido *#${p.numero}*.\n${linkPedido(CODIGO)}`);
+        const ev = x => x.pago ? `<div class="ev pago">✓ Pagamento confirmado<em>${quandoBR(x.quando)}</em></div>` : `<div class="ev">💬 ${esc(x.texto)}<em>${quandoBR(x.quando)}</em></div>`;
         $('conteudo').innerHTML = `<div class="acomp">
-            <div class="bloco"><h2>Andamento</h2>${p.status === 'cancelado' ? '<p class="cancelado">Este pedido foi cancelado. Se tiver dúvida, fale com a gente.</p>'
-                : `<ol class="etapas">${ETAPAS.map((e, i) => `<li class="${i < atual ? 'feita' : i === atual ? (p.status === 'entregue' ? 'feita' : 'agora') : ''}"><span class="bola">${i < atual || p.status === 'entregue' && i === atual ? '✓' : i + 1}</span><span><b>${e[1]}</b><small>${e[2]}</small></span></li>`).join('')}</ol>`}</div>
-            <div class="bloco"><h2>Itens</h2>${p.itens.map(i => `<div class="linha-item"><span>${i.qtd}× ${esc(i.nome)}</span><span>${i.preco ? real(i.preco * i.qtd) : 'a combinar'}</span></div>`).join('')}
+            <div class="bloco st-card ${cancel ? 'cancel' : ''} ${mudou ? 'atualizou' : ''}">${enfeiteMM(TEMA, 10)}
+                <div class="st-topo"><span class="st-emoji">${e[3]}</span><div><small>Pedido #${p.numero}</small><h2>${e[1]}</h2><p>${cancel ? e[2] : fraseEtapa(e, p)}</p></div></div>
+                <div class="st-barra" aria-hidden="true">${ETAPAS.map((x, i) => `<i class="${cancel ? '' : i < atual || entregue ? 'on' : i === atual ? 'agora' : ''}"></i>`).join('')}</div>
+                <div class="st-rodape"><span>Atualizado ${quandoBR(p.atualizado_em || p.criado_em)}</span>${p.data_entrega && !entregue && !cancel ? `<span class="st-prev">📅 Previsão: ${esc(diaSemana(p.data_entrega))}</span>` : ''}</div></div>
+            ${ultimo && ultimo.recado ? `<div class="recado"><span>💬</span><div><b>Recado da Mini Mundo</b><p>${esc(ultimo.recado)}</p><small>${quandoBR(ultimo.quando)}</small></div></div>` : ''}
+            <div id="avisos-box"></div>
+            <div class="bloco"><h2>Andamento</h2>${cancel ? `<p class="cancelado">Este pedido foi cancelado ${quandoBR(p.atualizado_em)}.</p>${recados.map(h => ev({ texto: h.recado, quando: h.quando })).join('')}`
+                : `<ol class="etapas">${ETAPAS.map((x, i) => { const feita = i < atual || (entregue && i === atual), agora = i === atual && !entregue;
+                    return `<li class="${feita ? 'feita' : agora ? 'agora' : ''}"><span class="bola">${feita ? '✓' : x[3]}</span><span><b>${x[1]}</b>${datas[i] && (feita || agora) ? `<small class="quando">${quandoBR(datas[i])}</small>` : ''}
+                        ${agora || (!feita && !agora) ? `<small>${fraseEtapa(x, p)}</small>` : ''}${(eventos[i] || []).map(ev).join('')}</span></li>`; }).join('')}</ol>`}</div>
+            <div class="bloco"><h2>Seu pedido</h2>${p.itens.map((i, n) => `<div class="ped-item">
+                    <button class="ped-foto" type="button" ${i.fotos && i.fotos.length ? `onclick="fotosDoPedido(${n})" aria-label="Ver fotos de ${esc(i.nome)}"` : 'disabled'}><img src="${esc((i.fotos || [])[0] || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'">${i.fotos && i.fotos.length > 1 ? `<span>${i.fotos.length}</span>` : ''}</button>
+                    <div class="ped-info"><div class="ped-nome"><b>${esc(i.nome)}</b><span>${i.preco ? real(i.preco * i.qtd) : 'a combinar'}</span></div>
+                        <div class="ped-qtd">${i.qtd} × ${i.preco ? real(i.preco) : 'preço a combinar'}${i.tipo === 'kit' ? ' · Kit' : ''}</div>
+                        ${i.descricao ? `<p class="ped-desc" onclick="this.classList.toggle('aberta')">${esc(i.descricao)}</p>` : ''}
+                        ${i.pecas && i.pecas.length ? `<div class="ped-pecas">${i.pecas.map(x => `<span>${x.foto ? `<img src="${esc(x.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${x.qtd}× ${esc(x.nome)}</span>`).join('')}</div>` : ''}</div></div>`).join('')}
+                ${p.desconto || p.taxa_entrega ? `<div class="linha-item"><span>Produtos</span><span>${real(subtotal)}</span></div>` : ''}
                 ${p.desconto ? `<div class="linha-item"><span>Desconto</span><span>− ${real(p.desconto)}</span></div>` : ''}${p.taxa_entrega ? `<div class="linha-item"><span>Entrega</span><span>${real(p.taxa_entrega)}</span></div>` : ''}
-                <div class="linha-total"><span>Total${p.pago ? '<span class="tag-pago">Pago</span>' : ''}</span><strong>${real(p.total)}</strong></div></div>
-            <div class="bloco info-p"><div><b>Feito em</b>${data(p.criado_em)}</div><div><b>Recebimento</b>${p.entrega === 'entrega' ? 'Entrega' : 'Retirada'}${p.data_entrega ? ` · ${data(p.data_entrega)}` : ''}</div><div><b>Pagamento</b>${esc(p.pagamento || 'A combinar')}</div>${p.pagina ? `<div><b>Coleção</b>${esc(p.pagina.titulo)}</div>` : ''}</div>
-            ${z ? `<a class="pilula zap" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Falar sobre o pedido</a>` : ''}
-            ${p.pagina && p.pagina.ativa ? `<a class="pilula clara" href="${esc(linkPagina(p.pagina.slug))}">Voltar para a coleção</a>` : ''}</div>`;
+                <div class="linha-total"><span>Total${semPreco ? ' <small>(+ itens a combinar)</small>' : ''}</span><strong>${real(p.total)}</strong></div></div>
+            <div class="bloco"><h2>Entrega e pagamento</h2><div class="info-p">
+                <div><b>Recebimento</b>${p.entrega === 'entrega' ? 'Entrega no endereço' : 'Retirada'}</div>
+                <div><b>Previsão</b>${p.data_entrega ? esc(diaSemana(p.data_entrega)) : 'A gente combina com você'}</div>
+                <div><b>Pagamento</b>${esc(p.pagamento || 'A combinar')}${p.pago ? '<span class="tag-pago">Pago</span>' : cancel ? '' : '<span class="tag-pagar">A pagar</span>'}</div>
+                <div><b>Feito em</b>${quandoBR(p.criado_em)}${p.pagina ? ` · ${esc(p.pagina.titulo)}` : ''}</div></div>
+                ${p.pix ? `<div class="pix"><b>Pague com Pix</b><code>${esc(p.pix)}</code><button class="pilula" type="button" onclick="copiarPix()">Copiar chave Pix</button><small>Valor: ${real(p.total)}${semPreco ? ' + itens a combinar' : ''}. Depois, mande o comprovante no WhatsApp.</small></div>` : ''}</div>
+            <div class="acomp-bt">
+                ${z ? `<a class="pilula zap" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Falar sobre o pedido</a>` : ''}
+                <button class="pilula clara" type="button" onclick="compartilharLink('Pedido #${p.numero} · Mini Mundo', 'Acompanhe o pedido #${p.numero} da Mini Mundo', linkPedido(CODIGO))">${IC.share} Guardar ou enviar este link</button>
+                ${p.pagina && p.pagina.ativa ? `<a class="pilula clara" href="${esc(linkPagina(p.pagina.slug))}">Ver a coleção ${esc(p.pagina.titulo)}</a>` : ''}</div></div>`;
+        montarAvisos();
+    }
+    function fotosDoPedido(n) { const i = PEDIDO.itens[n]; if (i && i.fotos.length) abrirGaleria({ fotos: i.fotos, indice: 0, titulo: i.nome }); }
+    async function copiarPix() { try { await navigator.clipboard.writeText(PEDIDO.pix); toast('Chave Pix copiada'); } catch (e) { prompt('Copie a chave Pix:', PEDIDO.pix); } }
+    // Confere o pedido a cada 45 s (e ao voltar para a página); se mudou, redesenha e avisa
+    function vigiarPedido() {
+        const olhar = async () => {
+            if (document.visibilityState !== 'visible') return;
+            ULTIMA_OLHADA = Date.now();
+            try {
+                const r = await post({ acao: 'acompanhar_pedido', c: CODIGO });
+                if (marcaPedido(r.pedido) === VISTO) return;
+                PEDIDO = r.pedido; VISTO = marcaPedido(PEDIDO); desenharPedido(true); toast('Seu pedido foi atualizado ✨');
+            } catch (e) { /* sem internet: tenta na próxima */ }
+        };
+        setInterval(olhar, 45000);
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - ULTIMA_OLHADA > 15000) olhar(); });
+        if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => { if (ev.data === 'atualizar') olhar(); });
+    }
+
+    // ---------- Avisos no celular (notificação quando o pedido mudar) ----------
+    const PUSH_OK = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && window.isSecureContext;
+    const IPHONE = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const NA_TELA = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const chaveBytes = b64 => { const s = atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, c => c.charCodeAt(0)); };
+    const registroAvisos = () => navigator.serviceWorker.register('loja-sw.js?api=' + encodeURIComponent(API), { scope: './loja' });
+    const esperarAtivo = reg => reg.active ? Promise.resolve() : new Promise(ok => { const w = reg.installing || reg.waiting; if (!w) return ok(); w.addEventListener('statechange', () => { if (w.state === 'activated') ok(); }); setTimeout(ok, 8000); });
+    async function assinaturaAtual() { try { const reg = await navigator.serviceWorker.getRegistration('./loja'); return reg ? await reg.pushManager.getSubscription() : null; } catch (e) { return null; } }
+    async function ativarAvisos(codigo, chave, botao) {
+        if (botao) { botao.disabled = true; botao.textContent = 'Ativando…'; }
+        let ok = false;
+        try {
+            if (await Notification.requestPermission() !== 'granted') throw new Error('bloqueado');
+            const reg = await registroAvisos(); await esperarAtivo(reg);
+            const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveBytes(chave) });
+            await post({ acao: 'assinar_avisos', c: codigo, endpoint: sub.endpoint });
+            guardar('mm_avisos_' + codigo, 1); ok = true; toast('Pronto! Você vai receber os avisos aqui.');
+        } catch (e) { toast(e.message === 'bloqueado' ? 'Os avisos estão bloqueados neste navegador.' : e.negocio ? e.message : 'Não deu para ativar os avisos neste aparelho.'); }
+        if (botao) { botao.textContent = ok ? '🔔 Avisos ligados' : '🔔 Me avise quando o pedido mudar'; botao.disabled = ok; }
+        if (PEDIDO) montarAvisos();
+        return ok;
+    }
+    async function desligarAvisos() {
+        const sub = await assinaturaAtual();
+        try { if (sub) await post({ acao: 'cancelar_avisos', c: CODIGO, endpoint: sub.endpoint }); } catch (e) { /* tenta de novo depois */ }
+        try { localStorage.removeItem('mm_avisos_' + CODIGO); } catch (e) { /* aba anônima */ }
+        toast('Avisos desligados para este pedido'); montarAvisos();
+    }
+    async function montarAvisos() {
+        const box = $('avisos-box'); if (!box) return;
+        if (!PUSH || ['entregue', 'cancelado'].includes(PEDIDO.status)) { box.innerHTML = ''; return; }
+        if (!PUSH_OK) {
+            box.innerHTML = IPHONE && !NA_TELA ? `<div class="bloco avisos"><span>🔔</span><div><b>Quer aviso no iPhone?</b><small>Toque em Compartilhar <b style="display:inline">⎙</b> e depois em “Adicionar à Tela de Início”. Abra o pedido por lá e ative os avisos.</small></div></div>` : '';
+            return;
+        }
+        const ligado = ler('mm_avisos_' + CODIGO, 0) && Notification.permission === 'granted' && await assinaturaAtual();
+        box.innerHTML = ligado ? `<div class="bloco avisos ligado"><span>🔔</span><div><b>Avisos ligados ✓</b><small>Você recebe uma notificação neste aparelho quando o pedido mudar.</small></div><a onclick="desligarAvisos()">Desligar</a></div>`
+            : Notification.permission === 'denied' ? `<div class="bloco avisos"><span>🔕</span><div><b>Avisos bloqueados</b><small>Para receber, libere as notificações deste site nas configurações do navegador. Esta página também se atualiza sozinha.</small></div></div>`
+            : `<div class="bloco avisos"><span>🔔</span><div><b>Quer ser avisado?</b><small>Receba uma notificação neste aparelho quando o pedido mudar de etapa.</small></div><button class="pilula" type="button" onclick="ativarAvisos(CODIGO, PUSH, this)">Ativar avisos</button></div>`;
     }
 
     new IntersectionObserver(([e]) => $('filtros').classList.toggle('colado', !e.isIntersecting)).observe($('hero'));

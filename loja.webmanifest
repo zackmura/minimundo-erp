@@ -1,0 +1,13 @@
+{
+    "name": "Mini Mundo",
+    "short_name": "Mini Mundo",
+    "description": "Presentes impressos em 3D e o acompanhamento do seu pedido.",
+    "display": "standalone",
+    "background_color": "#f7f1e8",
+    "theme_color": "#2b1d18",
+    "icons": [
+        { "src": "icone-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icone-512.png", "sizes": "512x512", "type": "image/png" },
+        { "src": "icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

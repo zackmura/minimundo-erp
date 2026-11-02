@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.8.0">
+    <link rel="stylesheet" href="style.css?v=5.9.0">
 </head>
 <body>
 
@@ -616,17 +616,8 @@
                 <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pc-busca" placeholder="Buscar por nome, número ou produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarPedidos()"></div>
                 <button class="btn-magic btn-pequeno" onclick="novoPedido()"><svg class="ic"><use href="#i-mais"/></svg>Anotar pedido</button>
             </div>
-            <p class="pc-resumo" id="pc-resumo"></p>
-            <div class="chips-rolagem" id="pc-filtros">
-                <button class="chip-op active" data-f="abertos" onclick="filtroPedidos('abertos')">Em aberto <em></em></button>
-                <button class="chip-op" data-f="novo" onclick="filtroPedidos('novo')">Novos <em></em></button>
-                <button class="chip-op" data-f="confirmado" onclick="filtroPedidos('confirmado')">Confirmados <em></em></button>
-                <button class="chip-op" data-f="producao" onclick="filtroPedidos('producao')">Em produção <em></em></button>
-                <button class="chip-op" data-f="pronto" onclick="filtroPedidos('pronto')">Prontos <em></em></button>
-                <button class="chip-op" data-f="entregue" onclick="filtroPedidos('entregue')">Entregues <em></em></button>
-                <button class="chip-op" data-f="cancelado" onclick="filtroPedidos('cancelado')">Cancelados <em></em></button>
-                <button class="chip-op" data-f="todos" onclick="filtroPedidos('todos')">Todos <em></em></button>
-            </div>
+            <div class="pc-painel" id="pc-painel"></div>
+            <div class="pc-filtros-linha"><div class="chips-rolagem" id="pc-filtros"></div><p class="pc-resumo" id="pc-resumo"></p></div>
             <div id="lista-pedidos" class="pc-lista"></div>
         </div>
 
@@ -998,19 +989,19 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.8.0"></script>
-<script src="app.js?v=5.8.0"></script>
-<script src="consignado.js?v=5.8.0"></script>
-<script src="vendas.js?v=5.8.0"></script>
-<script src="produtos.js?v=5.8.0"></script>
-<script src="dashboard.js?v=5.8.0"></script>
-<script src="ajustes.js?v=5.8.0"></script>
-<script src="rascunho.js?v=5.8.0"></script>
-<script src="usuarios.js?v=5.8.0"></script>
-<script src="temas.js?v=5.8.0"></script>
-<script src="kits.js?v=5.8.0"></script>
-<script src="paginas.js?v=5.8.0"></script>
-<script src="pedidos.js?v=5.8.0"></script>
+<script src="galeria.js?v=5.9.0"></script>
+<script src="app.js?v=5.9.0"></script>
+<script src="consignado.js?v=5.9.0"></script>
+<script src="vendas.js?v=5.9.0"></script>
+<script src="produtos.js?v=5.9.0"></script>
+<script src="dashboard.js?v=5.9.0"></script>
+<script src="ajustes.js?v=5.9.0"></script>
+<script src="rascunho.js?v=5.9.0"></script>
+<script src="usuarios.js?v=5.9.0"></script>
+<script src="temas.js?v=5.9.0"></script>
+<script src="kits.js?v=5.9.0"></script>
+<script src="paginas.js?v=5.9.0"></script>
+<script src="pedidos.js?v=5.9.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

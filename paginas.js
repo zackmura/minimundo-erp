@@ -339,7 +339,9 @@ window.abrirAjustesPaginas = async function() {
     window.abrirModalMM(`<h3 class="modal-title">${window.ic('ajustes')} Ajustes das páginas</h3>
         <p class="texto-ajuda" style="margin-top:0;">Valem para todas as páginas de venda.</p>
         <div class="input-group"><label for="ap-zap">WhatsApp que recebe os pedidos</label><input type="tel" id="ap-zap" value="${esc(c.pagina_whatsapp || c.telefone_admin || '')}" placeholder="(11) 98888-7777" maxlength="30">
-            <small class="texto-ajuda">A sacola do cliente chega neste número. Sem ele, a sacola não aparece.</small></div>
+            <small class="texto-ajuda">O botão de WhatsApp da página e os avisos de pedido usam este número.</small></div>
+        <div class="input-group"><label for="ap-pix">Chave Pix (opcional)</label><input type="text" id="ap-pix" value="${esc(c.pagina_pix || '')}" placeholder="CNPJ, e-mail, celular ou chave aleatória" maxlength="120" autocomplete="off">
+            <small class="texto-ajuda">Aparece no acompanhar do pedido, com botão de copiar, quando o cliente escolhe Pix e ainda não pagou.</small></div>
         <div class="input-group"><label for="ap-insta">Instagram (opcional)</label><input type="text" id="ap-insta" value="${esc(c.pagina_instagram || '')}" placeholder="@minimundo3d" maxlength="80" autocomplete="off"></div>
         <div class="input-group"><label for="ap-site">Endereço do site</label><input type="url" id="ap-site" value="${esc(c.site_url || 'https://minimundo.vivainteligente.net')}" maxlength="120" autocomplete="off">
             <small class="texto-ajuda">Para onde o link das redes leva. Só mude se o site mudar de endereço.</small></div>
@@ -351,7 +353,7 @@ window.salvarAjustesPaginas = async function() {
     if (!/^https?:\/\/[^\s]+$/i.test(site)) return window.mostrarAlerta('Endereço do site', 'O endereço precisa começar com https://', 'warning');
     const b = $('btn-ap'); b.disabled = true;
     try {
-        const cfg = (await window.apiAcao('salvar_config', { valores: { pagina_whatsapp: zap, pagina_instagram: $('ap-insta').value.trim(), site_url: site } })).config;
+        const cfg = (await window.apiAcao('salvar_config', { valores: { pagina_whatsapp: zap, pagina_instagram: $('ap-insta').value.trim(), pagina_pix: $('ap-pix').value.trim(), site_url: site } })).config;
         if (cfg.site_url === undefined) throw new Error('Ação não reconhecida.');
         PG.cfg = cfg; window.configMM = Object.assign(window.configMM || {}, cfg);
         window.fecharModalMM(); window.renderizarPaginas(); window.toastMM('Ajustes das páginas salvos');
