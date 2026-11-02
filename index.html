@@ -2,18 +2,22 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- App no celular: sem zoom de tela (nem o automático do iPhone ao tocar num campo); fotos têm o próprio zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Mini Mundo | Central & ERP</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3e2723">
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="apple-mobile-web-app-title" content="Mini Mundo">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.2.0">
+    <link rel="stylesheet" href="style.css?v=5.3.0">
 </head>
 <body>
 
@@ -61,6 +65,7 @@
     <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-cima" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
     <symbol id="i-imagem" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-estrela" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
     <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
 </svg>
 
@@ -299,7 +304,10 @@
                     <div class="card">
                         <div class="card-titulo" id="pf-titulo-form">Novo produto</div>
                         <div class="pf-ident">
-                            <label class="pf-foto" id="pf-foto-box" title="Escolher foto"><img id="pf-foto-img" src="logo.png" alt="" onerror="this.src='logo.png'"><span><svg class="ic"><use href="#i-camera"/></svg><b id="pf-foto-rot">Foto</b></span><input type="file" id="pf-foto" accept="image/*" onchange="pfPreviaFoto()" hidden></label>
+                            <div class="pf-foto-col">
+                                <label class="pf-foto" id="pf-foto-box" title="Escolher fotos (pode marcar várias)"><img id="pf-foto-img" src="logo.png" alt="" onerror="this.src='logo.png'"><em id="pf-foto-n" class="pf-foto-n" hidden></em><span><svg class="ic"><use href="#i-camera"/></svg><b id="pf-foto-rot">Foto</b></span><input type="file" id="pf-foto" accept="image/*" multiple onchange="pfPreviaFoto()" hidden></label>
+                                <button type="button" class="pf-ver-fotos" id="pf-ver-fotos" onclick="pfVerFotos()" hidden></button>
+                            </div>
                             <div class="pf-ident-campos">
                                 <div class="input-group"><label for="pf-nome">Nome *</label><input type="text" id="pf-nome" placeholder="Ex: Placa profissões"></div>
                                 <div class="input-group"><label for="pf-categoria">Categoria</label><input type="text" id="pf-categoria" list="pf-categorias" placeholder="Ex: Decoração, Chaveiros…"><datalist id="pf-categorias"></datalist></div>
@@ -911,13 +919,14 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="app.js?v=5.2.0"></script>
-<script src="consignado.js?v=5.2.0"></script>
-<script src="vendas.js?v=5.2.0"></script>
-<script src="produtos.js?v=5.2.0"></script>
-<script src="dashboard.js?v=5.2.0"></script>
-<script src="ajustes.js?v=5.2.0"></script>
-<script src="rascunho.js?v=5.2.0"></script>
+<script src="galeria.js?v=5.3.0"></script>
+<script src="app.js?v=5.3.0"></script>
+<script src="consignado.js?v=5.3.0"></script>
+<script src="vendas.js?v=5.3.0"></script>
+<script src="produtos.js?v=5.3.0"></script>
+<script src="dashboard.js?v=5.3.0"></script>
+<script src="ajustes.js?v=5.3.0"></script>
+<script src="rascunho.js?v=5.3.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

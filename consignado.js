@@ -42,6 +42,9 @@ window.copiarTexto = function(txt, msg) {
     else window.mostrarParaCopiar(txt);
 };
 window.imgProduto = (foto, estilo = '') => `<img src="${window.esc(foto || 'logo.png')}" class="mm-foto" style="${estilo}" onerror="this.src='logo.png'">`;
+// Vendedor: tocar na foto abre as fotos da peça em tela cheia, com zoom (bom para mostrar ao cliente)
+window.fotoVendedor = (e, estilo = '') => { const n = (e.fotos || []).length; return n ? `<button type="button" class="foto-ver" data-n="${n > 1 ? n : ''}" onclick="verFotosVendedor(${e.produto_id})" title="Ver as fotos">${window.imgProduto(e.foto, estilo)}</button>` : window.imgProduto(e.foto, estilo); };
+window.verFotosVendedor = pid => { const e = ((window.painelVendedor || {}).estoque || []).find(x => x.produto_id === pid); if (e) window.abrirGaleria({ fotos: e.fotos && e.fotos.length ? e.fotos : [e.foto], titulo: e.nome }); };
 
 // ==========================================
 // ⚙️ PARÂMETROS (Ajustes)
@@ -615,7 +618,7 @@ window.renderizarVendedorEstoque = function() {
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;text-align:center;margin:-5px 0 15px;">Vendeu? Toque em <b>✅ Vendi</b> na peça. Repasse total se vender tudo: <b>${window.fmt(valor)}</b></p>`;
     const t = window.$('v-busca-estoque').value || '';
     const lista = d.estoque.filter(e => window.buscaBate(t, e.nome));
-    window.$('v-lista-estoque').innerHTML = d.estoque.length ? lista.map(e => `<div class="mm-card">${window.imgProduto(e.foto)}
+    window.$('v-lista-estoque').innerHTML = d.estoque.length ? lista.map(e => `<div class="mm-card">${window.fotoVendedor(e)}
         <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">📦 Com você: ${e.qtd}</span><span class="mm-chip amarelo">🤝 Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">💡 Sugerido ${window.fmt(e.preco_sugerido)}</span></div></div>
         <div class="mm-acoes"><button class="btn-vendi" onclick="window.abrirBaixa(${e.produto_id})">✅ Vendi</button></div></div>`).join('')
         : '<p class="mm-vazio">Você ainda não tem peças. Quando a Mini Mundo te enviar uma mala, elas aparecem aqui. 🧳</p>';
@@ -629,7 +632,7 @@ window.renderizarVendedorEstoque = function() {
 window.abrirBaixa = function(pid) {
     const e = window.painelVendedor.estoque.find(x => x.produto_id === pid); if (!e) return;
     window.baixaAtual = { pid, qtd: 1, max: e.qtd, repasse: e.repasse };
-    window.abrirModalMM(`<h3 class="modal-title">✅ Registrar venda</h3><div style="text-align:center;">${window.imgProduto(e.foto, 'width:96px;height:96px;border-radius:16px;object-fit:cover;')}
+    window.abrirModalMM(`<h3 class="modal-title">✅ Registrar venda</h3><div style="text-align:center;">${window.fotoVendedor(e, 'width:96px;height:96px;border-radius:16px;object-fit:cover;')}
         <h4 class="baixa-nome">${window.esc(e.nome)}</h4>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:700;margin:0;">Quantas você vendeu? (tem ${e.qtd})</p>
         <div class="stepper"><button onclick="window.stepBaixa(-1)">−</button><span id="baixa-qtd">1</span><button onclick="window.stepBaixa(1)">+</button></div>

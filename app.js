@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.2.0";
+const VERSAO_APP = "v5.3.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -164,6 +164,9 @@ window.toastMM = function(msg) {
     t.innerHTML = `${window.ic('check')}<span>${window.esc(msg)}</span>`; t.classList.add('visivel');
     clearTimeout(window.toastMM.timer); window.toastMM.timer = setTimeout(() => t.classList.remove('visivel'), 2600);
 };
+
+// O iPhone ignora o "sem zoom" da página no gesto de pinça; aqui ele é bloqueado (a galeria de fotos tem zoom próprio)
+['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 
 // 🔎 Busca de produto igual em todas as telas: não liga para acento nem maiúscula, e cada palavra pode estar
 // no nome, na categoria ou no tipo, em qualquer ordem. Ex.: "kit cori" acha "Kit festa Corinthians".

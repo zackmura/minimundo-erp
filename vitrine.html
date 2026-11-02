@@ -19,7 +19,9 @@
         main { max-width:900px; margin:0 auto; padding:20px 16px 90px; }
         .grade { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:14px; }
         .peca { background:#fff; border:1px solid var(--borda); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(78,52,46,0.06); }
-        .peca img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#f5f5f4; }
+        .peca img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#f5f5f4; display:block; }
+        .peca .fotos { position:relative; display:block; width:100%; padding:0; border:none; background:none; cursor:zoom-in; }
+        .peca .fotos em { position:absolute; right:8px; bottom:8px; background:rgba(28,25,23,.72); color:#fff; font-style:normal; font-size:0.72rem; font-weight:800; padding:4px 9px; border-radius:20px; }
         .peca .info { padding:12px; display:flex; flex-direction:column; gap:6px; flex:1; }
         .peca h2 { font-size:0.95rem; margin:0; color:var(--brand-dark); font-weight:900; }
         .peca p { font-size:0.78rem; color:var(--muted); margin:0; line-height:1.35; flex:1; }
@@ -44,11 +46,16 @@
     <footer>Peças impressas em 3D com carinho 🌍🖨️</footer>
     <a id="flutuante" class="flutuante" target="_blank">💬 Falar no WhatsApp</a>
 
+<script src="galeria.js?v=5.3.0"></script>
 <script>
     // Mesmo servidor do painel. Para testar: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
     const API = localStorage.getItem('mm_api_url') || "https://bdfernando.alwaysdata.net/mmapi/api";
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const zap = (tel, txt) => { let n = String(tel || '').replace(/\D/g, ''); if (n && n.length <= 11) n = '55' + n; return n ? `https://wa.me/${n}?text=${encodeURIComponent(txt)}` : ''; };
+
+    let PRODUTOS = [];
+    // Toque na foto: tela cheia com zoom (galeria.js, a mesma do painel)
+    function verFotos(i) { const p = PRODUTOS[i]; if (!p) return; const fotos = (p.fotos && p.fotos.length) ? p.fotos : (p.foto ? [p.foto] : []); if (fotos.length) abrirGaleria({ fotos, titulo: p.nome }); }
 
     async function carregar() {
         const codigo = new URLSearchParams(location.search).get('v');
@@ -62,9 +69,11 @@
             document.getElementById('subtitulo').innerText = `Vitrine de ${v.nome} · peças a pronta entrega`;
             if (v.telefone) { const f = document.getElementById('flutuante'); f.href = zap(v.telefone, `Olá, ${v.nome}! Vi sua vitrine da Mini Mundo 3D e quero saber mais 😊`); f.style.display = 'block'; }
             if (!res.produtos.length) { aviso.innerText = 'No momento não há peças a pronta entrega. Chama no WhatsApp que a gente faz sob encomenda! 💬'; aviso.style.display = 'block'; return; }
-            document.getElementById('grade').innerHTML = res.produtos.map(p => {
+            PRODUTOS = res.produtos;
+            document.getElementById('grade').innerHTML = res.produtos.map((p, i) => {
+                const n = (p.fotos || []).length;
                 const link = zap(v.telefone, `Olá, ${v.nome}! Tenho interesse em: ${p.nome} 😊`);
-                return `<div class="peca"><img src="${esc(p.foto || 'logo.png')}" alt="${esc(p.nome)}" loading="lazy" onerror="this.src='logo.png'">
+                return `<div class="peca"><button type="button" class="fotos" onclick="verFotos(${i})" aria-label="Ver fotos de ${esc(p.nome)}"><img src="${esc(p.foto || 'logo.png')}" alt="${esc(p.nome)}" loading="lazy" onerror="this.src='logo.png'">${n > 1 ? `<em>📷 ${n} fotos</em>` : ''}</button>
                     <div class="info"><span class="tag ${p.disponivel <= 2 ? 'ultimas' : ''}">${p.disponivel <= 2 ? '🔥 Últimas unidades' : '✅ Pronta entrega'}</span>
                     <h2>${esc(p.nome)}</h2><p>${esc(p.descricao)}</p>
                     ${link ? `<a class="btn" href="${link}" target="_blank">💬 Quero esse</a>` : ''}</div></div>`;

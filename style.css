@@ -19,6 +19,10 @@ svg.ic { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1
 a[onclick] { color:var(--primary-hover); font-weight:700; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 * { box-sizing:border-box; }
 html, body { margin:0; padding:0; }
+/* App no celular: toque rápido sem zoom de dois toques, e nada passa da largura da tela */
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; touch-action:manipulation; }
+body { overflow-x:clip; }
+img { max-width:100%; }
 body { font-family:'Inter', sans-serif; background:var(--bg-color); color:var(--text-main); font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased; min-height:100vh; }
 h1, h2, h3, h4 { font-family:inherit; }
 
@@ -888,3 +892,28 @@ input[type="search"]::-webkit-search-decoration { -webkit-appearance:none; }
     .tp-resumo { display:block !important; white-space:normal !important; line-height:1.35; margin-top:2px; }
     .ep-topo .foto-rapida { width:56px; height:56px; }
 }
+
+/* ---------- v5.3: várias fotos por produto (galeria com zoom fica no galeria.js) ---------- */
+.foto-rapida:not(.sem) { cursor:zoom-in; }
+.foto-rapida:not(.sem) .fr-ic { display:none; }
+.fr-n { position:absolute; right:3px; bottom:3px; display:inline-flex; align-items:center; gap:2px; background:rgba(28,25,23,.7); color:#fff; font-size:.6rem; font-weight:800; padding:2px 5px 2px 4px; border-radius:20px; line-height:1; }
+.fr-n svg.ic { width:10px; height:10px; stroke-width:2.4; }
+.pf-foto-col { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+.pf-foto-n { position:absolute; top:6px; right:6px; background:rgba(28,25,23,.72); color:#fff; font-style:normal; font-size:.7rem; font-weight:800; padding:2px 8px; border-radius:20px; z-index:1; }
+.pf-ver-fotos { display:inline-flex; align-items:center; justify-content:center; gap:5px; background:#fff; border:1px solid var(--border-color); color:var(--brand-dark); border-radius:9px; padding:6px 8px; font:inherit; font-size:.74rem; font-weight:700; cursor:pointer; }
+.pf-ver-fotos svg.ic { width:14px; height:14px; }
+.pf-ver-fotos:hover { border-color:var(--primary); color:var(--primary); }
+.ep-fotos { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:thin; }
+.ep-foto { position:relative; width:72px; height:72px; border-radius:11px; overflow:hidden; border:1px solid var(--border-color); background:#f5f5f4; padding:0; flex-shrink:0; cursor:zoom-in; }
+.ep-foto img { width:100%; height:100%; object-fit:cover; display:block; }
+.ep-foto em { position:absolute; left:0; right:0; bottom:0; background:rgba(217,119,6,.92); color:#fff; font-size:.56rem; font-weight:800; font-style:normal; text-transform:uppercase; letter-spacing:.03em; text-align:center; padding:1px 0; }
+.ep-foto.mais { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:1.5px dashed var(--borda-forte); background:#faf9f7; color:var(--primary); cursor:pointer; font:inherit; font-size:.64rem; font-weight:700; line-height:1.15; text-align:center; padding:4px; }
+.ep-foto.mais svg.ic { width:20px; height:20px; }
+.ep-foto.mais:hover { background:var(--primary-soft); border-color:var(--primary); }
+.rot-dica { font-weight:600; color:var(--text-muted); font-size:.72rem; margin-left:4px; }
+.pl-foto, .foto-ver { position:relative; display:block; flex-shrink:0; cursor:zoom-in; line-height:0; }
+.foto-ver { padding:0; border:none; background:none; border-radius:10px; }
+.pl-foto[data-n]:not([data-n=""])::after, .foto-ver[data-n]:not([data-n=""])::after { content:attr(data-n); position:absolute; right:-3px; bottom:-3px; min-width:16px; height:16px; padding:0 4px; border-radius:20px; background:var(--brand-dark); color:#fff; font-size:.58rem; font-weight:800; line-height:16px; text-align:center; border:1.5px solid #fff; }
+/* Itens de grade encolhem até a largura da tela (sem isso um texto comprido alargava a página no celular e ela ficava "com zoom") */
+.grade-2 > *, .dash-cards > *, .grid-menu > *, .mini-kpis > *, .dash-grade > *, .kpis > *, .mm-resumo > *, .barra-acoes > *, .dash-kpis > *, .ped-det-info > *, .ped-det-mini > *, .pdv > *, .pf-grade > * { min-width:0; }
+.chart-box { position:relative; min-width:0; }

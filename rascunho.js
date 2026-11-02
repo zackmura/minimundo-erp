@@ -14,8 +14,8 @@ const cheio = id => { const el = $(id); return !!(el && String(el.value || '').t
 const FORMS = {
     precificar: {
         raiz: 'pf-form', aba: 'precificar', titulo: 'o cadastro do produto',
-        extra: () => ({ tipo: PF.tipo, editando: PF.editando, kit: PF.kit, fotoUrl: PF.fotoUrl }),
-        temAlgo: () => PF.editando || PF.kit.length || PF.fotoUrl || ['pf-nome', 'pf-categoria', 'pf-peso', 'pf-tempo', 'pf-venda', 'pf-repasse'].some(cheio),
+        extra: () => ({ tipo: PF.tipo, editando: PF.editando, kit: PF.kit, fotos: PF.fotos }),
+        temAlgo: () => PF.editando || PF.kit.length || PF.fotos.length || ['pf-nome', 'pf-categoria', 'pf-peso', 'pf-tempo', 'pf-venda', 'pf-repasse'].some(cheio),
         antes: (x, carregou) => {
             if (x.editando) {
                 const p = (window.arrayBancoCustos || []).find(p => p.linha === x.editando);
@@ -26,7 +26,8 @@ const FORMS = {
         },
         depois: x => {
             if (PF.tipo === 'kit') PF.kit = (x.kit || []).filter(i => i && i.produto_id).map(i => ({ produto_id: +i.produto_id, qtd: Math.max(1, +i.qtd || 1) }));
-            if (x.fotoUrl) { PF.fotoUrl = x.fotoUrl; $('pf-foto-img').src = x.fotoUrl; }
+            // Produto novo: fotos já enviadas (rascunho antigo guardava só uma, em "fotoUrl")
+            if (!PF.editando) PF.fotos = Array.isArray(x.fotos) ? x.fotos.filter(Boolean) : x.fotoUrl ? [x.fotoUrl] : [];
             window.pfFotoEstado(); $('pf-filamento').dataset.mexeu = '1';
             window.pfRenderKit(); window.pfCalcular();
         },

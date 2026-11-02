@@ -98,9 +98,9 @@ window.renderizarCatalogoPDV = function() {
     }
     // Lista compacta: foto pequena, nome, estoque e preço numa linha. Tocar soma 1; no carrinho aparece − quantidade +
     grade.innerHTML = lista.map(p => {
-        const noCar = PDV.itens.find(i => i.produto_id === p.linha), est = p.est_atelie || 0, preco = window.precoVendaDe(p);
+        const noCar = PDV.itens.find(i => i.produto_id === p.linha), est = p.est_atelie || 0, preco = window.precoVendaDe(p), nf = window.fotosDe ? window.fotosDe(p).length : 0;
         return `<div class="pdv-lin ${noCar ? 'no-carrinho' : ''} ${est > 0 ? '' : 'sem'}" onclick="addPDV(${p.linha})" role="button" tabindex="0">
-            <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">
+            ${nf ? `<span class="pl-foto" data-n="${nf > 1 ? nf : ''}" onclick="event.stopPropagation(); tocarFotoProduto(${p.linha})" title="Ver as fotos">` : ''}<img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">${nf ? '</span>' : ''}
             <div class="pl-info"><b>${p.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${esc(p.modelo)}</b><small><span class="pl-preco">${preco ? window.fmt(preco) : '<i>sem preço</i>'}</span> · <span class="pp-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sem estoque'}</span>${p.categoria ? ` · ${esc(p.categoria)}` : ''}</small></div>
             ${noCar ? `<span class="pl-qtd" onclick="event.stopPropagation()"><button type="button" onclick="menosPDV(${p.linha})" aria-label="Tirar um">−</button><b>${noCar.qtd}</b><button type="button" onclick="addPDV(${p.linha})" aria-label="Mais um">+</button></span>`
                 : `<span class="pl-add" aria-hidden="true">${window.ic('mais')}</span>`}
