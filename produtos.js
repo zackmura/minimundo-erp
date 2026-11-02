@@ -29,6 +29,7 @@ window.carregarBancoDeCustos = async function() {
         window.arrayBancoCustos = (await window.apiAcao('listar_custos')).produtos;
         window.renderizarProdutos(); window.pfMontarListas();
         if (window.renderizarCatalogoPDV) { window.renderizarCatalogoPDV(); window.renderizarCarrinhoPDV(); }
+        if (window.renderizarKits) window.renderizarKits();
     } catch (e) { if ($('lista-produtos')) $('lista-produtos').innerHTML = `<p class="mm-vazio">Não consegui carregar os produtos: ${esc(e.message)}</p>`; }
     finally { if (ld) ld.style.display = 'none'; }
 };
@@ -479,6 +480,7 @@ async function salvarFotosProduto(id, lista, indice, aviso) {
         window.renderizarProdutos();
         if (window.painelEstoque && window.renderizarEstoque) window.renderizarEstoque();
         if (window.renderizarCatalogoPDV) window.renderizarCatalogoPDV();
+        if (window.renderizarKits) window.renderizarKits();
         if (PF.editando === id) pfFotoEstado();
         document.querySelectorAll(`[data-fotos-de="${id}"]`).forEach(el => { el.outerHTML = fotosFaixa(id); }); // janela de edição, se aberta
         window.galeriaAtualizar(todas, indice);
@@ -491,6 +493,7 @@ const fotosFaixa = id => {
     return `<div class="ep-fotos" data-fotos-de="${id}">${fotos.map((f, i) => `<button type="button" class="ep-foto" onclick="tocarFotoProduto(${id}, ${i})" aria-label="Ver foto ${i + 1}"><img src="${esc(f)}" alt="" loading="lazy" onerror="this.src='logo.png'">${i === 0 && proprias && fotos.length > 1 ? '<em>principal</em>' : ''}</button>`).join('')}`
         + `<button type="button" class="ep-foto mais" onclick="adicionarFotosProduto(${id})">${window.ic('camera')}<span>${fotos.length ? 'Mais fotos' : 'Adicionar fotos'}</span></button></div>`;
 };
+window.fotosFaixa = fotosFaixa;
 
 // ==========================================
 // ✏️ EDIÇÃO RÁPIDA (lista de Produtos e Estoque)

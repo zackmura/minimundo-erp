@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.5.0">
+    <link rel="stylesheet" href="style.css?v=5.6.0">
 </head>
 <body>
 
@@ -104,6 +104,7 @@
             <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vendas</span></button>
             <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
             <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos</span></button>
+            <button id="btn-kits" class="tab-btn" onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg><span>Kits</span></button>
             <button id="btn-custos" class="tab-btn" onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg><span>Custos</span></button>
 
             <div class="sb-grupo">Consignado</div>
@@ -163,6 +164,7 @@
                 <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
                 <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
                 <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos</button>
+                <button onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg>Kits</button>
                 <button onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg>Custos</button>
             </div>
             <div class="menu-grupo">Consignado</div>
@@ -457,6 +459,7 @@
             <div class="barra-acoes">
                 <button class="btn-magic btn-global" onclick="abrirProducao()"><svg class="ic"><use href="#i-impressora"/></svg>Registrar produção</button>
                 <button class="btn-magic btn-roxo" onclick="abrirMontarKit()"><svg class="ic"><use href="#i-camadas"/></svg>Montar kit</button>
+                <button class="btn-magic btn-secundario" onclick="switchTab('kits')"><svg class="ic"><use href="#i-olho"/></svg>Ver kits</button>
                 <button class="btn-magic" onclick="abrirMala()"><svg class="ic"><use href="#i-mala"/></svg>Enviar mala</button>
                 <button class="btn-magic btn-secundario" onclick="abrirMovimentos()"><svg class="ic"><use href="#i-relogio"/></svg>Histórico</button>
             </div>
@@ -604,6 +607,23 @@
         <!-- ========================================== -->
         <!-- 👥 USUÁRIOS E ACESSOS                      -->
         <!-- ========================================== -->
+        <div id="tab-kits" class="tab-content">
+            <div class="kt-pagina" id="kt-pagina"></div>
+            <div class="pl-topo">
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="kt-busca" placeholder="Buscar kit ou peça…" autocomplete="off" enterkeyhint="search" oninput="renderizarKits()"></div>
+                <select id="kt-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarKits()" hidden></select>
+                <button class="btn-magic btn-pequeno" onclick="novoProduto('kit')"><svg class="ic"><use href="#i-mais"/></svg>Novo kit</button>
+            </div>
+            <div class="chips-rolagem" id="kt-filtros">
+                <button class="chip-op active" data-f="todos" onclick="filtroKits('todos')">Todos <em></em></button>
+                <button class="chip-op" data-f="pagina" onclick="filtroKits('pagina')">Na página <em></em></button>
+                <button class="chip-op" data-f="fora" onclick="filtroKits('fora')">Fora da página <em></em></button>
+                <button class="chip-op" data-f="pronta" onclick="filtroKits('pronta')">Pronta entrega <em></em></button>
+                <button class="chip-op" data-f="inativos" onclick="filtroKits('inativos')">Inativos <em></em></button>
+            </div>
+            <div id="lista-kits" class="kt-grade"></div>
+        </div>
+
         <div id="tab-usuarios" class="tab-content">
             <div class="us-conta" id="us-minha-conta"></div>
             <div class="pl-topo">
@@ -946,15 +966,16 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.5.0"></script>
-<script src="app.js?v=5.5.0"></script>
-<script src="consignado.js?v=5.5.0"></script>
-<script src="vendas.js?v=5.5.0"></script>
-<script src="produtos.js?v=5.5.0"></script>
-<script src="dashboard.js?v=5.5.0"></script>
-<script src="ajustes.js?v=5.5.0"></script>
-<script src="rascunho.js?v=5.5.0"></script>
-<script src="usuarios.js?v=5.5.0"></script>
+<script src="galeria.js?v=5.6.0"></script>
+<script src="app.js?v=5.6.0"></script>
+<script src="consignado.js?v=5.6.0"></script>
+<script src="vendas.js?v=5.6.0"></script>
+<script src="produtos.js?v=5.6.0"></script>
+<script src="dashboard.js?v=5.6.0"></script>
+<script src="ajustes.js?v=5.6.0"></script>
+<script src="rascunho.js?v=5.6.0"></script>
+<script src="usuarios.js?v=5.6.0"></script>
+<script src="kits.js?v=5.6.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

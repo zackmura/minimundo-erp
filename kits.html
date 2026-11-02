@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Kits Mini Mundo | Presentes impressos em 3D</title>
+    <meta name="description" content="Kits de presente e festa com peças impressas em 3D, montados à mão pela Mini Mundo. Veja as fotos, o que vem em cada kit e os preços.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Kits Mini Mundo">
+    <meta property="og:description" content="Presentes e festas com peças impressas em 3D. Veja as fotos e os preços.">
+    <meta property="og:image" content="https://minimundo.vivainteligente.net/logo.jpg">
+    <meta name="theme-color" content="#f7f1e8">
+    <link rel="icon" href="logo.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --creme:#f7f1e8; --papel:#fffdf9; --cacau:#2b1d18; --cacau-2:#4a3329; --texto:#3d2e27; --suave:#857065;
+            --ouro:#a8762f; --ouro-2:#dcbd88; --ouro-3:#f3e6cf; --linha:#ebe0cf; --verde:#2e6b4c; --verde-bg:#e4f1e9;
+            --sombra:0 1px 2px rgba(43,29,24,.05), 0 18px 40px -18px rgba(43,29,24,.22);
+            --serif:'Fraunces', Georgia, 'Times New Roman', serif; --sans:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        * { box-sizing:border-box; }
+        html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+        body { margin:0; font-family:var(--sans); color:var(--texto); background:var(--creme); line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:clip; }
+        img { display:block; max-width:100%; }
+        button { font-family:inherit; }
+        a { color:inherit; }
+
+        /* Topo */
+        .hero { position:relative; text-align:center; padding:calc(48px + env(safe-area-inset-top)) 20px 36px; background:
+            radial-gradient(1200px 420px at 50% -120px, #fffaf1 0%, rgba(255,250,241,0) 70%),
+            radial-gradient(500px 260px at 12% 10%, rgba(220,189,136,.18), transparent 70%),
+            radial-gradient(500px 260px at 88% 0%, rgba(120,170,200,.10), transparent 70%); }
+        .logo { width:116px; height:116px; margin:0 auto 18px; border-radius:50%; background:#fff; padding:8px; object-fit:contain; box-shadow:0 0 0 1px var(--ouro-3), 0 0 0 7px var(--papel), 0 0 0 8px var(--ouro-2), 0 16px 34px -12px rgba(43,29,24,.35); }
+        .sobre { margin:0 0 14px; font-size:.68rem; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:var(--ouro); }
+        .hero h1 { margin:0 auto; max-width:16ch; font-family:var(--serif); font-weight:500; font-size:clamp(2.1rem, 7vw, 3.5rem); line-height:1.04; letter-spacing:-.015em; color:var(--cacau); font-variation-settings:'opsz' 144; }
+        .hero h1 em { font-style:italic; color:var(--ouro); }
+        .divisor { display:flex; align-items:center; justify-content:center; gap:10px; margin:20px auto 16px; color:var(--ouro-2); }
+        .divisor::before, .divisor::after { content:''; width:46px; height:1px; background:currentColor; }
+        .divisor i { width:6px; height:6px; border:1px solid currentColor; transform:rotate(45deg); }
+        .lead { margin:0 auto; max-width:36ch; font-size:1.02rem; color:var(--suave); }
+        .hero-bt { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:24px; }
+        .pilula { display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:600; font-size:.88rem; padding:12px 20px; border-radius:999px; border:1px solid var(--cacau); background:var(--cacau); color:var(--creme); transition:transform .15s, background .15s; }
+        .pilula:hover { transform:translateY(-1px); background:var(--cacau-2); }
+        .pilula.clara { background:transparent; color:var(--cacau); border-color:var(--ouro-2); }
+        .pilula.clara:hover { background:var(--papel); }
+        .pilula svg { width:18px; height:18px; flex-shrink:0; }
+
+        /* Filtros */
+        .filtros { position:sticky; top:0; z-index:20; background:rgba(247,241,232,.86); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid transparent; transition:border-color .2s; }
+        .filtros.colado { border-bottom-color:var(--linha); }
+        .filtros-in { max-width:1180px; margin:0 auto; padding:12px 20px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+        .filtros-in::-webkit-scrollbar { display:none; }
+        .chip { flex-shrink:0; border:1px solid var(--linha); background:var(--papel); color:var(--cacau-2); font-size:.84rem; font-weight:600; padding:9px 16px; border-radius:999px; cursor:pointer; white-space:nowrap; transition:all .15s; }
+        .chip:hover { border-color:var(--ouro-2); }
+        .chip.on { background:var(--cacau); border-color:var(--cacau); color:var(--creme); }
+        .chip small { font-weight:500; opacity:.7; margin-left:4px; }
+
+        /* Kits */
+        main { max-width:1180px; margin:0 auto; padding:22px 20px 40px; }
+        .grade { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 372px)); justify-content:center; gap:28px; }
+        .grade > * { min-width:0; }
+        .kit { background:var(--papel); border:1px solid var(--linha); border-radius:26px; overflow:hidden; box-shadow:var(--sombra); display:flex; flex-direction:column; transition:transform .25s, box-shadow .25s; scroll-margin-top:84px; }
+        @media (hover:hover) { .kit:hover { transform:translateY(-3px); box-shadow:0 1px 2px rgba(43,29,24,.05), 0 26px 50px -20px rgba(43,29,24,.3); } }
+        .kit.destaque { box-shadow:0 0 0 3px var(--ouro-2), var(--sombra); }
+        .fotos { position:relative; aspect-ratio:1 / 1; background:var(--ouro-3); }
+        .trilho { display:flex; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+        .trilho::-webkit-scrollbar { display:none; }
+        .foto { flex:0 0 100%; height:100%; scroll-snap-align:center; border:none; padding:0; background:none; cursor:zoom-in; }
+        .foto img { width:100%; height:100%; object-fit:cover; }
+        .sem-foto { display:flex; align-items:center; justify-content:center; height:100%; }
+        .sem-foto img { width:44%; opacity:.9; }
+        .selo { position:absolute; top:14px; left:14px; display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:600; letter-spacing:.02em; padding:7px 12px; border-radius:999px; background:rgba(255,253,249,.92); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:var(--ouro); box-shadow:0 2px 10px rgba(43,29,24,.12); }
+        .selo::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
+        .selo.pronta { color:var(--verde); }
+        .pontos { position:absolute; left:0; right:0; bottom:12px; display:flex; justify-content:center; gap:6px; pointer-events:none; }
+        .pontos i { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.6); box-shadow:0 0 0 1px rgba(43,29,24,.12); transition:all .2s; }
+        .pontos i.on { width:18px; border-radius:6px; background:#fff; }
+        .seta { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,253,249,.9); color:var(--cacau); display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(43,29,24,.15); }
+        .seta svg { width:18px; height:18px; }
+        .seta.esq { left:12px; } .seta.dir { right:12px; }
+        @media (hover:hover) { .fotos:hover .seta { display:flex; } }
+        .corpo { padding:22px 22px 22px; display:flex; flex-direction:column; flex:1; }
+        .cat { margin:0 0 6px; font-size:.68rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--ouro); }
+        .kit h2 { margin:0; font-family:var(--serif); font-weight:500; font-size:1.55rem; line-height:1.15; color:var(--cacau); letter-spacing:-.01em; }
+        .desc { margin:10px 0 0; font-size:.93rem; color:var(--suave); }
+        .vem { margin-top:18px; }
+        .vem-rot { display:block; font-size:.68rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--cacau-2); margin-bottom:10px; }
+        .vem ul { list-style:none; margin:0; padding:0; display:grid; gap:9px; }
+        .vem li { display:flex; align-items:center; gap:11px; font-size:.9rem; color:var(--texto); }
+        .vem li img { width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--ouro-3); box-shadow:0 0 0 1px var(--linha), 0 0 0 3px var(--papel); }
+        .vem li b { font-family:var(--serif); font-weight:600; color:var(--ouro); margin-right:3px; }
+        .rodape { margin-top:auto; padding-top:20px; }
+        .rodape-in { border-top:1px solid var(--linha); padding-top:18px; display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+        .preco { display:flex; flex-direction:column; gap:2px; }
+        .preco s { font-size:.8rem; color:var(--suave); }
+        .preco strong { font-family:var(--serif); font-weight:500; font-size:1.85rem; line-height:1; color:var(--cacau); font-variant-numeric:lining-nums; }
+        .preco .consulta { font-family:var(--serif); font-style:italic; font-size:1.25rem; color:var(--cacau); }
+        .economia { align-self:flex-start; margin-top:6px; font-size:.72rem; font-weight:600; color:var(--verde); background:var(--verde-bg); padding:4px 10px; border-radius:999px; }
+        .acoes { display:flex; gap:8px; }
+        .btn-pedir { display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; background:var(--cacau); color:var(--creme); font-weight:600; font-size:.9rem; padding:13px 20px; border-radius:999px; transition:background .15s, transform .15s; }
+        .btn-pedir:hover { background:var(--cacau-2); transform:translateY(-1px); }
+        .btn-pedir svg { width:18px; height:18px; }
+        .btn-share { width:48px; height:48px; flex-shrink:0; border-radius:50%; border:1px solid var(--ouro-2); background:transparent; color:var(--cacau); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+        .btn-share:hover { background:var(--ouro-3); }
+        .btn-share svg { width:19px; height:19px; }
+
+        /* Carregando, vazio e erro */
+        .esqueleto { border-radius:26px; overflow:hidden; background:var(--papel); border:1px solid var(--linha); }
+        .esqueleto div { background:linear-gradient(90deg, var(--ouro-3) 0%, #fbf4e8 50%, var(--ouro-3) 100%); background-size:200% 100%; animation:brilho 1.4s infinite linear; }
+        .esqueleto .e-foto { aspect-ratio:1 / 1; }
+        .esqueleto .e-linha { height:14px; margin:18px 22px 0; border-radius:8px; }
+        .esqueleto .e-linha.curta { width:45%; margin-bottom:24px; }
+        @keyframes brilho { to { background-position:-200% 0; } }
+        .aviso { text-align:center; padding:56px 20px; color:var(--suave); }
+        .aviso h3 { font-family:var(--serif); font-weight:500; font-size:1.6rem; color:var(--cacau); margin:0 0 8px; }
+        .aviso p { margin:0 0 20px; }
+
+        footer { text-align:center; padding:36px 20px calc(96px + env(safe-area-inset-bottom)); border-top:1px solid var(--linha); background:linear-gradient(var(--creme), #f1e8da); }
+        footer img { width:64px; height:64px; margin:0 auto 12px; border-radius:50%; background:#fff; padding:5px; object-fit:contain; box-shadow:0 0 0 1px var(--ouro-3); }
+        footer .frase { font-family:var(--serif); font-style:italic; font-size:1.15rem; color:var(--cacau); margin:0 0 6px; }
+        footer .marca { font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ouro); margin:0; }
+        footer .links { display:flex; justify-content:center; gap:18px; margin-top:16px; font-size:.86rem; font-weight:600; }
+        footer .links a { text-decoration:none; color:var(--cacau-2); border-bottom:1px solid var(--ouro-2); padding-bottom:1px; }
+
+        .zap-flutuante { position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:30; width:58px; height:58px; border-radius:50%; background:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 26px -6px rgba(37,211,102,.55), 0 2px 6px rgba(0,0,0,.15); transition:transform .15s; }
+        .zap-flutuante:hover { transform:scale(1.05); }
+        .zap-flutuante svg { width:30px; height:30px; }
+        .zap-flutuante[hidden] { display:none; }
+        .toast { position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translate(-50%, 20px); background:var(--cacau); color:var(--creme); font-size:.88rem; font-weight:500; padding:12px 20px; border-radius:999px; opacity:0; pointer-events:none; transition:all .25s; z-index:40; white-space:nowrap; }
+        .toast.on { opacity:1; transform:translate(-50%, 0); }
+
+        @media (max-width:640px) {
+            .hero { padding-top:calc(36px + env(safe-area-inset-top)); padding-bottom:28px; }
+            .logo { width:96px; height:96px; }
+            .filtros-in { padding:10px 16px; }
+            main { padding:18px 16px 32px; }
+            .grade { grid-template-columns:minmax(0, 1fr); gap:20px; }
+            .corpo { padding:20px 18px 18px; }
+            .kit h2 { font-size:1.4rem; }
+            .acoes { width:100%; }
+            .btn-pedir { flex:1; }
+        }
+        @media (prefers-reduced-motion:reduce) { *, *::before, *::after { transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <img class="logo" src="logo.png" alt="Mini Mundo" onerror="this.src='logo.jpg'">
+        <p class="sobre">Mini Mundo · Impressão 3D &amp; Design</p>
+        <h1 id="titulo">Kits para <em>presentear</em></h1>
+        <div class="divisor" aria-hidden="true"><i></i></div>
+        <p class="lead" id="texto">Peças impressas em 3D, montadas à mão e prontas para encantar.</p>
+        <div class="hero-bt" id="hero-bt"></div>
+    </header>
+    <nav class="filtros" id="filtros" aria-label="Filtrar kits" hidden><div class="filtros-in" id="filtros-in"></div></nav>
+    <main>
+        <div class="grade" id="grade">
+            <div class="esqueleto"><div class="e-foto"></div><div class="e-linha"></div><div class="e-linha curta"></div></div>
+            <div class="esqueleto"><div class="e-foto"></div><div class="e-linha"></div><div class="e-linha curta"></div></div>
+            <div class="esqueleto"><div class="e-foto"></div><div class="e-linha"></div><div class="e-linha curta"></div></div>
+        </div>
+        <div class="aviso" id="aviso" hidden></div>
+    </main>
+    <footer>
+        <img src="logo.png" alt="" onerror="this.src='logo.jpg'">
+        <p class="frase">Feito à mão, camada por camada.</p>
+        <p class="marca">Mini Mundo · Impressão 3D &amp; Design</p>
+        <div class="links" id="rodape-links"></div>
+    </footer>
+    <a class="zap-flutuante" id="zap-flutuante" target="_blank" rel="noopener" aria-label="Falar no WhatsApp" hidden></a>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="galeria.js?v=5.6.0"></script>
+<script>
+    // Página de kits para clientes. Os dados vêm do servidor (ação pública "kits_publicos"): só nome,
+    // texto, preço, fotos e peças de cada kit. Para testar: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
+    const API = localStorage.getItem('mm_api_url') || 'https://bdfernando.alwaysdata.net/mmapi/api';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const real = v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const zap = (tel, txt) => { let n = String(tel || '').replace(/\D/g, ''); if (n && n.length <= 11) n = '55' + n; return n ? `https://wa.me/${n}?text=${encodeURIComponent(txt)}` : ''; };
+    const linkKit = id => `${location.origin}${location.pathname}${id ? '?k=' + id : ''}`;
+    const IC = {
+        zap: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91A9.85 9.85 0 0 0 12.04 2Zm5.8 14.13c-.25.69-1.44 1.32-1.98 1.37-.5.05-.98.24-3.32-.69-2.8-1.1-4.58-3.97-4.72-4.15-.14-.19-1.13-1.5-1.13-2.87 0-1.36.71-2.03.97-2.31.25-.28.55-.35.73-.35l.53.01c.17 0 .4-.06.62.48.25.6.85 2.06.92 2.21.08.15.12.32.03.51-.1.19-.14.31-.28.48-.14.16-.3.37-.42.49-.14.14-.29.29-.12.57.16.28.73 1.2 1.57 1.95 1.08.96 1.99 1.26 2.27 1.4.28.14.45.12.61-.07.17-.19.71-.83.9-1.11.19-.28.37-.23.63-.14.25.09 1.62.76 1.9.9.28.14.46.21.53.33.07.11.07.66-.18 1.35Z"/></svg>',
+        insta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+        share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v5a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-5"/></svg>',
+        esq: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
+        dir: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>'
+    };
+    let LOJA = {}, KITS = [], FILTRO = 'todos';
+    const pedidoTexto = k => `Olá! Vi o *${k.nome}*${k.preco ? ` (${real(k.preco)})` : ''} na página de kits da Mini Mundo e quero fazer um pedido.\n${linkKit(k.id)}`;
+    const instaLink = s => { s = String(s || '').trim(); if (!s) return ''; return /^https?:\/\//i.test(s) ? s : `https://instagram.com/${s.replace(/^@/, '').replace(/^instagram\.com\//i, '')}`; };
+
+    function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2400); }
+
+    async function carregar() {
+        try {
+            const r = await (await fetch(API, { method: 'POST', body: JSON.stringify({ acao: 'kits_publicos' }) })).json();
+            if (!r.sucesso) throw new Error(r.erro || 'erro');
+            LOJA = r.loja || {}; KITS = (r.kits || []).sort((a, b) => (b.pronta_entrega - a.pronta_entrega) || a.nome.localeCompare(b.nome, 'pt-BR'));
+            montarTopo(); montarFiltros(); renderizar(); destacarDoLink();
+        } catch (e) {
+            $('grade').innerHTML = '';
+            $('aviso').hidden = false;
+            $('aviso').innerHTML = `<h3>Não conseguimos abrir os kits agora</h3><p>Verifique a internet e tente de novo em instantes.</p><button class="pilula" onclick="location.reload()">Tentar de novo</button>`;
+        }
+    }
+    function montarTopo() {
+        if (LOJA.titulo) { $('titulo').textContent = LOJA.titulo; document.title = `${LOJA.titulo} | Mini Mundo`; }
+        if (LOJA.texto) $('texto').textContent = LOJA.texto;
+        const z = zap(LOJA.whatsapp, 'Olá! Vim pela página de kits da Mini Mundo.'), ig = instaLink(LOJA.instagram);
+        $('hero-bt').innerHTML = (z ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Fale com a gente</a>` : '') + (ig ? `<a class="pilula clara" href="${esc(ig)}" target="_blank" rel="noopener">${IC.insta} Instagram</a>` : '');
+        $('rodape-links').innerHTML = (z ? `<a href="${esc(z)}" target="_blank" rel="noopener">WhatsApp</a>` : '') + (ig ? `<a href="${esc(ig)}" target="_blank" rel="noopener">Instagram</a>` : '');
+        if (z) { $('zap-flutuante').href = z; $('zap-flutuante').innerHTML = IC.zap; $('zap-flutuante').hidden = false; }
+    }
+    // Filtros: só aparecem quando ajudam (mais de 3 kits, ou categorias diferentes)
+    function montarFiltros() {
+        const cats = [...new Set(KITS.map(k => k.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const prontos = KITS.filter(k => k.pronta_entrega).length;
+        const ops = [['todos', 'Todos', KITS.length]];
+        if (prontos && prontos < KITS.length) ops.push(['pronta', 'Pronta entrega', prontos]);
+        if (cats.length > 1) cats.forEach(c => ops.push(['c:' + c, c, KITS.filter(k => k.categoria === c).length]));
+        if (ops.length < 2) return;
+        $('filtros').hidden = false;
+        $('filtros-in').innerHTML = ops.map(([v, r, n]) => `<button class="chip ${v === FILTRO ? 'on' : ''}" data-v="${esc(v)}">${esc(r)}<small>${n}</small></button>`).join('');
+        $('filtros-in').querySelectorAll('.chip').forEach(b => b.onclick = () => { FILTRO = b.dataset.v; montarFiltros(); renderizar(); window.scrollTo({ top: $('filtros').offsetTop, behavior: 'smooth' }); });
+    }
+    function renderizar() {
+        const lista = KITS.filter(k => FILTRO === 'todos' || (FILTRO === 'pronta' ? k.pronta_entrega : 'c:' + k.categoria === FILTRO));
+        if (!KITS.length) {
+            const z = zap(LOJA.whatsapp, 'Olá! Vim pela página de kits da Mini Mundo. Quero montar um kit.');
+            $('grade').innerHTML = ''; $('aviso').hidden = false;
+            $('aviso').innerHTML = `<h3>Novos kits chegando em breve</h3><p>Enquanto isso, que tal montar um kit do seu jeito?</p>${z ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Conversar no WhatsApp</a>` : ''}`;
+            return;
+        }
+        $('grade').innerHTML = lista.map(k => {
+            const i = KITS.indexOf(k), fotos = k.fotos || [], z = zap(LOJA.whatsapp, pedidoTexto(k));
+            const economia = k.separadas && k.preco ? k.separadas - k.preco : 0;
+            return `<article class="kit" id="kit-${k.id}">
+                <div class="fotos">
+                    ${fotos.length ? `<div class="trilho" data-i="${i}">${fotos.map((f, j) => `<button class="foto" type="button" onclick="verFotos(${i}, ${j})" aria-label="Ver foto ${j + 1} de ${esc(k.nome)}"><img src="${esc(f)}" alt="${esc(k.nome)}" loading="${i < 2 && !j ? 'eager' : 'lazy'}" onerror="this.src='logo.png'"></button>`).join('')}</div>`
+                        : '<div class="sem-foto"><img src="logo.png" alt=""></div>'}
+                    <span class="selo ${k.pronta_entrega ? 'pronta' : ''}">${k.pronta_entrega ? 'Pronta entrega' : 'Sob encomenda'}</span>
+                    ${fotos.length > 1 ? `<button class="seta esq" type="button" aria-label="Foto anterior" onclick="passar(${i}, -1)">${IC.esq}</button><button class="seta dir" type="button" aria-label="Próxima foto" onclick="passar(${i}, 1)">${IC.dir}</button>
+                        <div class="pontos" id="pontos-${i}">${fotos.map((_, j) => `<i class="${j ? '' : 'on'}"></i>`).join('')}</div>` : ''}
+                </div>
+                <div class="corpo">
+                    ${k.categoria ? `<p class="cat">${esc(k.categoria)}</p>` : ''}
+                    <h2>${esc(k.nome)}</h2>
+                    ${k.descricao ? `<p class="desc">${esc(k.descricao)}</p>` : ''}
+                    <div class="vem"><span class="vem-rot">Vem no kit</span>
+                        <ul>${(k.itens || []).map(it => `<li><img src="${esc(it.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${it.qtd}×</b> ${esc(it.nome)}</span></li>`).join('')}</ul></div>
+                    <div class="rodape"><div class="rodape-in">
+                        <div class="preco">${k.preco ? `${economia > 0 ? `<s>Separadas: ${real(k.separadas)}</s>` : ''}<strong>${real(k.preco)}</strong>${economia > 0 ? `<span class="economia">Você economiza ${real(economia)}</span>` : ''}` : '<span class="consulta">Sob consulta</span>'}</div>
+                        <div class="acoes">${z ? `<a class="btn-pedir" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Quero este kit</a>` : ''}<button class="btn-share" type="button" onclick="compartilhar(${i})" aria-label="Compartilhar ${esc(k.nome)}">${IC.share}</button></div>
+                    </div></div>
+                </div></article>`;
+        }).join('');
+        // Bolinhas embaixo das fotos acompanham o deslizar
+        document.querySelectorAll('.trilho').forEach(t => t.addEventListener('scroll', () => {
+            const n = Math.round(t.scrollLeft / t.clientWidth), p = $('pontos-' + t.dataset.i);
+            if (p) [...p.children].forEach((b, j) => b.classList.toggle('on', j === n));
+        }, { passive: true }));
+    }
+    function passar(i, d) { const t = document.querySelector(`.trilho[data-i="${i}"]`); if (t) t.scrollBy({ left: d * t.clientWidth, behavior: 'smooth' }); }
+    function verFotos(i, j) { const k = KITS[i]; if (k && k.fotos.length) abrirGaleria({ fotos: k.fotos, indice: j, titulo: k.nome }); }
+    async function compartilhar(i) {
+        const k = KITS[i]; if (!k) return;
+        const url = linkKit(k.id), texto = `${k.nome}${k.preco ? ` por ${real(k.preco)}` : ''} · Mini Mundo`;
+        if (navigator.share) { try { await navigator.share({ title: k.nome, text: texto, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+        try { await navigator.clipboard.writeText(url); toast('Link do kit copiado'); } catch (e) { prompt('Copie o link do kit:', url); }
+    }
+    // Link de um kit (kits.html?k=12): rola até ele e destaca
+    function destacarDoLink() {
+        const id = new URLSearchParams(location.search).get('k'); if (!id) return;
+        const k = KITS.find(x => String(x.id) === id), el = $('kit-' + id); if (!k || !el) return;
+        document.title = `${k.nome} | Mini Mundo`;
+        el.classList.add('destaque');
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 250);
+    }
+    const obs = new IntersectionObserver(([e]) => $('filtros').classList.toggle('colado', !e.isIntersecting));
+    obs.observe($('hero-bt'));
+    carregar();
+</script>
+</body>
+</html>

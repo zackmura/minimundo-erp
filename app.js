@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.5.0";
+const VERSAO_APP = "v5.6.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -143,6 +143,7 @@ window.TELAS = {
     vendas: ['carrinho', 'Vendas', 'Lance pedidos e acompanhe os recebimentos'],
     precificar: ['calculadora', 'Precificar', 'Calcule o custo e cadastre peças e kits'],
     modelos: ['pacote', 'Produtos', 'Peças e kits com custo, preços e estoque'],
+    kits: ['camadas', 'Kits', 'Fotos, página para clientes e compartilhar'],
     custos: ['carteira', 'Custos', 'Compras e despesas do ateliê'],
     estoque: ['arquivo', 'Estoque', 'Ateliê, kits e peças com os vendedores'],
     vendedores: ['usuarios', 'Vendedores', 'Equipe, acertos e encomendas'],
@@ -228,6 +229,7 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(tabName==='precificar'){ window.pfMontarListas(); window.pfCalcular(); }
     if(tabName==='config') window.abrirAjustes();
     if(tabName==='usuarios') window.carregarUsuarios();
+    if(tabName==='kits') window.carregarKits();
     if(tabName==='dashboard_erp') window.carregarDashboardERP();
     if(tabName==='imas') window.carregarImas();
     if (window.atualizarBarraPDV) window.atualizarBarraPDV();
