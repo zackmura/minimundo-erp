@@ -2,8 +2,9 @@
 // 🛍️ PÁGINAS DE VENDA (Natal, Dia das Mães, Black Friday…)
 // ==========================================
 // Uma página por tema, com os kits e as peças escolhidos. Cada produto pode ter, só naquela página, nome,
-// texto e preço promocional. O cliente monta a sacola e manda o pedido pelo WhatsApp (loja.html?p=link).
-// Daqui também saem o link para as redes (com foto na prévia) e a arte pronta para Story e Feed.
+// texto e preço promocional. O cliente monta a sacola e faz o pedido no site (minimundo.vivainteligente.net/loja?p=link),
+// que chega na tela Pedidos. Mudar o link de uma página não quebra o antigo (o servidor guarda e leva para o novo).
+// Daqui também saem o link para divulgar e a arte pronta para Story e Feed.
 (() => {
 const $ = window.$;
 const esc = s => window.esc(s);
@@ -22,8 +23,8 @@ const dataBR = s => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$
 const slugDe = s => window.normMM(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
 const SLUG_TEMA = { natal: 'natal', blackfriday: 'black-friday', maes: 'dia-das-maes', namorados: 'dia-dos-namorados', pascoa: 'pascoa', pais: 'dia-dos-pais', criancas: 'dia-das-criancas' };
 
-window.linkSocialPg = (slug, item) => `${API_BASE}/p/${encodeURIComponent(slug)}${item ? '/' + item : ''}`;
-window.linkSitePg = (slug, item) => new URL(`loja.html?p=${encodeURIComponent(slug)}${item ? '&i=' + item : ''}`, location.href).href;
+// Link no seu domínio, o mesmo do painel: minimundo.vivainteligente.net/loja?p=natal
+window.linkSitePg = (slug, item) => new URL(`loja?p=${encodeURIComponent(slug)}${item ? '&i=' + item : ''}`, location.href).href;
 const nomeNaPagina = (it, p) => it.nome || (p ? p.modelo : '(produto removido)');
 const precoNaPagina = (it, p) => it.preco > 0 ? it.preco : (p && p.preco_venda) || 0;
 
@@ -49,7 +50,7 @@ window.renderizarPaginas = function() {
         : PG.cfg && !c.pagina_whatsapp ? `<div class="mm-alerta">${window.ic('alerta')} <span>Falta o WhatsApp que recebe os pedidos. Sem ele os clientes não conseguem mandar a sacola. <a onclick="abrirAjustesPaginas()">Colocar agora</a></span></div>` : '';
     if (!PG.lista.length) {
         box.innerHTML = `<div class="pg-vazio"><span class="pg-vazio-emoji">🎄</span><b>Crie a sua primeira página de venda</b>
-            <span>Uma página por data especial, com os kits e as peças que você escolher, fotos, preços e pedido pelo WhatsApp.</span>
+            <span>Uma página por data especial, com os kits e as peças que você escolher, fotos, preços e pedido pelo site.</span>
             <button class="btn-magic" onclick="novaPagina('natal')">${window.ic('mais')} Criar a página de Natal</button>
             <button class="btn-limpar" onclick="novaPagina()">Escolher outro tema</button></div>`;
         return;
@@ -63,7 +64,7 @@ window.renderizarPaginas = function() {
             <div class="pg-corpo">
                 <b>${esc(p.titulo)}</b>
                 <small>${esc(t.nome)} · ${p.itens.length} produto${p.itens.length === 1 ? '' : 's'}${p.pedidos_ate ? ` · encomendas até ${dataBR(p.pedidos_ate)}` : ''}</small>
-                <div class="pg-numeros"><span title="Vezes que a página foi aberta">${window.ic('olho')} ${p.visitas} visita${p.visitas === 1 ? '' : 's'}</span><span title="Sacolas enviadas pelo WhatsApp">${window.ic('zap')} ${p.pedidos} pedido${p.pedidos === 1 ? '' : 's'}</span></div>
+                <div class="pg-numeros"><span title="Vezes que a página foi aberta">${window.ic('olho')} ${p.visitas} visita${p.visitas === 1 ? '' : 's'}</span><span title="Pedidos feitos pela página">${window.ic('zap')} ${p.pedidos} pedido${p.pedidos === 1 ? '' : 's'}</span></div>
             </div>
             <div class="pg-botoes">
                 <button class="btn-magic btn-pequeno" onclick="compartilharPaginaPg(${p.id})">${window.ic('zap')} Divulgar</button>
@@ -113,7 +114,7 @@ window.abrirEditorPagina = function(id) {
     const p = paginaPorId(id); if (!p) return window.renderizarPaginas();
     PG.editando = id; PG.temaEditor = p.tema; PG.capaEditor = p.capa;
     $('pg-lista-box').hidden = true; $('pg-editor').hidden = false;
-    const social = window.linkSocialPg(p.slug);
+    const social = window.linkSitePg(p.slug);
     $('pg-editor').innerHTML = `
         <div class="pg-ed-topo"><button class="btn-limpar" onclick="renderizarPaginas(); window.scrollTo(0, 0)">${window.ic('voltar')} Páginas</button>
             <a class="btn-limpar" href="${esc(window.linkSitePg(p.slug))}" target="_blank" rel="noopener">${window.ic('olho')} Ver página</a></div>
@@ -126,7 +127,7 @@ window.abrirEditorPagina = function(id) {
             <button type="button" class="btn-limpar ep-link" id="pe-ia" onclick="iaTextoPagina()" style="margin:-4px 0 14px;">✨ Escrever título e texto com IA</button>
             <div class="row">
                 <div class="col"><div class="input-group"><label for="pe-ate">Encomendas até</label><input type="date" id="pe-ate" value="${esc(p.pedidos_ate)}"><small class="texto-ajuda">Aparece com contagem regressiva. Pode deixar vazio.</small></div></div>
-                <div class="col"><div class="input-group"><label for="pe-slug">Link da página</label><div class="pe-slug"><span>…/p/</span><input type="text" id="pe-slug" value="${esc(p.slug)}" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false"></div></div></div>
+                <div class="col"><div class="input-group"><label for="pe-slug">Link da página</label><div class="pe-slug"><span>…/loja?p=</span><input type="text" id="pe-slug" value="${esc(p.slug)}" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false"></div></div></div>
             </div>
             <div class="input-group"><label>Foto de capa <small class="rot-dica">opcional, larga, aparece embaixo do título</small></label><div class="pe-capa" id="pe-capa"></div></div>
             <label class="chave" style="margin:4px 0 16px;"><input type="checkbox" id="pe-ativa" ${p.ativa ? 'checked' : ''}> Página no ar (clientes conseguem abrir)</label>
@@ -135,14 +136,15 @@ window.abrirEditorPagina = function(id) {
         <div>
             <div class="card">
                 <div class="card-cabeca"><div class="card-titulo">Divulgar</div></div>
-                <p class="card-desc" style="margin-top:-8px;">Link para WhatsApp, Instagram e Facebook. Ele mostra a foto, o título e o preço na prévia.</p>
-                <div class="pe-link"><code>${esc(social.replace(/^https?:\/\//, ''))}</code><button class="btn-limpar" onclick="copiarTexto('${esc(social)}', 'Link da página copiado!')">${window.ic('copiar')} Copiar</button></div>
+                <p class="card-desc" style="margin-top:-8px;">Link da página no seu site, para WhatsApp, Instagram e Facebook.</p>
+                <div class="pe-link"><code>${esc(social.replace(/^https?:\/\//, ''))}</code><button class="btn-limpar" onclick="copiarTexto(this.dataset.l, 'Link da página copiado!')" data-l="${esc(social)}">${window.ic('copiar')} Copiar</button></div>
+                ${p.links_antigos && p.links_antigos.length ? `<p class="texto-ajuda pe-antigos">${window.ic('check')} Links antigos que continuam funcionando: ${p.links_antigos.map(s => `<code>${esc(s)}</code>`).join(' ')}</p>` : ''}
                 <div class="pe-divulgar"><button class="btn-magic btn-pequeno" onclick="compartilharPaginaPg(${p.id})">${window.ic('zap')} Compartilhar</button><button class="btn-limpar" onclick="abrirArte(${p.id})">${window.ic('imagem')} Arte para Instagram</button></div>
-                <div class="pg-numeros grande"><span>${window.ic('olho')} <b>${p.visitas}</b> visita${p.visitas === 1 ? '' : 's'}</span><span>${window.ic('zap')} <b>${p.pedidos}</b> pedido${p.pedidos === 1 ? '' : 's'} pelo WhatsApp</span></div>
+                <div class="pg-numeros grande"><span>${window.ic('olho')} <b>${p.visitas}</b> visita${p.visitas === 1 ? '' : 's'}</span><span>${window.ic('recibo')} <b>${p.pedidos}</b> pedido${p.pedidos === 1 ? '' : 's'} pela página</span><a onclick="switchTab('pedidos')">Ver pedidos →</a></div>
             </div>
             <div class="card">
                 <div class="card-cabeca"><div class="card-titulo">Produtos <span class="kit-conta" id="pe-conta"></span></div></div>
-                <p class="card-desc" style="margin-top:-8px;">Kits e peças avulsas. Toque num produto para mudar nome, texto e preço só nesta página. Fica salvo na hora.</p>
+                <p class="card-desc" style="margin-top:-8px;">Kits e peças avulsas. Em cada produto, o <b>lápis</b> muda nome, texto e preço só nesta página. Fica salvo na hora.</p>
                 <div class="pe-acoes"><button class="btn-magic btn-pequeno" onclick="escolherProdutosPg()">${window.ic('mais')} Adicionar produtos</button><button class="btn-limpar" id="pe-ia-itens" onclick="iaTextosItens()">✨ Textos com IA</button></div>
                 <div id="pe-itens"></div>
             </div>
@@ -211,7 +213,9 @@ window.renderizarItensPg = function() {
             <button type="button" class="pi-abrir" onclick="editarItemPg(${it.produto_id})">
                 <img src="${esc(fotoPrincipal(prod) || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'">
                 <span class="pi-info"><b>${it.destaque ? '<span class="pi-estrela" title="Destaque">★</span> ' : ''}${esc(nomeNaPagina(it, prod))}</b>
-                    <small>${prod && prod.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${preco ? `${it.preco > 0 && normal > it.preco ? `<s>${window.fmt(normal)}</s> ` : ''}${window.fmt(preco)}` : '<span class="neg">sem preço</span>'} · ${!prod ? 'removido' : prod.ativo === false ? 'inativo (não aparece)' : prontaEntrega(prod) ? 'pronta entrega' : 'sob encomenda'}${it.descricao ? '' : ' · <i>sem texto</i>'}</small></span></button>
+                    <small>${prod && prod.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${preco ? `${it.preco > 0 && normal > it.preco ? `<s>${window.fmt(normal)}</s> ` : ''}${window.fmt(preco)}` : '<span class="neg">sem preço</span>'} · ${!prod ? 'removido' : prod.ativo === false ? 'inativo (não aparece)' : prontaEntrega(prod) ? 'pronta entrega' : 'sob encomenda'}</small>
+                    <small class="pi-texto">${it.descricao ? esc(it.descricao) : '<i>Sem texto: toque no lápis para escrever</i>'}</small></span></button>
+            <button type="button" class="pi-editar" onclick="editarItemPg(${it.produto_id})" title="Mudar nome, texto e preço nesta página" aria-label="Editar ${esc(nomeNaPagina(it, prod))}">${window.ic('lapis')}</button>
             <span class="pi-ordem"><button type="button" onclick="moverItemPg(${n}, -1)" ${n ? '' : 'disabled'} aria-label="Subir">▲</button><button type="button" onclick="moverItemPg(${n}, 1)" ${n < p.itens.length - 1 ? '' : 'disabled'} aria-label="Descer">▼</button></span>
             <button type="button" class="pi-x" onclick="tirarItemPg(${it.produto_id})" title="Tirar da página">${window.ic('x')}</button></div>`;
     }).join('');
@@ -300,13 +304,13 @@ window.compartilharPaginaPg = function(id) {
     const p = paginaPorId(id); if (!p) return;
     if (!p.ativa) return window.mostrarAlerta('Página pausada', 'Ligue "Página no ar" no editor para os clientes conseguirem abrir o link.', 'warning');
     const t = window.temaMM(p.tema);
-    window.compartilharMM(p.titulo, `${t.emoji} *${p.titulo}*\n${p.texto || t.texto}${p.pedidos_ate ? `\n🎁 Encomendas até ${dataBR(p.pedidos_ate)}` : ''}\n\nVeja as fotos e faça seu pedido: ${window.linkSocialPg(p.slug)}`);
+    window.compartilharMM(p.titulo, `${t.emoji} *${p.titulo}*\n${p.texto || t.texto}${p.pedidos_ate ? `\n🎁 Encomendas até ${dataBR(p.pedidos_ate)}` : ''}\n\nVeja as fotos e faça seu pedido: ${window.linkSitePg(p.slug)}`);
 };
 window.compartilharItemPg = function(pid, pagId) {
     const p = paginaPorId(pagId || PG.editando), it = p && p.itens.find(i => i.produto_id === pid), prod = produtoPorId(pid); if (!it || !prod) return;
     if (!p.ativa) return window.mostrarAlerta('Página pausada', `A página "${p.titulo}" está fora do ar. Ligue "Página no ar" para o link funcionar.`, 'warning');
     const preco = precoNaPagina(it, prod), t = window.temaMM(p.tema);
-    window.compartilharMM(nomeNaPagina(it, prod), `${t.emoji} *${nomeNaPagina(it, prod)}*${preco ? ` por ${window.fmt(preco)}` : ''}\n${it.descricao || ''}${prod.tipo === 'kit' ? `\n${(prod.itens || []).map(i => `• ${i.qtd}× ${i.nome_vitrine || (produtoPorId(i.produto_id) || {}).modelo || ''}`).join('\n')}` : ''}\n\nVeja as fotos: ${window.linkSocialPg(p.slug, pid)}`.replace(/\n{3,}/g, '\n\n'));
+    window.compartilharMM(nomeNaPagina(it, prod), `${t.emoji} *${nomeNaPagina(it, prod)}*${preco ? ` por ${window.fmt(preco)}` : ''}\n${it.descricao || ''}${prod.tipo === 'kit' ? `\n${(prod.itens || []).map(i => `• ${i.qtd}× ${i.nome_vitrine || (produtoPorId(i.produto_id) || {}).modelo || ''}`).join('\n')}` : ''}\n\nVeja as fotos: ${window.linkSitePg(p.slug, pid)}`.replace(/\n{3,}/g, '\n\n'));
 };
 // Em quais páginas o produto aparece (atalho no Kits e na edição rápida)
 window.paginasDoProduto = async function(pid) {
@@ -531,13 +535,13 @@ window.desenharArtePg = async function() {
     const it = a.pid ? p.itens.find(i => i.produto_id === a.pid) : null, prod = it && produtoPorId(it.produto_id);
     const item = prod ? { nome: nomeNaPagina(it, prod), preco: precoNaPagina(it, prod), de: it.preco > 0 && prod.preco_venda > it.preco ? prod.preco_venda : 0, foto: fotoPrincipal(prod) } : null;
     const fotos = p.itens.map(i => fotoPrincipal(produtoPorId(i.produto_id))).filter(Boolean);
-    const dominio = String((PG.cfg && PG.cfg.site_url) || location.origin).replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const dominio = String((PG.cfg && PG.cfg.site_url) || location.origin).replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/loja';
     const tela = document.createElement('canvas');
     await desenharArte(tela, { pagina: p, formato: a.formato, item, fotos: p.capa ? [p.capa, ...fotos] : fotos, dominio });
     if (vez !== a.vez || !$('ar-canvas')) return; // trocou de opção no meio
     cv.width = tela.width; cv.height = tela.height; cv.getContext('2d').drawImage(tela, 0, 0);
     $('ar-carregando').hidden = true;
-    const t = window.temaMM(p.tema), link = window.linkSocialPg(p.slug, item ? a.pid : 0);
+    const t = window.temaMM(p.tema), link = window.linkSitePg(p.slug, item ? a.pid : 0);
     $('ar-legenda').value = item
         ? `${t.emoji} ${item.nome}${item.preco ? ` · ${window.fmt(item.preco)}` : ''}\n${it.descricao || ''}\n\n🛍️ Peça pelo link: ${link}\n\n${t.hashtags}`.replace(/\n{3,}/g, '\n\n')
         : `${t.emoji} ${p.titulo}\n${p.texto || t.texto}${p.pedidos_ate ? `\n🎁 Encomendas até ${dataBR(p.pedidos_ate)}` : ''}\n\n🛍️ Veja tudo e peça pelo link: ${link}\n\n${t.hashtags}`;

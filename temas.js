@@ -61,9 +61,28 @@ window.aplicarTemaMM = function(el, id) {
 };
 // Número "aleatório" que se repete (o enfeite fica igual toda vez que a página abre)
 const semente = s => () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-// Enfeite do topo da página: neve caindo, corações subindo, confete… (só CSS, para no "reduzir movimento")
-window.enfeiteMM = function(id, n = 26) {
-    const t = window.temaMM(id), r = semente(7), cores = t.cores.enfeite;
+// Símbolo do tema (títulos das seções) e as três cores da fitinha dos cartões
+const GLIFO = { neve: '❄', brilho: '✦', flores: '❀', coracoes: '♥', ovos: '✿', estrelas: '★', confete: '✦', nenhum: '✦' };
+window.glifoMM = id => GLIFO[window.temaMM(id).enfeite] || '✦';
+window.fitaMM = id => { const t = window.temaMM(id), c = t.cores; return id === 'natal' ? ['#1d3a2b', '#b3262f', '#c9a24a'] : [c.tinta, c.ouro, c.ouro2]; };
+// Fundo da página inteira: desenhinhos do tema bem clarinhos, repetidos (SVG embutido, não baixa nada)
+window.padraoMM = function(id) {
+    const t = window.temaMM(id), cor = t.cores.ouro2, e = t.enfeite;
+    const forma = {
+        neve: '<path d="M0-7V7M-6-3.5L6 3.5M-6 3.5L6-3.5" stroke="C" stroke-width="1.3" stroke-linecap="round" fill="none"/>',
+        coracoes: '<path d="M0 6C-6 1-7-2-5-5C-3-7 0-6 0-3C0-6 3-7 5-5C7-2 6 1 0 6Z" fill="C"/>',
+        flores: '<g fill="C"><circle cx="0" cy="-4" r="2.6"/><circle cx="3.8" cy="-1.2" r="2.6"/><circle cx="2.4" cy="3.3" r="2.6"/><circle cx="-2.4" cy="3.3" r="2.6"/><circle cx="-3.8" cy="-1.2" r="2.6"/></g>',
+        ovos: '<ellipse rx="4" ry="5.5" fill="C"/>',
+        confete: '<rect x="-4" y="-2" width="8" height="4" rx="1" fill="C"/>'
+    }[e] || '<path d="M0-7L1.6-1.6L7 0L1.6 1.6L0 7L-1.6 1.6L-7 0L-1.6-1.6Z" fill="C"/>';
+    const pos = [[26, 30, 0, 1], [98, 22, 25, .7], [62, 88, 50, .85], [124, 116, 15, .6], [18, 128, 70, .7]];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="148" height="148"><g opacity="${t.escuro ? .5 : .55}">${pos.map(([x, y, r, s]) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})">${forma.replace(/C/g, cor)}</g>`).join('')}</g></svg>`;
+    return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+};
+// Enfeite animado: neve caindo, corações subindo, confete… (só CSS, para no "reduzir movimento").
+// classe "fixo" = camada leve que acompanha a página inteira enquanto rola
+window.enfeiteMM = function(id, n = 26, classe = '') {
+    const t = window.temaMM(id), r = semente(classe ? 13 : 7), cores = t.cores.enfeite;
     if (t.enfeite === 'nenhum') return '';
     const forma = { neve: '❄', brilho: '✦', flores: '❀', coracoes: '♥', ovos: '', estrelas: '★', confete: '' }[t.enfeite];
     let h = '';
@@ -71,7 +90,7 @@ window.enfeiteMM = function(id, n = 26) {
         const cor = cores[Math.floor(r() * cores.length)], x = (r() * 100).toFixed(1), y = (r() * 92).toFixed(1), dur = (9 + r() * 10).toFixed(1), atraso = (-r() * 18).toFixed(1), tam = (0.55 + r() * 0.9).toFixed(2), gira = Math.round(r() * 360);
         h += `<i style="--x:${x}%;--y:${y}%;--d:${dur}s;--t:${atraso}s;--s:${tam};--r:${gira}deg;color:${cor}">${forma}</i>`;
     }
-    return `<div class="enfeite enfeite-${t.enfeite}" aria-hidden="true">${h}</div>`;
+    return `<div class="enfeite enfeite-${t.enfeite}${classe ? ' ' + classe : ''}" aria-hidden="true">${h}</div>`;
 };
 // Mesmo enfeite desenhado na arte das redes (canvas)
 // bordas = só nas laterais e no alto, para não passar por cima de texto e foto

@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Mini Mundo | Presentes impressos em 3D</title>
-    <meta name="description" content="Kits e peças impressos em 3D, feitos à mão pela Mini Mundo. Veja as fotos, monte sua sacola e peça pelo WhatsApp.">
+    <meta name="description" content="Kits e peças impressos em 3D, feitos à mão pela Mini Mundo. Veja as fotos, monte sua sacola e faça seu pedido.">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Mini Mundo · Impressão 3D & Design">
-    <meta property="og:description" content="Kits e peças impressos em 3D, feitos à mão. Veja as fotos e os preços.">
+    <meta property="og:site_name" content="Mini Mundo · Impressão 3D & Design">
+    <meta property="og:title" content="Mini Mundo · Presentes impressos em 3D">
+    <meta property="og:description" content="Kits e peças feitos à mão, camada por camada. Veja as fotos, os preços e faça seu pedido.">
     <meta property="og:image" content="https://minimundo.vivainteligente.net/logo.jpg">
     <meta name="theme-color" content="#f7f1e8">
     <link rel="icon" href="logo.png">
@@ -18,23 +19,24 @@
     <style>
         :root {
             --fundo:#f7f1e8; --papel:#fffdf9; --tinta:#2b1d18; --tinta2:#4a3329; --texto:#3d2e27; --suave:#857065; --ouro:#a8762f; --ouro2:#dcbd88; --ouro3:#f3e6cf;
-            --linha:#ebe0cf; --botao:#2b1d18; --botaoTxt:#f7f1e8; --ok:#2e6b4c; --okBg:#e4f1e9;
+            --linha:#ebe0cf; --botao:#2b1d18; --botaoTxt:#f7f1e8; --ok:#2e6b4c; --okBg:#e4f1e9; --fita1:#2b1d18; --fita2:#a8762f; --fita3:#dcbd88;
             --sombra:0 1px 2px rgba(43,29,24,.05), 0 18px 40px -18px rgba(43,29,24,.22);
             --serif:'Fraunces', Georgia, 'Times New Roman', serif; --sans:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
         }
         .escuro { --sombra:0 1px 2px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.7); }
         * { box-sizing:border-box; }
         html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
-        body { margin:0; font-family:var(--sans); color:var(--texto); background:var(--fundo); line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:clip; }
+        body { margin:0; font-family:var(--sans); color:var(--texto); background-color:var(--fundo); background-image:var(--padrao, none); background-size:148px 148px; line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:clip; }
         img { display:block; max-width:100%; }
         button, input, textarea { font-family:inherit; }
         a { color:inherit; }
         [hidden] { display:none !important; }
+        .por-cima { position:relative; z-index:1; }
 
         /* ---------- Topo ---------- */
-        .hero { position:relative; overflow:hidden; text-align:center; padding:calc(46px + env(safe-area-inset-top)) 20px 38px; color:var(--tinta);
-            background:radial-gradient(1100px 420px at 50% -140px, color-mix(in srgb, var(--papel) 85%, transparent), transparent 70%); }
-        .hero-escuro .hero { background:radial-gradient(900px 520px at 50% 0%, var(--hero-fundo), var(--hero-fundo2)); color:var(--hero-tinta); border-radius:0 0 40px 40px; }
+        .hero { position:relative; overflow:hidden; text-align:center; padding:calc(46px + env(safe-area-inset-top)) 20px 38px; color:var(--tinta); z-index:1;
+            background:radial-gradient(1100px 420px at 50% -140px, var(--papel), transparent 70%); }
+        .hero-escuro .hero { background:radial-gradient(900px 520px at 50% 0%, var(--hero-fundo), var(--hero-fundo2)); color:var(--hero-tinta); border-radius:0 0 40px 40px; box-shadow:0 20px 40px -24px rgba(0,0,0,.5); }
         .hero > *:not(.enfeite):not(.bolas) { position:relative; z-index:1; }
         .logo { width:112px; height:112px; margin:0 auto 18px; border-radius:50%; background:#fff; padding:8px; object-fit:contain; box-shadow:0 0 0 1px var(--ouro3), 0 0 0 7px var(--papel), 0 0 0 8px var(--ouro2), 0 16px 34px -12px rgba(0,0,0,.35); }
         .hero-escuro .logo { box-shadow:0 0 0 1px rgba(255,255,255,.2), 0 0 0 7px rgba(255,255,255,.08), 0 0 0 8px var(--hero-ouro), 0 18px 40px -12px rgba(0,0,0,.6); }
@@ -44,7 +46,7 @@
         .divisor { display:flex; align-items:center; justify-content:center; gap:10px; margin:20px auto 16px; color:var(--ouro2); }
         .hero-escuro .divisor { color:var(--hero-ouro); }
         .divisor::before, .divisor::after { content:''; width:46px; height:1px; background:currentColor; }
-        .divisor i { width:6px; height:6px; border:1px solid currentColor; transform:rotate(45deg); }
+        .divisor i { font-style:normal; font-size:.8rem; line-height:1; }
         .lead { margin:0 auto; max-width:38ch; font-size:1.02rem; color:var(--suave); }
         .hero-escuro .lead { color:var(--hero-suave); }
         .prazo { display:inline-flex; align-items:center; gap:8px; margin-top:20px; padding:9px 16px; border-radius:999px; font-size:.84rem; font-weight:600; background:var(--papel); color:var(--tinta); box-shadow:0 0 0 1px var(--ouro2); }
@@ -52,7 +54,7 @@
         .hero-escuro .prazo { background:rgba(255,255,255,.1); color:var(--hero-tinta); box-shadow:0 0 0 1px rgba(255,255,255,.22); }
         .hero-escuro .prazo b { color:var(--hero-ouro); }
         .hero-bt { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:22px; }
-        .pilula { display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:600; font-size:.88rem; padding:12px 20px; border-radius:999px; border:1px solid var(--botao); background:var(--botao); color:var(--botaoTxt); cursor:pointer; transition:transform .15s, opacity .15s; }
+        .pilula { display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; font-weight:600; font-size:.88rem; padding:12px 20px; border-radius:999px; border:1px solid var(--botao); background:var(--botao); color:var(--botaoTxt); cursor:pointer; transition:transform .15s, opacity .15s; }
         .pilula:hover { transform:translateY(-1px); opacity:.92; }
         .pilula.clara { background:transparent; color:var(--tinta); border-color:var(--ouro2); }
         .hero-escuro .hero .pilula { background:var(--hero-ouro); border-color:var(--hero-ouro); color:var(--hero-fundo2); }
@@ -72,6 +74,15 @@
         @keyframes piscar { 0%, 100% { opacity:0; transform:scale(.6); } 50% { opacity:.75; transform:scale(1); } }
         .enfeite-ovos i { top:var(--y); width:calc(15px * var(--s)); height:calc(20px * var(--s)); border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; background:currentColor; opacity:.35; animation-name:boiar; }
         @keyframes boiar { 0%, 100% { transform:translateY(0) rotate(-8deg); } 50% { transform:translateY(-10px) rotate(8deg); } }
+        /* Camada leve que acompanha a página toda enquanto rola */
+        .enfeite.fixo { position:fixed; z-index:0; }
+        .enfeite.fixo i { color:var(--ouro2) !important; text-shadow:none; animation-name:cairTela; }
+        .enfeite-neve.fixo i, .enfeite-flores.fixo i, .enfeite-confete.fixo i { opacity:.45; }
+        .enfeite-coracoes.fixo i { animation-name:subirTela; opacity:.3; }
+        .enfeite-brilho.fixo i, .enfeite-estrelas.fixo i { animation-name:piscar; }
+        .enfeite-ovos.fixo i { animation-name:boiar; opacity:.25; }
+        @keyframes cairTela { from { transform:translate3d(0, 0, 0) rotate(0); } to { transform:translate3d(30px, calc(100vh + 60px), 0) rotate(var(--r)); } }
+        @keyframes subirTela { from { transform:translateY(0); } to { transform:translateY(calc(-100vh - 60px)) rotate(12deg); } }
         .bolas { position:absolute; inset:0; pointer-events:none; z-index:0; }
         .bolas svg { position:absolute; top:0; width:58px; animation:balanca 5s ease-in-out infinite; transform-origin:top center; }
         .bolas svg:nth-child(1) { left:7%; } .bolas svg:nth-child(2) { left:18%; width:44px; animation-delay:-1.5s; } .bolas svg:nth-child(3) { right:9%; animation-delay:-3s; } .bolas svg:nth-child(4) { right:21%; width:40px; animation-delay:-.7s; }
@@ -81,7 +92,7 @@
         .capa img { width:100%; aspect-ratio:21 / 9; object-fit:cover; border-radius:26px; box-shadow:var(--sombra); }
 
         /* ---------- Filtros ---------- */
-        .filtros { position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--fundo) 88%, transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid transparent; transition:border-color .2s; margin-top:12px; }
+        .filtros { position:sticky; top:0; z-index:20; background:var(--fundo); background:color-mix(in srgb, var(--fundo) 88%, transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid transparent; transition:border-color .2s; margin-top:12px; }
         .filtros.colado { border-bottom-color:var(--linha); }
         .filtros-in { max-width:1180px; margin:0 auto; padding:12px 20px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
         .filtros-in::-webkit-scrollbar { display:none; }
@@ -91,34 +102,45 @@
         .chip small { font-weight:500; opacity:.7; margin-left:4px; }
 
         /* ---------- Produtos ---------- */
-        main { max-width:1180px; margin:0 auto; padding:18px 20px 40px; }
-        .secao { margin-top:26px; }
+        main { position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:18px 20px 40px; }
+        .secao { position:relative; margin-top:30px; }
         .secao:first-child { margin-top:8px; }
         .sec-tit { display:flex; align-items:baseline; gap:12px; margin:0 0 18px; font-family:var(--serif); font-weight:500; font-size:1.7rem; color:var(--tinta); letter-spacing:-.01em; }
         .sec-tit small { font-family:var(--sans); font-size:.8rem; font-weight:500; color:var(--suave); }
-        .sec-tit::after { content:''; flex:1; height:1px; background:var(--linha); align-self:center; }
+        .sec-tit .orn { color:var(--ouro); font-size:1rem; align-self:center; }
+        .sec-tit::after { content:''; flex:1; height:1px; background:linear-gradient(90deg, var(--ouro2), transparent); align-self:center; }
+        /* Destaques numa faixa com a cor do tema */
+        .secao.destaques { overflow:hidden; background:var(--ouro3); border-radius:30px; padding:26px 22px 28px; box-shadow:inset 0 0 0 1px var(--linha); }
+        .hero-escuro .secao.destaques { background:radial-gradient(800px 400px at 50% 0%, var(--hero-fundo), var(--hero-fundo2)); box-shadow:none; }
+        .hero-escuro .secao.destaques .sec-tit { color:var(--hero-tinta); }
+        .hero-escuro .secao.destaques .sec-tit small { color:var(--hero-suave); }
+        .hero-escuro .secao.destaques .sec-tit .orn { color:var(--hero-ouro); }
+        .secao.destaques > .enfeite i { font-size:calc(12px * var(--s)); }
+        .secao.destaques > *:not(.enfeite) { position:relative; z-index:1; }
         .grade { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 372px)); justify-content:center; gap:26px; }
         .grade > * { min-width:0; }
         .card { background:var(--papel); border:1px solid var(--linha); border-radius:26px; overflow:hidden; box-shadow:var(--sombra); display:flex; flex-direction:column; transition:transform .25s, box-shadow .25s; scroll-margin-top:84px; }
         @media (hover:hover) { .card:hover { transform:translateY(-3px); } }
         .card.marcado { box-shadow:0 0 0 3px var(--ouro2), var(--sombra); }
         .fotos { position:relative; aspect-ratio:1 / 1; background:var(--ouro3); }
+        /* Fitinha com as cores do tema entre a foto e o texto */
+        .fotos::after { content:''; position:absolute; left:0; right:0; bottom:0; height:5px; background:linear-gradient(90deg, var(--fita1) 0 33.3%, var(--fita2) 33.3% 66.6%, var(--fita3) 66.6%); z-index:2; }
         .trilho { display:flex; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
         .trilho::-webkit-scrollbar { display:none; }
         .foto { flex:0 0 100%; height:100%; scroll-snap-align:center; border:none; padding:0; background:none; cursor:zoom-in; }
         .foto img { width:100%; height:100%; object-fit:cover; }
         .sem-foto { display:flex; align-items:center; justify-content:center; height:100%; }
         .sem-foto img { width:42%; opacity:.9; }
-        .selos { position:absolute; top:14px; left:14px; right:14px; display:flex; gap:6px; flex-wrap:wrap; pointer-events:none; }
+        .selos { position:absolute; top:14px; left:14px; right:14px; display:flex; gap:6px; flex-wrap:wrap; pointer-events:none; z-index:2; }
         .selo { display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:600; padding:7px 12px; border-radius:999px; background:rgba(255,253,249,.93); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:#a8762f; box-shadow:0 2px 10px rgba(0,0,0,.12); }
         .selo::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
         .selo.pronta { color:#2e6b4c; }
         .selo.kit { color:#5b3a8c; } .selo.kit::before { display:none; }
         .selo.promo { background:var(--ouro); color:#fff; margin-left:auto; } .selo.promo::before { display:none; }
-        .pontos { position:absolute; left:0; right:0; bottom:12px; display:flex; justify-content:center; gap:6px; pointer-events:none; }
+        .pontos { position:absolute; left:0; right:0; bottom:14px; display:flex; justify-content:center; gap:6px; pointer-events:none; z-index:2; }
         .pontos i { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.6); box-shadow:0 0 0 1px rgba(0,0,0,.12); transition:all .2s; }
         .pontos i.on { width:18px; border-radius:6px; background:#fff; }
-        .seta { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,253,249,.92); color:#2b1d18; display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+        .seta { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,253,249,.92); color:#2b1d18; display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.15); z-index:2; }
         .seta svg { width:18px; height:18px; } .seta.esq { left:12px; } .seta.dir { right:12px; }
         @media (hover:hover) { .fotos:hover .seta { display:flex; } }
         .corpo { padding:22px; display:flex; flex-direction:column; flex:1; }
@@ -141,6 +163,7 @@
         .acoes { display:flex; gap:8px; align-items:center; }
         .btn-add { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; background:var(--botao); color:var(--botaoTxt); font-weight:600; font-size:.9rem; padding:13px 20px; border-radius:999px; transition:transform .15s, opacity .15s; text-decoration:none; }
         .btn-add:hover { transform:translateY(-1px); opacity:.92; }
+        .btn-add:disabled { opacity:.6; cursor:wait; transform:none; }
         .btn-add svg { width:18px; height:18px; }
         .passo { display:inline-flex; align-items:center; border-radius:999px; background:var(--botao); color:var(--botaoTxt); overflow:hidden; }
         .passo button { width:44px; height:46px; border:none; background:none; color:inherit; font-size:1.25rem; cursor:pointer; }
@@ -169,29 +192,57 @@
         .aviso h2 { font-family:var(--serif); font-weight:500; font-size:1.7rem; color:var(--tinta); margin:0 0 8px; }
         .aviso p { margin:0 0 20px; }
 
-        footer { text-align:center; padding:36px 20px calc(110px + env(safe-area-inset-bottom)); border-top:1px solid var(--linha); }
-        footer img { width:64px; height:64px; margin:0 auto 12px; border-radius:50%; background:#fff; padding:5px; object-fit:contain; box-shadow:0 0 0 1px var(--ouro3); }
+        /* ---------- Acompanhar pedido ---------- */
+        .acomp { max-width:620px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+        .bloco { background:var(--papel); border:1px solid var(--linha); border-radius:24px; padding:22px; box-shadow:var(--sombra); }
+        .bloco h2 { margin:0 0 14px; font-family:var(--serif); font-weight:500; font-size:1.35rem; color:var(--tinta); }
+        .etapas { list-style:none; margin:0; padding:0; display:grid; gap:0; }
+        .etapas li { position:relative; display:flex; gap:14px; align-items:flex-start; padding:0 0 18px; color:var(--suave); }
+        .etapas li:last-child { padding-bottom:0; }
+        .etapas li::before { content:''; position:absolute; left:13px; top:28px; bottom:0; width:2px; background:var(--linha); }
+        .etapas li:last-child::before { display:none; }
+        .etapas .bola { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--fundo); border:2px solid var(--linha); font-size:.8rem; font-weight:700; position:relative; z-index:1; }
+        .etapas li.feita { color:var(--texto); } .etapas li.feita .bola { background:var(--ok); border-color:var(--ok); color:#fff; } .etapas li.feita::before { background:var(--ok); }
+        .etapas li.agora { color:var(--tinta); } .etapas li.agora .bola { background:var(--botao); border-color:var(--botao); color:var(--botaoTxt); box-shadow:0 0 0 5px var(--ouro3); }
+        .etapas b { display:block; font-size:.95rem; } .etapas small { font-size:.8rem; }
+        .cancelado { text-align:center; color:#b42318; font-weight:600; }
+        .linha-item { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px dashed var(--linha); font-size:.92rem; }
+        .linha-item:last-child { border-bottom:none; }
+        .linha-item span:last-child { white-space:nowrap; font-variant-numeric:tabular-nums; }
+        .linha-total { display:flex; justify-content:space-between; margin-top:12px; font-weight:600; }
+        .linha-total strong { font-family:var(--serif); font-weight:500; font-size:1.5rem; color:var(--tinta); }
+        .info-p { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; font-size:.88rem; }
+        .info-p b { display:block; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--suave); font-weight:600; margin-bottom:2px; }
+        .tag-pago { display:inline-block; font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--okBg); color:var(--ok); margin-left:6px; }
+
+        footer { position:relative; z-index:1; overflow:hidden; text-align:center; padding:40px 20px calc(110px + env(safe-area-inset-bottom)); border-top:1px solid var(--linha); background:var(--ouro3); }
+        .hero-escuro footer { background:radial-gradient(900px 400px at 50% 100%, var(--hero-fundo), var(--hero-fundo2)); color:var(--hero-tinta); border-top:none; border-radius:40px 40px 0 0; margin-top:20px; }
+        footer > *:not(.enfeite) { position:relative; z-index:1; }
+        footer img { width:64px; height:64px; margin:0 auto 12px; border-radius:50%; background:#fff; padding:5px; object-fit:contain; box-shadow:0 0 0 1px var(--ouro3), 0 0 0 4px var(--papel), 0 0 0 5px var(--ouro2); }
         footer .frase { font-family:var(--serif); font-style:italic; font-size:1.15rem; color:var(--tinta); margin:0 0 6px; }
         footer .marca { font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ouro); margin:0; }
-        footer .links { display:flex; justify-content:center; gap:18px; margin-top:16px; font-size:.86rem; font-weight:600; }
+        .hero-escuro footer .frase { color:var(--hero-tinta); } .hero-escuro footer .marca { color:var(--hero-ouro); }
+        footer .links { display:flex; justify-content:center; flex-wrap:wrap; gap:8px 18px; margin-top:16px; font-size:.86rem; font-weight:600; }
         footer .links a { text-decoration:none; color:var(--tinta2); border-bottom:1px solid var(--ouro2); padding-bottom:1px; cursor:pointer; }
+        .hero-escuro footer .links a { color:var(--hero-tinta); border-bottom-color:var(--hero-ouro); }
 
-        /* ---------- Sacola ---------- */
+        /* ---------- Sacola e finalizar pedido ---------- */
         .barra { position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:30; width:calc(100% - 32px); max-width:460px; display:flex; align-items:center; gap:12px; padding:10px 10px 10px 18px; border-radius:999px; background:var(--botao); color:var(--botaoTxt); box-shadow:0 14px 34px -10px rgba(0,0,0,.45); cursor:pointer; border:none; text-align:left; animation:aparece .25s ease; }
         @keyframes aparece { from { transform:translate(-50%, 20px); opacity:0; } }
         .barra svg { width:22px; height:22px; flex-shrink:0; }
         .barra span { flex:1; min-width:0; font-size:.9rem; } .barra span b { display:block; font-size:1rem; }
-        .barra em { font-style:normal; font-weight:600; font-size:.86rem; background:color-mix(in srgb, var(--botaoTxt) 16%, transparent); padding:10px 16px; border-radius:999px; white-space:nowrap; }
+        .barra em { font-style:normal; font-weight:600; font-size:.86rem; background:rgba(255,255,255,.16); padding:10px 16px; border-radius:999px; white-space:nowrap; }
         .zap-flutuante { position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:30; width:58px; height:58px; border-radius:50%; background:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 26px -6px rgba(37,211,102,.55), 0 2px 6px rgba(0,0,0,.15); }
         .zap-flutuante svg { width:30px; height:30px; }
         .fundo-sacola { position:fixed; inset:0; z-index:40; background:rgba(20,14,10,.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:surge .2s ease; }
         @keyframes surge { from { opacity:0; } }
-        .sacola { position:fixed; z-index:41; left:0; right:0; bottom:0; max-height:88vh; overflow:auto; background:var(--papel); color:var(--texto); border-radius:28px 28px 0 0; padding:10px 20px calc(20px + env(safe-area-inset-bottom)); box-shadow:0 -10px 40px rgba(0,0,0,.25); animation:sobe .25s ease; }
+        .sacola { position:fixed; z-index:41; left:0; right:0; bottom:0; max-height:90vh; overflow:auto; overscroll-behavior:contain; background:var(--papel); color:var(--texto); border-radius:28px 28px 0 0; padding:10px 20px calc(20px + env(safe-area-inset-bottom)); box-shadow:0 -10px 40px rgba(0,0,0,.25); animation:sobe .25s ease; }
         @keyframes sobe { from { transform:translateY(40px); opacity:0; } }
-        @media (min-width:700px) { .sacola { left:auto; right:24px; bottom:24px; width:420px; border-radius:26px; max-height:calc(100vh - 48px); } }
+        @media (min-width:700px) { .sacola { left:auto; right:24px; bottom:24px; width:440px; border-radius:26px; max-height:calc(100vh - 48px); } }
         .sacola .alca { width:42px; height:5px; border-radius:5px; background:var(--linha); margin:2px auto 12px; }
-        .sacola h2 { display:flex; align-items:center; justify-content:space-between; margin:0 0 6px; font-family:var(--serif); font-weight:500; font-size:1.6rem; color:var(--tinta); }
-        .sacola h2 button { border:none; background:var(--ouro3); color:var(--tinta); width:38px; height:38px; border-radius:50%; font-size:1.1rem; cursor:pointer; }
+        .sacola h2 { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 6px; font-family:var(--serif); font-weight:500; font-size:1.55rem; color:var(--tinta); }
+        .sacola h2 button { border:none; background:var(--ouro3); color:var(--tinta); width:38px; height:38px; border-radius:50%; font-size:1.1rem; cursor:pointer; flex-shrink:0; }
+        .s-voltar { border:none; background:none; color:var(--suave); font-size:.86rem; font-weight:600; cursor:pointer; padding:4px 0; margin-bottom:6px; }
         .s-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--linha); }
         .s-item img { width:52px; height:52px; border-radius:14px; object-fit:cover; background:var(--ouro3); flex-shrink:0; }
         .s-info { flex:1; min-width:0; } .s-info b { display:block; font-size:.92rem; color:var(--tinta); line-height:1.25; } .s-info small { color:var(--suave); font-size:.8rem; }
@@ -200,9 +251,22 @@
         .s-passo b { min-width:20px; text-align:center; font-size:.88rem; }
         .s-total { display:flex; justify-content:space-between; align-items:baseline; margin:16px 0 14px; font-size:.95rem; }
         .s-total strong { font-family:var(--serif); font-weight:500; font-size:1.7rem; color:var(--tinta); }
-        .s-campo { display:block; width:100%; border:1px solid var(--linha); background:var(--fundo); color:var(--texto); border-radius:14px; padding:12px 14px; font-size:16px; margin-bottom:10px; resize:vertical; }
-        .s-enviar { width:100%; justify-content:center; background:#25d366 !important; color:#fff !important; padding:15px 20px; font-size:1rem; }
+        .s-rot { display:block; font-size:.78rem; font-weight:600; color:var(--tinta2); margin:12px 0 6px; }
+        .s-campo { display:block; width:100%; border:1px solid var(--linha); background:var(--fundo); color:var(--texto); border-radius:14px; padding:12px 14px; font-size:16px; resize:vertical; }
+        .s-campo:focus { outline:2px solid var(--ouro2); outline-offset:1px; }
+        .s-opcoes { display:flex; flex-wrap:wrap; gap:8px; }
+        .s-opcoes button { border:1px solid var(--linha); background:var(--fundo); color:var(--tinta2); font-size:.86rem; font-weight:600; padding:10px 14px; border-radius:999px; cursor:pointer; }
+        .s-opcoes button.on { background:var(--botao); border-color:var(--botao); color:var(--botaoTxt); }
+        .s-erro { color:#b42318; font-size:.85rem; font-weight:600; margin:10px 0 0; min-height:1px; }
+        .s-enviar { width:100%; margin-top:16px; padding:15px 20px; font-size:1rem; }
         .s-nota { text-align:center; font-size:.78rem; color:var(--suave); margin:10px 0 0; }
+        .s-ok { text-align:center; padding:8px 0 4px; }
+        .s-ok .s-selo { width:72px; height:72px; margin:4px auto 12px; border-radius:50%; background:var(--okBg); color:var(--ok); display:flex; align-items:center; justify-content:center; font-size:2rem; }
+        .s-ok h2 { justify-content:center; }
+        .s-ok p { color:var(--suave); margin:0 0 6px; }
+        .s-ok .pilula { width:100%; margin-top:10px; }
+        .pilula.zap { background:#25d366; border-color:#25d366; color:#fff; }
+        .escondido { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
         .toast { position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom)); transform:translate(-50%, 20px); background:var(--tinta); color:var(--papel); font-size:.88rem; font-weight:500; padding:12px 20px; border-radius:999px; opacity:0; pointer-events:none; transition:all .25s; z-index:50; white-space:nowrap; }
         .toast.on { opacity:1; transform:translate(-50%, 0); }
 
@@ -215,28 +279,33 @@
             .filtros-in { padding:10px 16px; }
             main { padding:14px 16px 32px; }
             .grade { grid-template-columns:minmax(0, 1fr); gap:20px; }
+            .secao.destaques { margin-left:-6px; margin-right:-6px; padding:22px 14px 20px; border-radius:26px; }
             .sec-tit { font-size:1.45rem; }
             .corpo { padding:20px 18px 18px; }
             .card h3 { font-size:1.4rem; }
             .acoes { width:100%; } .btn-add, .passo { flex:1; } .passo { justify-content:space-between; }
+            .info-p { grid-template-columns:minmax(0, 1fr); }
+            .hero-escuro footer { border-radius:30px 30px 0 0; }
         }
         @media (prefers-reduced-motion:reduce) {
             *, *::before, *::after { transition:none !important; animation:none !important; }
             .enfeite i { top:var(--y); opacity:.5; }
+            .enfeite.fixo { display:none; }
         }
     </style>
 </head>
 <body>
+    <div id="enfeite-fixo"></div>
     <header class="hero" id="hero">
         <img class="logo" src="logo.png" alt="Mini Mundo" onerror="this.src='logo.jpg'">
         <p class="sobre" id="selo">Mini Mundo · Impressão 3D &amp; Design</p>
         <h1 id="titulo">&nbsp;</h1>
-        <div class="divisor" aria-hidden="true"><i></i></div>
+        <div class="divisor" aria-hidden="true"><i id="glifo">✦</i></div>
         <p class="lead" id="texto"></p>
         <div id="prazo"></div>
         <div class="hero-bt" id="hero-bt"></div>
     </header>
-    <div class="capa" id="capa" hidden></div>
+    <div class="capa por-cima" id="capa" hidden></div>
     <nav class="filtros" id="filtros" aria-label="Filtrar produtos" hidden><div class="filtros-in" id="filtros-in"></div></nav>
     <main>
         <div id="conteudo">
@@ -248,7 +317,7 @@
         </div>
         <section class="outras" id="outras" hidden></section>
     </main>
-    <footer>
+    <footer id="rodape">
         <img src="logo.png" alt="" onerror="this.src='logo.jpg'">
         <p class="frase">Feito à mão, camada por camada.</p>
         <p class="marca">Mini Mundo · Impressão 3D &amp; Design</p>
@@ -259,20 +328,27 @@
     <div id="sacola-box"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="temas.js?v=5.7.0"></script>
-<script src="galeria.js?v=5.7.0"></script>
+<script src="temas.js?v=5.8.0"></script>
+<script src="galeria.js?v=5.8.0"></script>
 <script>
-    // Página de venda para clientes: loja.html?p=natal (uma página por tema). Sem "p" mostra as coleções no ar.
-    // Os dados vêm do servidor (ações públicas): nome, texto, preço, fotos e peças. Custo e estoque nunca chegam aqui.
+    // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
+    // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
+    // O pedido é feito aqui mesmo e chega no painel (tela Pedidos). Custo e estoque nunca chegam aqui.
     // Para testar: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
     const API = localStorage.getItem('mm_api_url') || 'https://bdfernando.alwaysdata.net/mmapi/api';
-    const SOCIAL = API.replace(/\/api$/, '') + '/p/';
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const real = v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const zap = (tel, txt) => { let n = String(tel || '').replace(/\D/g, ''); if (n && n.length <= 11) n = '55' + n; return n ? `https://wa.me/${n}?text=${encodeURIComponent(txt)}` : ''; };
     const instaLink = s => { s = String(s || '').trim(); if (!s) return ''; return /^https?:\/\//i.test(s) ? s : `https://instagram.com/${s.replace(/^@/, '').replace(/^instagram\.com\//i, '')}`; };
-    const PARAMS = new URLSearchParams(location.search), SLUG = (PARAMS.get('p') || '').toLowerCase();
+    // Endereço curto da página (minimundo.vivainteligente.net/loja), mesmo se abriu como loja.html
+    const BASE = location.origin + location.pathname.replace(/\.html$/, '');
+    const linkPagina = (slug, item) => `${BASE}?p=${encodeURIComponent(slug)}${item ? '&i=' + item : ''}`;
+    const linkPedido = codigo => `${BASE}?pedido=${encodeURIComponent(codigo)}`;
+    const PARAMS = new URLSearchParams(location.search);
+    // Aceita loja?p=natal e também loja?natal
+    let SLUG = (PARAMS.get('p') || (!PARAMS.get('pedido') && [...PARAMS.keys()].find(k => !['i', 'pedido', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign'].includes(k) && !PARAMS.get(k))) || '').toLowerCase();
+    const CODIGO = (PARAMS.get('pedido') || '').toUpperCase();
     const IC = {
         zap: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91A9.85 9.85 0 0 0 12.04 2Zm5.8 14.13c-.25.69-1.44 1.32-1.98 1.37-.5.05-.98.24-3.32-.69-2.8-1.1-4.58-3.97-4.72-4.15-.14-.19-1.13-1.5-1.13-2.87 0-1.36.71-2.03.97-2.31.25-.28.55-.35.73-.35l.53.01c.17 0 .4-.06.62.48.25.6.85 2.06.92 2.21.08.15.12.32.03.51-.1.19-.14.31-.28.48-.14.16-.3.37-.42.49-.14.14-.29.29-.12.57.16.28.73 1.2 1.57 1.95 1.08.96 1.99 1.26 2.27 1.4.28.14.45.12.61-.07.17-.19.71-.83.9-1.11.19-.28.37-.23.63-.14.25.09 1.62.76 1.9.9.28.14.46.21.53.33.07.11.07.66-.18 1.35Z"/></svg>',
         insta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
@@ -283,32 +359,37 @@
     };
     const BOLA = (cor, brilho) => `<svg viewBox="0 0 60 140" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="78" stroke="${brilho}" stroke-width="1.2" opacity=".7"/><rect x="24" y="74" width="12" height="9" rx="2" fill="${brilho}"/><circle cx="30" cy="104" r="22" fill="${cor}"/><ellipse cx="22" cy="96" rx="6" ry="9" fill="#fff" opacity=".28" transform="rotate(25 22 96)"/><path d="M10 104c6 4 34 4 40 0" stroke="${brilho}" stroke-width="1.5" fill="none" opacity=".8"/></svg>`;
 
-    let DADOS = null, ITENS = [], FILTRO = 'tudo', SACOLA = [];
+    let DADOS = null, ITENS = [], FILTRO = 'tudo', SACOLA = [], TEMA = 'padrao', ETAPA = 'sacola', CHECKOUT = { entrega: 'retirar', pagamento: 'Pix' };
+    const guardar = (k, v) => { try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) { /* aba anônima */ } };
+    const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v === null ? padrao : JSON.parse(v); } catch (e) { return padrao; } };
     const chaveSacola = () => 'mm_sacola_' + SLUG;
-    function lerSacola() { try { SACOLA = JSON.parse(localStorage.getItem(chaveSacola()) || '[]').filter(s => s && s.id && s.qtd > 0); } catch (e) { SACOLA = []; } }
-    function gravarSacola() { try { localStorage.setItem(chaveSacola(), JSON.stringify(SACOLA)); } catch (e) { /* aba anônima */ } }
     function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2400); }
-    const post = async corpo => { const r = await (await fetch(API, { method: 'POST', body: JSON.stringify(corpo) })).json(); if (!r.sucesso) throw new Error(r.erro || 'erro'); return r; };
+    const post = async corpo => { const r = await (await fetch(API, { method: 'POST', body: JSON.stringify(corpo) })).json(); if (!r.sucesso) { const e = new Error(r.erro || 'erro'); e.negocio = true; throw e; } return r; };
 
-    // ---------- Topo ----------
+    // ---------- Tema (topo, fundo da página, destaques e rodapé) ----------
     function montarTopo(pagina, tema) {
-        const t = temaMM(tema);
-        aplicarTemaMM(document.documentElement, tema);
+        TEMA = tema; const t = temaMM(tema), raiz = document.documentElement, [f1, f2, f3] = fitaMM(tema);
+        aplicarTemaMM(raiz, tema);
+        raiz.style.setProperty('--padrao', padraoMM(tema)); raiz.style.setProperty('--fita1', f1); raiz.style.setProperty('--fita2', f2); raiz.style.setProperty('--fita3', f3);
         document.querySelector('meta[name="theme-color"]').content = t.hero ? t.hero.fundo : t.cores.fundo;
         const hero = $('hero');
         hero.querySelectorAll('.enfeite, .bolas').forEach(e => e.remove());
         hero.insertAdjacentHTML('afterbegin', enfeiteMM(tema));
         if (t.enfeite === 'neve') hero.insertAdjacentHTML('afterbegin', `<div class="bolas" aria-hidden="true">${BOLA('#b3262f', '#e3c47e') + BOLA('#e3c47e', '#e3c47e') + BOLA('#c9a24a', '#e3c47e') + BOLA('#b3262f', '#e3c47e')}</div>`);
+        $('enfeite-fixo').innerHTML = enfeiteMM(tema, 14, 'fixo');
+        const rod = $('rodape'); rod.querySelectorAll('.enfeite').forEach(e => e.remove()); if (t.hero) rod.insertAdjacentHTML('afterbegin', enfeiteMM(tema, 16));
+        $('glifo').textContent = glifoMM(tema);
         $('selo').textContent = t.selo;
-        $('titulo').innerHTML = esc(pagina.titulo || t.titulo);
+        $('titulo').textContent = pagina.titulo || t.titulo;
         $('texto').textContent = pagina.texto || t.texto;
         document.title = `${pagina.titulo || t.titulo} | Mini Mundo`;
     }
-    function montarContato(textoTopo) {
-        const L = DADOS.loja || {}, z = zap(L.whatsapp, 'Olá! Vim pela página da Mini Mundo.'), ig = instaLink(L.instagram);
-        $('hero-bt').innerHTML = (textoTopo || '') + (z && !textoTopo ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Fale com a gente</a>` : '') + (ig ? `<a class="pilula clara" href="${esc(ig)}" target="_blank" rel="noopener">${IC.insta} Instagram</a>` : '');
-        $('rodape-links').innerHTML = (z ? `<a href="${esc(z)}" target="_blank" rel="noopener">WhatsApp</a>` : '') + (ig ? `<a href="${esc(ig)}" target="_blank" rel="noopener">Instagram</a>` : '') + (SLUG ? `<a onclick="compartilharPagina()">Compartilhar</a>` : '');
-        if (z) { $('zap-flutuante').href = z; $('zap-flutuante').innerHTML = IC.zap; }
+    function montarContato() {
+        const L = (DADOS && DADOS.loja) || {}, z = zap(L.whatsapp, 'Olá! Vim pela página da Mini Mundo.'), ig = instaLink(L.instagram), meus = ler('mm_pedidos', []);
+        $('hero-bt').innerHTML = (z ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Fale com a gente</a>` : '') + (ig ? `<a class="pilula clara" href="${esc(ig)}" target="_blank" rel="noopener">${IC.insta} Instagram</a>` : '');
+        $('rodape-links').innerHTML = (z ? `<a href="${esc(z)}" target="_blank" rel="noopener">WhatsApp</a>` : '') + (ig ? `<a href="${esc(ig)}" target="_blank" rel="noopener">Instagram</a>` : '')
+            + (SLUG && DADOS && DADOS.pagina ? `<a onclick="compartilharPagina()">Compartilhar</a>` : '') + (meus.length ? `<a onclick="meusPedidos()">Meus pedidos (${meus.length})</a>` : '');
+        if (z) { $('zap-flutuante').href = z; $('zap-flutuante').innerHTML = IC.zap; $('zap-flutuante').hidden = !!SACOLA.length; }
     }
     // "Encomendas até 15/12 · faltam 12 dias"
     function montarPrazo(ate) {
@@ -321,23 +402,29 @@
     // ---------- Carregar ----------
     async function carregar() {
         try {
+            if (CODIGO) return mostrarPedido(await post({ acao: 'acompanhar_pedido', c: CODIGO }));
             if (!SLUG) return mostrarColecoes(await post({ acao: 'paginas_publicas' }));
             DADOS = await post({ acao: 'pagina_publica', p: SLUG });
+            // Link antigo da página: mostra o endereço de hoje
+            if (DADOS.pagina && DADOS.pagina.slug && DADOS.pagina.slug !== SLUG) {
+                const antiga = ler('mm_sacola_' + SLUG, null); SLUG = DADOS.pagina.slug;
+                if (antiga && !ler(chaveSacola(), null)) guardar(chaveSacola(), antiga);
+                history.replaceState(null, '', linkPagina(SLUG, PARAMS.get('i')));
+            }
             if (!DADOS.encontrada || DADOS.encerrada) return mostrarFora();
             const pg = DADOS.pagina;
-            montarTopo(pg, pg.tema); montarContato(); montarPrazo(pg.pedidos_ate);
+            montarTopo(pg, pg.tema); montarPrazo(pg.pedidos_ate);
             if (pg.capa) { $('capa').hidden = false; $('capa').innerHTML = `<img src="${esc(pg.capa)}" alt="${esc(pg.titulo)}">`; }
             ITENS = DADOS.itens || [];
-            lerSacola(); SACOLA = SACOLA.filter(s => ITENS.some(i => i.id === s.id && i.preco !== undefined));
-            montarFiltros(); renderizar(); atualizarBarra(); mostrarOutras(DADOS.outras, 'Veja também');
+            SACOLA = ler(chaveSacola(), []).filter(s => s && s.qtd > 0 && ITENS.some(i => i.id === s.id));
+            montarContato(); montarFiltros(); renderizar(); atualizarBarra(); mostrarOutras(DADOS.outras, 'Veja também');
             marcarDoLink();
-            if (!sessionStorage.getItem('mm_visita_' + SLUG)) { sessionStorage.setItem('mm_visita_' + SLUG, '1'); post({ acao: 'registrar_pagina', p: SLUG, evento: 'visita' }).catch(() => {}); }
+            if (!sessionStorage.getItem('mm_visita_' + SLUG)) { sessionStorage.setItem('mm_visita_' + SLUG, '1'); post({ acao: 'registrar_pagina', p: SLUG }).catch(() => {}); }
         } catch (e) {
-            montarTopo({ titulo: 'Mini Mundo' }, 'padrao');
-            $('conteudo').innerHTML = `<div class="aviso"><h2>Não conseguimos abrir a página agora</h2><p>Verifique a internet e tente de novo em instantes.</p><button class="pilula" onclick="location.reload()">Tentar de novo</button></div>`;
+            montarTopo({ titulo: CODIGO ? 'Pedido não encontrado' : 'Mini Mundo' }, 'padrao');
+            $('conteudo').innerHTML = `<div class="aviso"><h2>${e.negocio ? esc(e.message) : 'Não conseguimos abrir a página agora'}</h2><p>${e.negocio ? 'Se precisar, fale com a gente pelo WhatsApp.' : 'Verifique a internet e tente de novo em instantes.'}</p><button class="pilula" onclick="location.reload()">Tentar de novo</button></div>`;
         }
     }
-    // Página que não existe ou já encerrou: mostra as outras coleções
     function mostrarFora() {
         const tema = DADOS.encerrada ? DADOS.pagina.tema : 'padrao';
         montarTopo({ titulo: DADOS.encerrada ? DADOS.pagina.titulo : 'Página não encontrada', texto: DADOS.encerrada ? 'Esta coleção já encerrou. Obrigado a todos que fizeram parte dela!' : 'O link pode ter mudado. Veja as coleções que estão no ar.' }, tema);
@@ -345,11 +432,10 @@
         $('conteudo').innerHTML = DADOS.outras && DADOS.outras.length ? '' : `<div class="aviso"><h2>Novidades em breve</h2><p>Fale com a gente pelo WhatsApp para encomendar.</p></div>`;
         mostrarOutras(DADOS.outras, 'Coleções no ar');
     }
-    // Sem "p": lista as coleções no ar (se só houver uma, já abre ela)
     function mostrarColecoes(r) {
         DADOS = r;
-        if (r.paginas.length === 1) return location.replace(`loja.html?p=${encodeURIComponent(r.paginas[0].slug)}`);
-        montarTopo({ titulo: 'Coleções Mini Mundo', texto: 'Escolha uma coleção para ver os kits e as peças, montar sua sacola e pedir pelo WhatsApp.' }, 'padrao');
+        if (r.paginas.length === 1) return location.replace(linkPagina(r.paginas[0].slug));
+        montarTopo({ titulo: 'Coleções Mini Mundo', texto: 'Escolha uma coleção para ver os kits e as peças, montar sua sacola e fazer seu pedido.' }, 'padrao');
         montarContato();
         $('conteudo').innerHTML = r.paginas.length ? '' : `<div class="aviso"><h2>Novas coleções em breve</h2><p>Enquanto isso, fale com a gente pelo WhatsApp.</p></div>`;
         mostrarOutras(r.paginas, '');
@@ -357,9 +443,9 @@
     function mostrarOutras(lista, titulo) {
         if (!lista || !lista.length) return;
         $('outras').hidden = false;
-        $('outras').innerHTML = (titulo ? `<h2 class="sec-tit">${esc(titulo)}</h2>` : '') + `<div class="colecoes">${lista.map(p => {
+        $('outras').innerHTML = (titulo ? `<h2 class="sec-tit"><span class="orn">${glifoMM(TEMA)}</span>${esc(titulo)}</h2>` : '') + `<div class="colecoes">${lista.map(p => {
             const t = temaMM(p.tema), c = t.cores;
-            return `<a class="colecao" href="loja.html?p=${encodeURIComponent(p.slug)}" style="--c-papel:${c.papel};--c-linha:${c.linha};--c-tinta:${c.tinta};--c-ouro:${c.ouro};--c-ouro3:${t.hero ? t.hero.fundo : c.ouro3}">
+            return `<a class="colecao" href="${esc(linkPagina(p.slug))}" style="--c-papel:${c.papel};--c-linha:${c.linha};--c-tinta:${c.tinta};--c-ouro:${c.ouro};--c-ouro3:${t.hero ? t.hero.fundo : c.ouro3}">
                 <span class="c-capa" style="${p.capa ? `background-image:url('${esc(p.capa).replace(/'/g, '%27')}')` : ''}"><span class="c-emoji">${t.emoji}</span></span>
                 <span class="c-corpo"><b>${esc(p.titulo)}</b><span>${esc(p.texto || t.texto)}</span><span class="c-ver">Ver coleção · ${p.qtd} ${p.qtd === 1 ? 'item' : 'itens'} →</span></span></a>`;
         }).join('')}</div>`;
@@ -378,6 +464,7 @@
         $('filtros-in').innerHTML = ops.map(([v, r, n]) => `<button class="chip ${v === FILTRO ? 'on' : ''}" data-v="${esc(v)}">${esc(r)}<small>${n}</small></button>`).join('');
         $('filtros-in').querySelectorAll('.chip').forEach(b => b.onclick = () => { FILTRO = b.dataset.v; montarFiltros(); renderizar(); window.scrollTo({ top: $('filtros').offsetTop - 2, behavior: 'smooth' }); });
     }
+    const titulo = (t, n) => `<h2 class="sec-tit"><span class="orn">${glifoMM(TEMA)}</span>${t}<small>${n}</small></h2>`;
     function renderizar() {
         if (!ITENS.length) { $('conteudo').innerHTML = `<div class="aviso"><h2>Os produtos estão chegando</h2><p>Em breve esta coleção vai estar cheia de novidades.</p></div>`; return; }
         const cartoes = lista => `<div class="grade">${lista.map(cartao).join('')}</div>`;
@@ -385,20 +472,23 @@
             const lista = ITENS.filter(i => FILTRO === 'kit' || FILTRO === 'peca' ? i.tipo === FILTRO : FILTRO === 'pronta' ? i.pronta_entrega : 'c:' + i.categoria === FILTRO);
             $('conteudo').innerHTML = cartoes(lista);
         } else {
-            // Tudo: destaques primeiro, depois kits e peças avulsas (cada grupo com título)
+            // Tudo: destaques numa faixa com a cara do tema, depois kits e peças avulsas
             const dest = ITENS.filter(i => i.destaque), resto = ITENS.filter(i => !i.destaque);
             const kits = resto.filter(i => i.tipo === 'kit'), pecas = resto.filter(i => i.tipo !== 'kit');
-            const grupos = [[dest, 'Destaques'], [kits, 'Kits'], [pecas, kits.length || dest.length ? 'Peças avulsas' : '']].filter(g => g[0].length);
-            $('conteudo').innerHTML = grupos.map(([l, t]) => `<section class="secao">${grupos.length > 1 && t ? `<h2 class="sec-tit">${t}<small>${l.length}</small></h2>` : ''}${cartoes(l)}</section>`).join('');
+            const grupos = [[dest, 'Destaques', true], [kits, 'Kits'], [pecas, kits.length || dest.length ? 'Peças avulsas' : '']].filter(g => g[0].length);
+            $('conteudo').innerHTML = grupos.map(([l, t, d]) => `<section class="secao ${d ? 'destaques' : ''}">${d ? enfeiteMM(TEMA, 12) : ''}${grupos.length > 1 && t ? titulo(t, l.length) : ''}${cartoes(l)}</section>`).join('');
         }
-        document.querySelectorAll('.trilho').forEach(t => t.addEventListener('scroll', () => {
+        ligarTrilhos(document);
+    }
+    function ligarTrilhos(raiz) {
+        raiz.querySelectorAll('.trilho').forEach(t => t.addEventListener('scroll', () => {
             const n = Math.round(t.scrollLeft / t.clientWidth), p = $('pontos-' + t.dataset.id);
             if (p) [...p.children].forEach((b, j) => b.classList.toggle('on', j === n));
         }, { passive: true }));
     }
     const naSacola = id => (SACOLA.find(s => s.id === id) || {}).qtd || 0;
     function cartao(it) {
-        const fotos = it.fotos || [], qtd = naSacola(it.id), podePedir = !!(DADOS.loja || {}).whatsapp;
+        const fotos = it.fotos || [], qtd = naSacola(it.id);
         const desconto = it.de ? Math.round((1 - it.preco / it.de) * 100) : 0, economia = it.separadas ? it.separadas - it.preco : 0;
         return `<article class="card" id="item-${it.id}">
             <div class="fotos">
@@ -414,15 +504,14 @@
                 ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map(p => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}</span></li>`).join('')}</ul></div>` : ''}
                 <div class="rodape"><div class="rodape-in">
                     <div class="preco">${it.preco ? `${it.de ? `<s>de ${real(it.de)}</s>` : economia > 0 ? `<s>Separadas: ${real(it.separadas)}</s>` : ''}<strong>${real(it.preco)}</strong>${economia > 0 ? `<span class="economia">Você economiza ${real(economia)}</span>` : ''}` : '<span class="consulta">Sob consulta</span>'}</div>
-                    <div class="acoes">${podePedir ? (qtd ? `<span class="passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span>`
-                        : `<button class="btn-add" type="button" onclick="mudar(${it.id}, 1)">${IC.sacola} Adicionar</button>`) : ''}
+                    <div class="acoes">${qtd ? `<span class="passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span>`
+                        : `<button class="btn-add" type="button" onclick="mudar(${it.id}, 1)">${IC.sacola} Adicionar</button>`}
                         <button class="btn-share" type="button" onclick="compartilhar(${it.id})" aria-label="Compartilhar ${esc(it.nome)}">${IC.share}</button></div>
                 </div></div>
             </div></article>`;
     }
     function passar(id, d) { const t = document.querySelector(`.trilho[data-id="${id}"]`); if (t) t.scrollBy({ left: d * t.clientWidth, behavior: 'smooth' }); }
     function verFotos(id, j) { const it = ITENS.find(i => i.id === id); if (it && it.fotos.length) abrirGaleria({ fotos: it.fotos, indice: j, titulo: it.nome }); }
-    // Link de um produto (loja.html?p=natal&i=12): rola até ele e destaca
     function marcarDoLink() {
         const id = parseInt(PARAMS.get('i')); if (!id) return;
         const it = ITENS.find(i => i.id === id), el = $('item-' + id); if (!it || !el) return;
@@ -433,19 +522,19 @@
         if (navigator.share) { try { await navigator.share({ title: titulo, text: texto, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
         try { await navigator.clipboard.writeText(url); toast('Link copiado'); } catch (e) { prompt('Copie o link:', url); }
     }
-    function compartilhar(id) { const it = ITENS.find(i => i.id === id); if (it) compartilharLink(it.nome, `${it.nome}${it.preco ? ` por ${real(it.preco)}` : ''} · Mini Mundo`, SOCIAL + encodeURIComponent(SLUG) + '/' + id); }
-    function compartilharPagina() { compartilharLink(DADOS.pagina.titulo, `${DADOS.pagina.titulo} · Mini Mundo`, SOCIAL + encodeURIComponent(SLUG)); }
+    function compartilhar(id) { const it = ITENS.find(i => i.id === id); if (it) compartilharLink(it.nome, `${it.nome}${it.preco ? ` por ${real(it.preco)}` : ''} · Mini Mundo`, linkPagina(SLUG, id)); }
+    function compartilharPagina() { compartilharLink(DADOS.pagina.titulo, `${DADOS.pagina.titulo} · Mini Mundo`, linkPagina(SLUG)); }
 
-    // ---------- Sacola (vai inteira numa mensagem de WhatsApp) ----------
+    // ---------- Sacola ----------
     function mudar(id, d) {
         const s = SACOLA.find(x => x.id === id);
-        if (s) { s.qtd += d; if (s.qtd <= 0) SACOLA = SACOLA.filter(x => x !== s); } else if (d > 0) SACOLA.push({ id, qtd: d });
-        gravarSacola();
-        const el = $('item-' + id); if (el) { const it = ITENS.find(i => i.id === id); const novo = document.createElement('div'); novo.innerHTML = cartao(it); const card = novo.firstElementChild; if (el.classList.contains('marcado')) card.classList.add('marcado'); el.replaceWith(card);
-            card.querySelector('.trilho')?.addEventListener('scroll', function () { const n = Math.round(this.scrollLeft / this.clientWidth), p = $('pontos-' + id); if (p) [...p.children].forEach((b, j) => b.classList.toggle('on', j === n)); }, { passive: true }); }
+        if (s) { s.qtd = Math.min(99, s.qtd + d); if (s.qtd <= 0) SACOLA = SACOLA.filter(x => x !== s); } else if (d > 0) SACOLA.push({ id, qtd: d });
+        guardar(chaveSacola(), SACOLA);
+        const el = $('item-' + id), it = ITENS.find(i => i.id === id);
+        if (el && it) { const novo = document.createElement('div'); novo.innerHTML = cartao(it); const card = novo.firstElementChild; if (el.classList.contains('marcado')) card.classList.add('marcado'); el.replaceWith(card); ligarTrilhos(card); }
         atualizarBarra();
         if (d > 0 && naSacola(id) === 1) toast('Adicionado à sacola');
-        if ($('sacola')) abrirSacola();
+        if ($('sacola') && ETAPA === 'sacola') abrirSacola();
     }
     const totais = () => {
         let total = 0, semPreco = 0, n = 0;
@@ -453,36 +542,105 @@
         return { total, semPreco, n };
     };
     function atualizarBarra() {
-        const { total, semPreco, n } = totais(), temZap = !!(DADOS && DADOS.loja && DADOS.loja.whatsapp);
-        $('barra').hidden = !n; $('zap-flutuante').hidden = !!n || !temZap;
+        const { total, semPreco, n } = totais();
+        $('barra').hidden = !n; if ($('zap-flutuante').innerHTML) $('zap-flutuante').hidden = !!n;
         if (n) $('barra').innerHTML = `${IC.sacola}<span>Sua sacola<b>${n} ${n === 1 ? 'item' : 'itens'} · ${real(total)}${semPreco ? ' +' : ''}</b></span><em>Ver e pedir</em>`;
     }
+    const gaveta = html => { $('sacola-box').innerHTML = `<div class="fundo-sacola" onclick="fecharSacola()"></div><div class="sacola" id="sacola" role="dialog" aria-modal="true" aria-label="Sua sacola"><div class="alca"></div>${html}</div>`; };
     function abrirSacola() {
+        ETAPA = 'sacola';
         const { total, semPreco, n } = totais();
         if (!n) return fecharSacola();
-        const linhas = SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); if (!it) return '';
-            return `<div class="s-item"><img src="${esc(it.fotos[0] || 'logo.png')}" alt="" onerror="this.src='logo.png'"><div class="s-info"><b>${esc(it.nome)}</b><small>${it.preco ? `${real(it.preco)} cada` : 'preço a combinar'}</small></div>
-                <span class="s-passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${s.qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span></div>`; }).join('');
-        const nome = $('s-nome') ? $('s-nome').value : (localStorage.getItem('mm_cliente_nome') || ''), obs = $('s-obs') ? $('s-obs').value : '';
-        $('sacola-box').innerHTML = `<div class="fundo-sacola" onclick="fecharSacola()"></div><div class="sacola" id="sacola" role="dialog" aria-modal="true" aria-label="Sua sacola">
-            <div class="alca"></div><h2>Sua sacola <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>${linhas}
+        gaveta(`<h2>Sua sacola <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
+            ${SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); if (!it) return '';
+                return `<div class="s-item"><img src="${esc(it.fotos[0] || 'logo.png')}" alt="" onerror="this.src='logo.png'"><div class="s-info"><b>${esc(it.nome)}</b><small>${it.preco ? `${real(it.preco)} cada` : 'preço a combinar'}</small></div>
+                    <span class="s-passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${s.qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span></div>`; }).join('')}
             <div class="s-total"><span>${n} ${n === 1 ? 'item' : 'itens'}${semPreco ? ` (${semPreco} a combinar)` : ''}</span><strong>${real(total)}</strong></div>
-            <input class="s-campo" id="s-nome" placeholder="Seu nome" autocomplete="name" value="${esc(nome)}">
-            <textarea class="s-campo" id="s-obs" rows="2" placeholder="Observações (cores, nome para personalizar, data…)">${esc(obs)}</textarea>
-            <button class="btn-add s-enviar" type="button" onclick="enviarPedido()">${IC.zap} Enviar pedido pelo WhatsApp</button>
-            <p class="s-nota">Você confirma tudo com a gente na conversa: entrega, pagamento e prazo.</p></div>`;
+            <button class="btn-add s-enviar" type="button" onclick="irParaDados()">Continuar para o pedido</button>
+            <p class="s-nota">No próximo passo você coloca seu nome e como quer receber.</p>`);
     }
-    function fecharSacola() { $('sacola-box').innerHTML = ''; }
-    function enviarPedido() {
-        const { total, semPreco } = totais(), nome = $('s-nome').value.trim(), obs = $('s-obs').value.trim();
-        try { localStorage.setItem('mm_cliente_nome', nome); } catch (e) { /* sem espaço */ }
-        const linhas = SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); return it ? `• ${s.qtd}× ${it.nome}${it.preco ? ` — ${real(it.preco * s.qtd)}` : ' — a combinar'}` : ''; }).filter(Boolean);
-        const msg = `Olá! Quero fazer um pedido pela página *${DADOS.pagina.titulo}*:\n\n${linhas.join('\n')}\n\n*Total: ${real(total)}*${semPreco ? ' + itens a combinar' : ''}${nome ? `\nNome: ${nome}` : ''}${obs ? `\nObs.: ${obs}` : ''}\n\n${location.origin}${location.pathname}?p=${encodeURIComponent(SLUG)}`;
-        const url = zap(DADOS.loja.whatsapp, msg); if (!url) return;
-        post({ acao: 'registrar_pagina', p: SLUG, evento: 'pedido' }).catch(() => {});
-        window.open(url, '_blank', 'noopener');
+    // Finalizar: nome, WhatsApp, entrega e pagamento (fica guardado no aparelho para a próxima compra)
+    function irParaDados() {
+        ETAPA = 'dados';
+        const c = ler('mm_cliente', {}), { total, semPreco } = totais();
+        CHECKOUT.entrega = c.entrega || CHECKOUT.entrega; CHECKOUT.pagamento = c.pagamento || CHECKOUT.pagamento;
+        const op = (grupo, v, r) => `<button type="button" class="${CHECKOUT[grupo] === v ? 'on' : ''}" onclick="escolher('${grupo}', '${v}', this)">${r}</button>`;
+        gaveta(`<button class="s-voltar" type="button" onclick="abrirSacola()">← Voltar para a sacola</button>
+            <h2>Seus dados <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
+            <form onsubmit="event.preventDefault(); enviarPedido()" novalidate>
+                <label class="s-rot" for="s-nome">Seu nome</label><input class="s-campo" id="s-nome" autocomplete="name" maxlength="120" value="${esc(c.nome || '')}" required>
+                <label class="s-rot" for="s-tel">WhatsApp (com DDD)</label><input class="s-campo" id="s-tel" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="(11) 98888-7777" value="${esc(c.telefone || '')}" required>
+                <span class="s-rot">Como quer receber?</span><div class="s-opcoes" data-grupo="entrega">${op('entrega', 'retirar', 'Vou retirar')}${op('entrega', 'entrega', 'Quero entrega')}</div>
+                <div id="s-end-box" ${CHECKOUT.entrega === 'entrega' ? '' : 'hidden'}><label class="s-rot" for="s-end">Endereço para entrega</label><textarea class="s-campo" id="s-end" rows="2" maxlength="500" autocomplete="street-address" placeholder="Rua, número, bairro e cidade">${esc(c.endereco || '')}</textarea></div>
+                <span class="s-rot">Como prefere pagar?</span><div class="s-opcoes" data-grupo="pagamento">${['Pix', 'Cartão', 'Dinheiro', 'A combinar'].map(v => op('pagamento', v, v)).join('')}</div>
+                <label class="s-rot" for="s-obs">Observações</label><textarea class="s-campo" id="s-obs" rows="2" maxlength="1000" placeholder="Nome para personalizar, cores, data que precisa…"></textarea>
+                <input class="escondido" id="s-site" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <p class="s-erro" id="s-erro" role="alert"></p>
+                <button class="btn-add s-enviar" id="s-enviar" type="submit">Fazer pedido · ${real(total)}${semPreco ? ' +' : ''}</button>
+                <p class="s-nota">Você não paga nada agora. A gente confirma o pedido, o prazo${CHECKOUT.entrega === 'entrega' ? ' e a entrega' : ''} com você pelo WhatsApp.</p>
+            </form>`);
+    }
+    function escolher(grupo, v, b) {
+        CHECKOUT[grupo] = v;
+        b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+        if (grupo === 'entrega') $('s-end-box').hidden = v !== 'entrega';
+    }
+    async function enviarPedido() {
+        const nome = $('s-nome').value.trim(), tel = $('s-tel').value.trim(), endereco = $('s-end').value.trim(), obs = $('s-obs').value.trim(), erro = $('s-erro');
+        erro.textContent = '';
+        if (nome.length < 2) { erro.textContent = 'Escreva o seu nome.'; return $('s-nome').focus(); }
+        if (tel.replace(/\D/g, '').length < 10) { erro.textContent = 'Coloque o seu WhatsApp com DDD.'; return $('s-tel').focus(); }
+        if (CHECKOUT.entrega === 'entrega' && endereco.length < 8) { erro.textContent = 'Coloque o endereço para a entrega.'; return $('s-end').focus(); }
+        guardar('mm_cliente', { nome, telefone: tel, endereco, entrega: CHECKOUT.entrega, pagamento: CHECKOUT.pagamento });
+        const b = $('s-enviar'), txt = b.innerHTML; b.disabled = true; b.textContent = 'Enviando seu pedido…';
+        try {
+            const r = await post({ acao: 'fazer_pedido', p: SLUG, site: $('s-site').value, itens: SACOLA.map(s => ({ id: s.id, qtd: s.qtd })),
+                cliente: { nome, telefone: tel, entrega: CHECKOUT.entrega, endereco, pagamento: CHECKOUT.pagamento, obs } });
+            const resumo = SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); return it ? `${s.qtd}× ${it.nome}` : ''; }).filter(Boolean);
+            const meus = ler('mm_pedidos', []); meus.unshift({ codigo: r.codigo, numero: r.numero, pagina: DADOS.pagina.titulo, data: new Date().toISOString().slice(0, 10) }); guardar('mm_pedidos', meus.slice(0, 20));
+            SACOLA = []; guardar(chaveSacola(), SACOLA); renderizar(); atualizarBarra(); montarContato();
+            mostrarConfirmacao(r, nome, resumo);
+        } catch (e) { erro.textContent = e.negocio ? e.message : 'Não conseguimos enviar agora. Verifique a internet e tente de novo.'; b.disabled = false; b.innerHTML = txt; }
+    }
+    function mostrarConfirmacao(r, nome, resumo) {
+        ETAPA = 'ok';
+        const L = DADOS.loja || {}, link = linkPedido(r.codigo);
+        const z = zap(L.whatsapp, `Olá! Acabei de fazer o pedido *#${r.numero}* pela página *${DADOS.pagina.titulo}*.\n${resumo.join('\n')}\nTotal: ${real(r.total)}${r.sem_preco ? ' + itens a combinar' : ''}\n\nAcompanhar: ${link}`);
+        gaveta(`<div class="s-ok"><div class="s-selo">✓</div><h2>Pedido #${r.numero} recebido!</h2>
+            <p>Obrigado, ${esc(nome.split(' ')[0])}! A gente vai confirmar tudo com você pelo WhatsApp.</p>
+            <p><b>Total: ${real(r.total)}</b>${r.sem_preco ? ' + itens a combinar' : ''}</p>
+            <a class="pilula" href="${esc(link)}">Acompanhar meu pedido</a>
+            ${z ? `<a class="pilula zap" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Avisar no WhatsApp (opcional)</a>` : ''}
+            <button class="pilula clara" type="button" onclick="fecharSacola()">Continuar olhando</button></div>`);
+    }
+    function fecharSacola() { $('sacola-box').innerHTML = ''; ETAPA = 'sacola'; }
+    function meusPedidos() {
+        const meus = ler('mm_pedidos', []);
+        gaveta(`<h2>Meus pedidos <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
+            ${meus.map(m => `<a class="s-item" href="${esc(linkPedido(m.codigo))}" style="text-decoration:none"><div class="s-info"><b>Pedido #${m.numero}</b><small>${esc(m.pagina || '')} · ${esc(String(m.data || '').split('-').reverse().join('/'))}</small></div><span>→</span></a>`).join('')}
+            <p class="s-nota">Ficam guardados só neste aparelho.</p>`);
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('sacola') && !galeriaAberta()) fecharSacola(); });
+
+    // ---------- Acompanhar pedido (loja?pedido=CODIGO) ----------
+    const ETAPAS = [['novo', 'Pedido recebido', 'A gente já viu o seu pedido'], ['confirmado', 'Confirmado', 'Combinamos tudo com você'], ['producao', 'Em produção', 'As peças estão sendo feitas'], ['pronto', 'Pronto', 'Já pode retirar ou vai sair para entrega'], ['entregue', 'Entregue', 'Aproveite o seu presente!']];
+    function mostrarPedido(r) {
+        DADOS = { loja: r.loja }; const p = r.pedido, tema = p.pagina ? p.pagina.tema : 'padrao';
+        if (p.pagina && p.pagina.slug) SLUG = p.pagina.slug;
+        montarTopo({ titulo: `Pedido #${p.numero}`, texto: `Olá, ${p.cliente || 'tudo bem'}! Aqui você acompanha o andamento do seu pedido.` }, tema);
+        montarContato();
+        const atual = ETAPAS.findIndex(e => e[0] === p.status), data = s => String(s || '').slice(0, 10).split('-').reverse().join('/');
+        const z = zap((r.loja || {}).whatsapp, `Olá! Queria falar sobre o meu pedido *#${p.numero}*.\n${linkPedido(CODIGO)}`);
+        $('conteudo').innerHTML = `<div class="acomp">
+            <div class="bloco"><h2>Andamento</h2>${p.status === 'cancelado' ? '<p class="cancelado">Este pedido foi cancelado. Se tiver dúvida, fale com a gente.</p>'
+                : `<ol class="etapas">${ETAPAS.map((e, i) => `<li class="${i < atual ? 'feita' : i === atual ? (p.status === 'entregue' ? 'feita' : 'agora') : ''}"><span class="bola">${i < atual || p.status === 'entregue' && i === atual ? '✓' : i + 1}</span><span><b>${e[1]}</b><small>${e[2]}</small></span></li>`).join('')}</ol>`}</div>
+            <div class="bloco"><h2>Itens</h2>${p.itens.map(i => `<div class="linha-item"><span>${i.qtd}× ${esc(i.nome)}</span><span>${i.preco ? real(i.preco * i.qtd) : 'a combinar'}</span></div>`).join('')}
+                ${p.desconto ? `<div class="linha-item"><span>Desconto</span><span>− ${real(p.desconto)}</span></div>` : ''}${p.taxa_entrega ? `<div class="linha-item"><span>Entrega</span><span>${real(p.taxa_entrega)}</span></div>` : ''}
+                <div class="linha-total"><span>Total${p.pago ? '<span class="tag-pago">Pago</span>' : ''}</span><strong>${real(p.total)}</strong></div></div>
+            <div class="bloco info-p"><div><b>Feito em</b>${data(p.criado_em)}</div><div><b>Recebimento</b>${p.entrega === 'entrega' ? 'Entrega' : 'Retirada'}${p.data_entrega ? ` · ${data(p.data_entrega)}` : ''}</div><div><b>Pagamento</b>${esc(p.pagamento || 'A combinar')}</div>${p.pagina ? `<div><b>Coleção</b>${esc(p.pagina.titulo)}</div>` : ''}</div>
+            ${z ? `<a class="pilula zap" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Falar sobre o pedido</a>` : ''}
+            ${p.pagina && p.pagina.ativa ? `<a class="pilula clara" href="${esc(linkPagina(p.pagina.slug))}">Voltar para a coleção</a>` : ''}</div>`;
+    }
 
     new IntersectionObserver(([e]) => $('filtros').classList.toggle('colado', !e.isIntersecting)).observe($('hero'));
     carregar();

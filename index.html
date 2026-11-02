@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.7.0">
+    <link rel="stylesheet" href="style.css?v=5.8.0">
 </head>
 <body>
 
@@ -102,6 +102,7 @@
 
             <div class="sb-grupo">Vendas e produção</div>
             <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vendas</span></button>
+            <button id="btn-pedidos" class="tab-btn" onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg><span>Pedidos</span><b class="aviso-num" data-aviso-pedidos hidden></b></button>
             <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
             <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos</span></button>
             <button id="btn-kits" class="tab-btn" onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg><span>Kits</span></button>
@@ -163,6 +164,7 @@
             <div class="grid-menu">
                 <button onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Dashboard</button>
                 <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
+                <button onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg>Pedidos<b class="aviso-num" data-aviso-pedidos hidden></b></button>
                 <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
                 <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos</button>
                 <button onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg>Kits</button>
@@ -609,6 +611,25 @@
         <!-- ========================================== -->
         <!-- 👥 USUÁRIOS E ACESSOS                      -->
         <!-- ========================================== -->
+        <div id="tab-pedidos" class="tab-content">
+            <div class="pl-topo">
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pc-busca" placeholder="Buscar por nome, número ou produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarPedidos()"></div>
+                <button class="btn-magic btn-pequeno" onclick="novoPedido()"><svg class="ic"><use href="#i-mais"/></svg>Anotar pedido</button>
+            </div>
+            <p class="pc-resumo" id="pc-resumo"></p>
+            <div class="chips-rolagem" id="pc-filtros">
+                <button class="chip-op active" data-f="abertos" onclick="filtroPedidos('abertos')">Em aberto <em></em></button>
+                <button class="chip-op" data-f="novo" onclick="filtroPedidos('novo')">Novos <em></em></button>
+                <button class="chip-op" data-f="confirmado" onclick="filtroPedidos('confirmado')">Confirmados <em></em></button>
+                <button class="chip-op" data-f="producao" onclick="filtroPedidos('producao')">Em produção <em></em></button>
+                <button class="chip-op" data-f="pronto" onclick="filtroPedidos('pronto')">Prontos <em></em></button>
+                <button class="chip-op" data-f="entregue" onclick="filtroPedidos('entregue')">Entregues <em></em></button>
+                <button class="chip-op" data-f="cancelado" onclick="filtroPedidos('cancelado')">Cancelados <em></em></button>
+                <button class="chip-op" data-f="todos" onclick="filtroPedidos('todos')">Todos <em></em></button>
+            </div>
+            <div id="lista-pedidos" class="pc-lista"></div>
+        </div>
+
         <div id="tab-paginas" class="tab-content">
             <div id="pg-lista-box">
                 <div class="pg-topo">
@@ -622,7 +643,6 @@
         </div>
 
         <div id="tab-kits" class="tab-content">
-            <div class="kt-pagina" id="kt-pagina"></div>
             <div class="pl-topo">
                 <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="kt-busca" placeholder="Buscar kit ou peça…" autocomplete="off" enterkeyhint="search" oninput="renderizarKits()"></div>
                 <select id="kt-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarKits()" hidden></select>
@@ -630,8 +650,6 @@
             </div>
             <div class="chips-rolagem" id="kt-filtros">
                 <button class="chip-op active" data-f="todos" onclick="filtroKits('todos')">Todos <em></em></button>
-                <button class="chip-op" data-f="pagina" onclick="filtroKits('pagina')">À venda <em></em></button>
-                <button class="chip-op" data-f="fora" onclick="filtroKits('fora')">Fora das páginas <em></em></button>
                 <button class="chip-op" data-f="pronta" onclick="filtroKits('pronta')">Pronta entrega <em></em></button>
                 <button class="chip-op" data-f="inativos" onclick="filtroKits('inativos')">Inativos <em></em></button>
             </div>
@@ -980,18 +998,19 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.7.0"></script>
-<script src="app.js?v=5.7.0"></script>
-<script src="consignado.js?v=5.7.0"></script>
-<script src="vendas.js?v=5.7.0"></script>
-<script src="produtos.js?v=5.7.0"></script>
-<script src="dashboard.js?v=5.7.0"></script>
-<script src="ajustes.js?v=5.7.0"></script>
-<script src="rascunho.js?v=5.7.0"></script>
-<script src="usuarios.js?v=5.7.0"></script>
-<script src="temas.js?v=5.7.0"></script>
-<script src="kits.js?v=5.7.0"></script>
-<script src="paginas.js?v=5.7.0"></script>
+<script src="galeria.js?v=5.8.0"></script>
+<script src="app.js?v=5.8.0"></script>
+<script src="consignado.js?v=5.8.0"></script>
+<script src="vendas.js?v=5.8.0"></script>
+<script src="produtos.js?v=5.8.0"></script>
+<script src="dashboard.js?v=5.8.0"></script>
+<script src="ajustes.js?v=5.8.0"></script>
+<script src="rascunho.js?v=5.8.0"></script>
+<script src="usuarios.js?v=5.8.0"></script>
+<script src="temas.js?v=5.8.0"></script>
+<script src="kits.js?v=5.8.0"></script>
+<script src="paginas.js?v=5.8.0"></script>
+<script src="pedidos.js?v=5.8.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
