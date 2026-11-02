@@ -13,7 +13,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.0.0">
+    <link rel="stylesheet" href="style.css?v=5.1.0">
 </head>
 <body>
 
@@ -61,6 +61,7 @@
     <symbol id="i-olho" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-cima" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
     <symbol id="i-imagem" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
 </svg>
 
 <!-- ========================================== -->
@@ -298,7 +299,7 @@
                     <div class="card">
                         <div class="card-titulo" id="pf-titulo-form">Novo produto</div>
                         <div class="pf-ident">
-                            <label class="pf-foto" title="Escolher foto"><img id="pf-foto-img" src="logo.png" alt="" onerror="this.src='logo.png'"><span><svg class="ic"><use href="#i-imagem"/></svg>Foto</span><input type="file" id="pf-foto" accept="image/*" onchange="pfPreviaFoto()" hidden></label>
+                            <label class="pf-foto" id="pf-foto-box" title="Escolher foto"><img id="pf-foto-img" src="logo.png" alt="" onerror="this.src='logo.png'"><span><svg class="ic"><use href="#i-camera"/></svg><b id="pf-foto-rot">Foto</b></span><input type="file" id="pf-foto" accept="image/*" onchange="pfPreviaFoto()" hidden></label>
                             <div class="pf-ident-campos">
                                 <div class="input-group"><label for="pf-nome">Nome *</label><input type="text" id="pf-nome" placeholder="Ex: Placa profissões"></div>
                                 <div class="input-group"><label for="pf-categoria">Categoria</label><input type="text" id="pf-categoria" list="pf-categorias" placeholder="Ex: Decoração, Chaveiros…"><datalist id="pf-categorias"></datalist></div>
@@ -477,7 +478,7 @@
         <!-- 🛍️ CATÁLOGO DA LOJA                        -->
         <!-- ========================================== -->
         <div id="tab-loja" class="tab-content">
-            <div class="card card-destaque">
+            <div class="card card-destaque" id="form-vitrine">
                 <div class="card-titulo">✨ Adicionar produto na vitrine</div>
                 <p class="card-desc">A IA escreve a descrição e escolhe a categoria a partir da foto.</p>
                 <div class="row">
@@ -497,7 +498,7 @@
         <!-- 🧲 ÍMÃS NFC                                -->
         <!-- ========================================== -->
         <div id="tab-imas" class="tab-content">
-            <div class="card card-destaque">
+            <div class="card card-destaque" id="form-ima">
                 <div class="card-titulo">➕ Criar ímã</div>
                 <div class="row">
                     <div class="col"><div class="input-group"><label>ID único</label><input type="text" id="ima-id" placeholder="Ex: 123"></div></div>
@@ -910,12 +911,13 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="app.js?v=5.0.0"></script>
-<script src="consignado.js?v=5.0.0"></script>
-<script src="vendas.js?v=5.0.0"></script>
-<script src="produtos.js?v=5.0.0"></script>
-<script src="dashboard.js?v=5.0.0"></script>
-<script src="ajustes.js?v=5.0.0"></script>
+<script src="app.js?v=5.1.0"></script>
+<script src="consignado.js?v=5.1.0"></script>
+<script src="vendas.js?v=5.1.0"></script>
+<script src="produtos.js?v=5.1.0"></script>
+<script src="dashboard.js?v=5.1.0"></script>
+<script src="ajustes.js?v=5.1.0"></script>
+<script src="rascunho.js?v=5.1.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

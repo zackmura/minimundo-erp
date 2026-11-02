@@ -154,7 +154,7 @@ window.renderizarEstoque = function() {
         const corAt = at <= 0 ? '' : (minimo > 0 && at <= minimo ? 'amarelo' : 'verde');
         const detalhe = comEles.map(e => `${window.nomeDoLocal(e.vendedor_id)}: ${e.qtd}`).join(' · ');
         const kit = p.tipo === 'kit', da = kit ? window.kitsMontaveis(p) : 0;
-        return `<div class="mm-card" style="${p.ativo ? '' : 'opacity:0.6;'}">${window.imgProduto(p.foto)}
+        return `<div class="mm-card" style="${p.ativo ? '' : 'opacity:0.6;'}">${window.fotoRapida(p.id, p.foto)}
             <div class="mm-info"><h4>${window.esc(p.nome)} ${kit ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : ''} ${p.ativo ? '' : '<span class="tag-inativo">Inativo</span>'}</h4>
                 <div class="mm-chips"><span class="mm-chip ${corAt}">Ateliê: ${at}</span><span class="mm-chip azul">Vendedores: ${totalVend}</span>
                 ${p.repasse ? `<span class="mm-chip">Repasse ${window.fmt(p.repasse)}</span>` : '<span class="mm-chip vermelho">sem repasse</span>'}<span class="mm-chip">custo ${window.fmt(p.custo)}</span>

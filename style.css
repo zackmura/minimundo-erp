@@ -801,3 +801,28 @@ body.vendo-como .sb-marca { background:rgba(124,58,237,.18); }
     .mk-linha { grid-template-columns:minmax(0, 1.6fr) .8fr .9fr 1fr; padding:8px 10px; font-size:.8rem; }
     .mini-kpis.tres { grid-template-columns:1fr; }
 }
+
+/* ---------- v5.1: foto rápida (Produtos e Estoque) e rascunho dos cadastros ---------- */
+.foto-rapida { position:relative; width:56px; height:56px; padding:0; margin:0; border:1px solid var(--border-color); border-radius:10px; background:#f5f5f4; overflow:hidden; flex-shrink:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font:inherit; transition:border-color .15s; }
+button.foto-rapida img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:0; }
+.foto-rapida .fr-ic { position:absolute; right:3px; bottom:3px; width:20px; height:20px; border-radius:50%; background:rgba(28,25,23,.6); color:#fff; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.foto-rapida .fr-ic svg.ic { width:12px; height:12px; stroke-width:2.2; }
+.foto-rapida .fr-txt { display:none; }
+.foto-rapida:hover, .foto-rapida:focus-visible { border-color:var(--primary); }
+.foto-rapida:hover .fr-ic { background:var(--primary); }
+.foto-rapida.sem { border:1.5px dashed var(--borda-forte); background:#faf9f7; }
+.foto-rapida.sem .fr-ic, .foto-rapida.sem:hover .fr-ic { position:static; width:auto; height:auto; background:none; color:var(--primary); }
+.foto-rapida.sem .fr-ic svg.ic { width:20px; height:20px; stroke-width:1.8; }
+.foto-rapida.sem .fr-txt { display:block; font-size:.62rem; font-weight:700; color:var(--primary); line-height:1; }
+.foto-rapida.sem:hover { background:var(--primary-soft); border-color:var(--primary); }
+.tp-prod .foto-rapida { width:42px; height:42px; }
+.tp-prod .foto-rapida.sem .fr-txt { display:none; }
+.foto-rapida.enviando, .pf-foto.enviando { pointer-events:none; }
+.foto-rapida.enviando::after, .pf-foto.enviando::after { content:''; position:absolute; inset:0; margin:auto; width:20px; height:20px; border-radius:50%; border:2.5px solid rgba(255,255,255,.9); border-top-color:var(--primary); animation:gira .8s linear infinite; z-index:2; }
+.foto-rapida.enviando::before, .pf-foto.enviando::before { content:''; position:absolute; inset:0; background:rgba(28,25,23,.35); z-index:1; }
+.pf-foto.enviando::after { width:28px; height:28px; bottom:22px; }
+.pf-foto span b { font-weight:700; }
+.rascunho-aviso { display:flex; align-items:center; gap:10px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:12px; padding:10px 12px 10px 14px; margin-bottom:14px; font-size:.84rem; font-weight:600; animation:fadeIn .25s; }
+.rascunho-aviso span { flex:1; min-width:0; }
+.rascunho-aviso button { background:#fff; border:1px solid #fcd34d; color:#92400e; border-radius:8px; padding:7px 11px; font:inherit; font-size:.78rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+.rascunho-aviso button:hover { background:#fef3c7; }

@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.0.0";
+const VERSAO_APP = "v5.1.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -106,7 +106,7 @@ window.tentarLogin = async function() {
 };
 
 window.verificarEnter = function(e){ if(e.key==="Enter") window.tentarLogin(); };
-window.fazerLogout = function(){ ['mm_token','mm_usuario','mm_cargo'].forEach(k => localStorage.removeItem(k)); location.reload(); };
+window.fazerLogout = function(){ ['mm_token','mm_usuario','mm_cargo'].forEach(k => localStorage.removeItem(k)); if (window.rascunhoApagarTodos) window.rascunhoApagarTodos(); location.reload(); };
 
 window.iniciarApp = function(){
     window.$('login-screen').style.display="none";
@@ -417,7 +417,7 @@ window.cadastrarIma = async function() {
         window.addLog(`Subindo foto do produto físico...`, "info"); const urlsProduto = await window.fazerUploadRedundante(await window.comprimirImagem(inputProd.files[0], 600, 600, 0.8), ik); 
         const p = { acao: "salvar_ima", id: id, nomes: nomes, foto: urlsCliente, linkVideoYoutube: video, dataLiberacao: dataOriginal ? dataOriginal + ":00" : "", fotoProduto: urlsProduto }; 
         const r = await window.apiFetch(API_PRECIFICACAO, { method: "POST", body: JSON.stringify(p) }); const res = await r.json(); 
-        if(res.sucesso) { window.mostrarAlerta("Sucesso!", "Ímã cadastrado com fotos personalizadas!", "success"); window.carregarImas(); } else { throw new Error(res.erro); }
+        if(res.sucesso) { window.mostrarAlerta("Sucesso!", "Ímã cadastrado com fotos personalizadas!", "success"); window.rascunhoApagar('imas'); window.carregarImas(); } else { throw new Error(res.erro); }
     } catch (e) { window.addLog(`❌ ERRO: ${e.message}`, "error"); } finally { b.disabled = false; b.innerText = "✨ Gerar Ímã"; } 
 };
 window.abrirModalEditarIma = function(l) { 
@@ -634,7 +634,7 @@ window.cadastrarProdutoIA = async function(){
         // 🔥 AGORA SALVA NO MYSQL! 🔥
         const rS=await window.apiFetch(API_PRECIFICACAO,{method:"POST",body:JSON.stringify({acao:"salvar_produto",nome:n,descricao:ds,preco:p,foto:ls.join(","),categoria:ct})}); 
         const resS=await rS.json(); 
-        if(resS.sucesso){window.addLog(`🎉 PRODUTO CADASTRADO!`,"success");window.$('prod-nome').value="";window.$('prod-preco').value="";window.$('prod-fotos').value="";window.carregarCatalogoAdmin();}else throw new Error("API falhou."); 
+        if(resS.sucesso){window.addLog(`🎉 PRODUTO CADASTRADO!`,"success");window.rascunhoApagar('loja');window.$('prod-nome').value="";window.$('prod-preco').value="";window.$('prod-fotos').value="";window.carregarCatalogoAdmin();}else throw new Error("API falhou."); 
     }catch(e){window.addLog(`❌ ERRO: ${e.message}`,"error");}finally{b.disabled=false;b.innerText="✨ Enviar e Cadastrar";} 
 };
 

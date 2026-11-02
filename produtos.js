@@ -17,7 +17,10 @@ const fotoDe = p => String((p && (p.foto || p.foto_catalogo)) || '').split(',')[
 const produtoPorId = id => (window.arrayBancoCustos || []).find(p => p.linha === id);
 const dinheiroCampo = id => $(id) && $(id).value ? val($(id).value) : 0;
 
-window.PF = { tipo: 'peca', editando: null, kit: [], custo: 0, fotoNova: null };
+// fotoUrl: foto já enviada (fica no rascunho); fotoEnvio: envio em andamento; fotoSeq: descarta envio de foto trocada no meio
+window.PF = { tipo: 'peca', editando: null, kit: [], custo: 0, fotoUrl: '', fotoEnvio: null, fotoSeq: 0 };
+const apagarRascunho = () => window.rascunhoApagar && window.rascunhoApagar('precificar');
+const guardarRascunho = () => window.rascunhoGuardar && window.rascunhoGuardar('precificar');
 
 // ---------- CARREGAR PRODUTOS (usado por várias telas) ----------
 window.carregarBancoDeCustos = async function() {
@@ -54,7 +57,7 @@ window.renderizarProdutos = function() {
             const custo = val(p.custo_total), venda = p.preco_venda || 0, margem = venda > 0 ? Math.round((venda - custo) / venda * 100) : null;
             const sub = p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`;
             return `<div class="tp-linha ${p.ativo === false ? 'inativo' : ''}" onclick="editarProduto(${p.linha})" role="button" tabindex="0">
-                <div class="tp-prod"><img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt=""><div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small></div></div>
+                <div class="tp-prod">${window.fotoRapida(p.linha, fotoDe(p))}<div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small></div></div>
                 <span class="tp-num" data-rot="Custo">${window.fmt(custo)}</span>
                 <span class="tp-num" data-rot="Venda">${venda ? window.fmt(venda) : '<i>—</i>'}</span>
                 <span class="tp-num" data-rot="Repasse">${p.preco_repasse ? window.fmt(p.preco_repasse) : '<span class="mm-chip vermelho">sem repasse</span>'}</span>
@@ -132,10 +135,27 @@ window.pfCalcular = function() {
 };
 window.pfAplicarMult = function(m) { $('pf-venda').value = window.fmt(Math.ceil(PF.custo * m)); window.pfCalcular(); };
 window.pfUsarRepasse = function() { $('pf-repasse').value = window.fmt(num($('pf-repasse-sug').dataset.v)); window.pfCalcular(); };
+// A foto sobe assim que é escolhida (e o endereço vai para o rascunho): se o celular recarregar a página, ela não se perde
 window.pfPreviaFoto = function() {
     const f = $('pf-foto').files[0]; if (!f) return;
-    const r = new FileReader(); r.onload = e => { $('pf-foto-img').src = e.target.result; }; r.readAsDataURL(f);
+    const seq = ++PF.fotoSeq, antes = PF.fotoUrl;
+    $('pf-foto-img').src = URL.createObjectURL(f); pfFotoEstado('enviando');
+    PF.fotoEnvio = (async () => {
+        try {
+            const url = await window.fazerUploadInteligente(await window.comprimirImagem(f, 800, 800, 0.8));
+            if (seq === PF.fotoSeq) { PF.fotoUrl = url; pfFotoEstado('ok'); guardarRascunho(); }
+            return url;
+        } catch (e) {
+            if (seq === PF.fotoSeq) { PF.fotoUrl = antes; $('pf-foto-img').src = antes || fotoDe(produtoPorId(PF.editando)) || 'logo.png'; pfFotoEstado(); window.mostrarAlerta('A foto não subiu', `${e.message}\nTente escolher de novo.`, 'error'); }
+            return antes;
+        } finally { if (seq === PF.fotoSeq) PF.fotoEnvio = null; }
+    })();
 };
+function pfFotoEstado(estado) {
+    $('pf-foto-box').classList.toggle('enviando', estado === 'enviando');
+    $('pf-foto-rot').innerText = estado === 'enviando' ? 'Enviando…' : estado === 'ok' || PF.fotoUrl || fotoDe(produtoPorId(PF.editando)) ? 'Trocar foto' : 'Foto';
+}
+window.pfFotoEstado = pfFotoEstado;
 window.pfSalvarImpressora = async function() {
     try {
         const valores = { imp_watts: $('pf-watts').value, imp_kwh: $('pf-kwh').value, imp_maq_hora: $('pf-maq').value, imp_hora: $('pf-hora').value, taxa_falha: $('pf-falha').value };
@@ -168,10 +188,13 @@ window.pfRenderKit = function() {
 };
 
 // ---------- NOVO / EDITAR ----------
-window.novoProduto = function(tipo) { window.switchTab('precificar'); window.pfLimpar(true); if (tipo) window.pfTipo(tipo); };
+window.novoProduto = function(tipo) { window.switchTab('precificar'); apagarRascunho(); window.pfLimpar(true); if (tipo) window.pfTipo(tipo); };
+// silencioso = limpeza feita pelo sistema; sem ele foi você que pediu um formulário novo (e o rascunho vai junto)
 window.pfLimpar = function(silencioso) {
+    if (!silencioso) apagarRascunho();
     PF.editando = null; PF.kit = []; $('pf-form').reset();
-    $('pf-foto-img').src = 'logo.png'; $('pf-filamento').dataset.mexeu = '';
+    PF.fotoUrl = ''; PF.fotoEnvio = null; PF.fotoSeq++;
+    $('pf-foto-img').src = 'logo.png'; pfFotoEstado(); $('pf-filamento').dataset.mexeu = '';
     $('pf-editando').hidden = true; $('pf-excluir').hidden = true; $('pf-ativo-box').hidden = true;
     $('pf-titulo-form').innerText = 'Novo produto'; $('pf-salvar').innerHTML = `${window.ic('check')} Cadastrar produto`;
     window.pfCarregarImpressora(); window.pfMontarListas();
@@ -180,12 +203,17 @@ window.pfLimpar = function(silencioso) {
 };
 window.editarProduto = function(id) {
     const p = produtoPorId(id); if (!p) return;
-    window.switchTab('precificar'); window.pfLimpar(true);
+    window.switchTab('precificar'); apagarRascunho();
+    window.pfCarregarProduto(p); window.scrollTo(0, 0);
+};
+// Preenche o formulário com um produto salvo (também usado para recuperar o rascunho de uma edição)
+window.pfCarregarProduto = function(p) {
+    const id = p.linha; window.pfLimpar(true);
     PF.editando = id; PF.tipo = p.tipo === 'kit' ? 'kit' : 'peca';
     document.querySelectorAll('#pf-tipo button').forEach(b => b.classList.toggle('active', b.dataset.t === PF.tipo));
     $('pf-bloco-peca').hidden = PF.tipo !== 'peca'; $('pf-bloco-kit').hidden = PF.tipo !== 'kit';
     $('pf-nome').value = p.modelo; $('pf-categoria').value = p.categoria || '';
-    $('pf-foto-img').src = fotoDe(p) || 'logo.png';
+    $('pf-foto-img').src = fotoDe(p) || 'logo.png'; pfFotoEstado();
     window.pfMontarListas(); $('pf-catalogo').value = String(p.catalogo_id || 0);
     $('pf-ativo-box').hidden = false; $('pf-ativo').checked = p.ativo !== false;
     $('pf-venda').value = p.preco_venda ? window.fmt(p.preco_venda) : '';
@@ -207,7 +235,7 @@ window.editarProduto = function(id) {
     $('pf-editando').hidden = false; $('pf-editando-nome').innerText = p.modelo;
     $('pf-excluir').hidden = false; $('pf-titulo-form').innerText = PF.tipo === 'kit' ? 'Editar kit' : 'Editar peça';
     $('pf-salvar').innerHTML = `${window.ic('check')} Salvar alterações`;
-    window.pfRenderKit(); window.pfCalcular(); window.scrollTo(0, 0);
+    window.pfRenderKit(); window.pfCalcular();
 };
 
 window.pfSalvar = async function() {
@@ -220,9 +248,8 @@ window.pfSalvar = async function() {
     if (abaixo.length && !await window.confirmarMM({ icone: '⚠️', titulo: 'Preço abaixo do custo', texto: `${abaixo.join(' e ')} ${abaixo.length > 1 ? 'estão' : 'está'} menor que o custo (${window.fmt(custo)}). Você teria prejuízo.\nSalvar mesmo assim?`, ok: 'Salvar assim' })) return;
     const b = $('pf-salvar'), txt = b.innerHTML; b.disabled = true; b.innerText = '⏳ Salvando…';
     try {
-        let foto = '';
-        const arq = $('pf-foto').files[0];
-        if (arq) { b.innerText = '⏳ Enviando a foto…'; foto = await window.fazerUploadInteligente(await window.comprimirImagem(arq, 800, 800, 0.8)); b.innerText = '⏳ Salvando…'; }
+        let foto = PF.fotoUrl;
+        if (PF.fotoEnvio) { b.innerText = '⏳ Terminando de enviar a foto…'; foto = await PF.fotoEnvio; b.innerText = '⏳ Salvando…'; }
         const dinheiro = v => v > 0 ? window.fmtPlanilha(v) : '';
         const comum = { modelo: nome, categoria: $('pf-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), foto, catalogo_id: parseInt($('pf-catalogo').value) || 0, ativo: PF.editando ? $('pf-ativo').checked : true };
         let r;
@@ -237,7 +264,7 @@ window.pfSalvar = async function() {
         const novo = !PF.editando;
         await window.carregarBancoDeCustos();
         if (window.painelEstoque) window.carregarPainelEstoque();
-        window.pfLimpar(true);
+        apagarRascunho(); window.pfLimpar(true);
         window.mostrarAlerta(novo ? 'Produto cadastrado!' : 'Alterações salvas!', `${nome} · custo ${window.fmt(custo)}${repasse ? ` · repasse ${window.fmt(repasse)}` : ''}`, 'success');
         void r;
     } catch (e) {
@@ -248,11 +275,46 @@ window.pfExcluir = async function() {
     if (!PF.editando) return;
     const id = PF.editando, p = produtoPorId(id); if (!p) return;
     if (!await window.confirmarMM({ tipo: 'perigo', icone: '🗑️', titulo: `Excluir "${p.modelo}"?`, texto: 'As vendas antigas continuam no histórico.\nSe só não quer mais vender, prefira desligar "Produto ativo".', ok: 'Excluir produto' })) return;
-    try { await window.apiAcao('excluir_registro', { aba: 'CustosProdutos', linha: id }); window.pfLimpar(true); window.toastMM('Produto excluído'); window.carregarBancoDeCustos(); window.switchTab('modelos'); }
+    try { await window.apiAcao('excluir_registro', { aba: 'CustosProdutos', linha: id }); window.pfLimpar(); window.toastMM('Produto excluído'); window.carregarBancoDeCustos(); window.switchTab('modelos'); }
     catch (e) { window.mostrarAlerta('Não deu para excluir', e.message, 'warning'); }
 };
 // O ✏️ antigo (estoque, vendedores) agora abre o formulário completo
 window.abrirModalEditarModelo = id => { window.fecharModalMM(); window.editarProduto(id); };
+
+// ==========================================
+// 📷 FOTO RÁPIDA (lista de Produtos e Estoque)
+// ==========================================
+// Toque na foto do produto → escolha ou tire a foto → ela sobe e já fica salva, sem abrir o cadastro.
+window.fotoRapida = (id, foto) => `<button type="button" class="foto-rapida${foto ? '' : ' sem'}" data-id="${id}" title="${foto ? 'Trocar a foto' : 'Adicionar foto'}" onclick="event.stopPropagation(); trocarFotoProduto(${id})">`
+    + (foto ? `<img src="${esc(foto)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('sem'); this.remove()">` : '')
+    + `<span class="fr-ic">${window.ic('camera')}</span><span class="fr-txt">Foto</span></button>`;
+window.trocarFotoProduto = function(id) {
+    let inp = $('foto-rapida-arq');
+    if (!inp) {
+        inp = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', id: 'foto-rapida-arq', hidden: true });
+        inp.onchange = () => { const f = inp.files[0], pid = parseInt(inp.dataset.id); inp.value = ''; if (f) enviarFotoRapida(pid, f); };
+        document.body.appendChild(inp);
+    }
+    inp.dataset.id = id; inp.click();
+};
+async function enviarFotoRapida(id, arq) {
+    const marcar = on => document.querySelectorAll(`.foto-rapida[data-id="${id}"]`).forEach(b => b.classList.toggle('enviando', on));
+    marcar(true);
+    try {
+        const url = await window.fazerUploadInteligente(await window.comprimirImagem(arq, 800, 800, 0.8));
+        await window.apiAcao('foto_produto', { linha: id, foto: url });
+        // Atualiza as telas abertas sem buscar tudo de novo
+        const p = produtoPorId(id); if (p) p.foto = url;
+        const pe = window.painelEstoque && window.painelEstoque.produtos.find(x => x.id === id); if (pe) pe.foto = url;
+        window.renderizarProdutos();
+        if (window.painelEstoque && window.renderizarEstoque) window.renderizarEstoque();
+        if (window.renderizarCatalogoPDV) window.renderizarCatalogoPDV();
+        if (PF.editando === id && !PF.fotoUrl && !PF.fotoEnvio) { $('pf-foto-img').src = url; pfFotoEstado(); }
+        window.toastMM(`Foto salva${p ? ': ' + p.modelo : ''}`);
+    } catch (e) {
+        window.mostrarAlerta('A foto não foi salva', e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga. Atualize o server.js na alwaysdata.' : e.message, 'error');
+    } finally { marcar(false); }
+}
 
 document.addEventListener('DOMContentLoaded', () => { if ($('pf-form')) window.pfLimpar(true); });
 })();
