@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=7.2.0">
+    <link rel="stylesheet" href="style.css?v=7.3.0">
 </head>
 <body>
 
@@ -387,6 +387,10 @@
                     <div class="card">
                         <div class="card-cabeca"><div class="card-titulo">Tamanho</div><small class="card-opc">opcional · em cm</small></div>
                         <p class="card-desc">Aparece numa régua aqui no painel e na página de venda, para o cliente ter ideia do tamanho.</p>
+                        <div class="med-kit" id="pf-med-kit" hidden>
+                            <p><b>Kit:</b> meça o kit montado: largura e comprimento da base (ex.: a bandeja) e a altura da peça mais alta. Se deixar vazio, o site mostra o tamanho de cada peça.</p>
+                            <button type="button" class="btn-limpar" id="pf-med-sugerir" onclick="pfSugerirMedidas()" hidden><svg class="ic"><use href="#i-regua"/></svg>Sugerir pelas peças</button>
+                        </div>
                         <div class="med-campos">
                             <label class="med-campo l"><span>Largura</span><input type="text" id="pf-largura" inputmode="decimal" placeholder="0" oninput="pfMedidas()"><em>cm</em></label>
                             <label class="med-campo c"><span>Comprimento</span><input type="text" id="pf-comprimento" inputmode="decimal" placeholder="0" oninput="pfMedidas()"><em>cm</em></label>
@@ -1031,22 +1035,22 @@
     <button id="nav-v-ajuda" class="bottom-nav-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg>Ajuda</button>
 </nav>
 
-<script src="galeria.js?v=7.2.0"></script>
-<script src="app.js?v=7.2.0"></script>
-<script src="regua.js?v=7.2.0"></script>
-<script src="lista-fotos.js?v=7.2.0"></script>
-<script src="consignado.js?v=7.2.0"></script>
-<script src="vendas.js?v=7.2.0"></script>
-<script src="produtos.js?v=7.2.0"></script>
-<script src="dashboard.js?v=7.2.0"></script>
-<script src="ajustes.js?v=7.2.0"></script>
-<script src="rascunho.js?v=7.2.0"></script>
-<script src="usuarios.js?v=7.2.0"></script>
-<script src="temas.js?v=7.2.0"></script>
-<script src="kits.js?v=7.2.0"></script>
-<script src="paginas.js?v=7.2.0"></script>
-<script src="pedidos.js?v=7.2.0"></script>
-<script src="ajuda.js?v=7.2.0"></script>
+<script src="galeria.js?v=7.3.0"></script>
+<script src="app.js?v=7.3.0"></script>
+<script src="regua.js?v=7.3.0"></script>
+<script src="lista-fotos.js?v=7.3.0"></script>
+<script src="consignado.js?v=7.3.0"></script>
+<script src="vendas.js?v=7.3.0"></script>
+<script src="produtos.js?v=7.3.0"></script>
+<script src="dashboard.js?v=7.3.0"></script>
+<script src="ajustes.js?v=7.3.0"></script>
+<script src="rascunho.js?v=7.3.0"></script>
+<script src="usuarios.js?v=7.3.0"></script>
+<script src="temas.js?v=7.3.0"></script>
+<script src="kits.js?v=7.3.0"></script>
+<script src="paginas.js?v=7.3.0"></script>
+<script src="pedidos.js?v=7.3.0"></script>
+<script src="ajuda.js?v=7.3.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

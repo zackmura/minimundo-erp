@@ -299,6 +299,12 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v7.3', data: '03/11/2026', titulo: 'Tamanho dos kits', itens: [
+        'Kit sem tamanho próprio, mas com as peças medidas: a foto do kit ganha o selo "Tamanho das peças". Ao tocar, o cliente vê uma régua de cada peça.',
+        'Na lista "Vem no kit" da página de venda, tocar no tamanho de uma peça abre a régua só dela.',
+        'Kit com tamanho próprio (montado): a régua do kit e, embaixo, as peças. Tocar numa peça abre a régua dela.',
+        'No Precificar, o cartão Tamanho do kit explica como medir o kit montado e tem o botão "Sugerir pelas peças" (a maior largura, o maior comprimento e a maior altura das peças).'
+    ] },
     { v: 'v7.2', data: '03/11/2026', titulo: 'Tamanho mais à vista', itens: [
         'Página de venda: o tamanho agora fica num selo em cima da foto do produto. No computador, passar o mouse no selo mostra a régua por cima da foto; no celular, tocar abre a régua grande.',
         'Vendas: o tamanho aparece na lista de produtos, no "Ver todos" e no produto escolhido (toque para ver a régua).'

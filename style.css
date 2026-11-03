@@ -1954,3 +1954,9 @@ label.cvb { cursor:pointer; }
 .pdv-tam { display:flex !important; align-items:center; gap:4px; margin-top:2px; color:#5b4bc4 !important; font-weight:700; }
 .pdv-tam svg.ic { width:12px; height:12px; flex-shrink:0; }
 .pi-info .med-chip { margin-top:5px; }
+/* Kit: como medir o kit montado */
+.med-kit { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border-radius:12px; background:#f5f3ff; border:1px solid #e4defb; }
+.med-kit p { margin:0; flex:1 1 220px; font-size:.78rem; line-height:1.45; color:#4c4470; }
+.med-kit .btn-limpar { flex-shrink:0; }
+.med-kit-txt { margin:8px 0 0 !important; font-size:.76rem; }
+.med-kit-txt a { color:#5b4bc4; font-weight:800; cursor:pointer; text-decoration:underline; }

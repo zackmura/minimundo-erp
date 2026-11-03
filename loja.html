@@ -163,19 +163,37 @@
         .tam-painel .regua svg { --rg-max:180px; }
         .tam-painel .regua figcaption { font-size:.74rem; margin-top:4px; }
         .tam-painel > small { position:absolute; right:16px; bottom:24px; font-size:.72rem; font-weight:600; }
+        .tam-painel { max-height:calc(100% - 20px); overflow:hidden; }
+        .tam-painel-tit { display:block; margin-bottom:8px; font-size:.66rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--tinta2); }
+        .tam-lista { list-style:none; margin:0; padding:0; display:grid; gap:7px; }
+        .tam-lista li { display:flex; align-items:center; gap:9px; font-size:.82rem; color:var(--tinta); }
+        .tam-lista img { width:30px; height:30px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--ouro3); }
+        .tam-lista b { flex:1; min-width:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .tam-lista span { color:var(--suave); white-space:nowrap; font-variant-numeric:tabular-nums; }
         @media (hover:hover) and (pointer:fine) {
             .tam-foto:hover .tam-painel, .tam-selo:focus-visible + .tam-painel { opacity:1; visibility:visible; transform:none; pointer-events:auto; transition:opacity .2s, transform .2s; }
         }
         .fotos.com-tam .pontos { justify-content:flex-end; padding-right:18px; bottom:29px; }
-        .vem-tam { display:block; font-size:.76rem; color:var(--suave); }
+        .vem-tam { display:flex; align-items:center; gap:5px; margin-top:2px; padding:0; border:none; background:none; font:inherit; font-size:.76rem; color:var(--suave); cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; }
+        .vem-tam svg { width:13px; height:13px; color:var(--ouro); flex-shrink:0; }
+        .vem-tam:hover { color:var(--tinta); }
         body .regua { --rg-caixa:var(--ouro); --rg-borda:var(--tinta2); --rg-l:var(--botao); --rg-c:var(--botao); --rg-a:var(--botao); --rg-pil-txt:var(--botaoTxt); color:var(--suave); }
         .tam-box { margin:4px 0 6px; padding:18px 10px 12px; border-radius:20px; background:var(--fundo); border:1px solid var(--linha); }
         .tam-box .regua svg { --rg-max:300px; }
         .tam-nome { margin:0 0 12px; color:var(--suave); font-size:.92rem; }
         .tam-nome b { color:var(--tinta); }
         .tam-pecas { list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px; }
-        .tam-pecas li { display:flex; justify-content:space-between; gap:12px; font-size:.86rem; padding-bottom:8px; border-bottom:1px solid var(--linha); }
-        .tam-pecas li span { color:var(--suave); white-space:nowrap; }
+        .tam-pecas li { border-bottom:1px solid var(--linha); }
+        .tam-pecas button { display:flex; align-items:center; gap:10px; width:100%; padding:4px 0 10px; border:none; background:none; font:inherit; color:var(--tinta); text-align:left; cursor:pointer; }
+        .tam-pecas img { width:34px; height:34px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--ouro3); }
+        .tam-pecas b { flex:1; min-width:0; font-size:.86rem; font-weight:600; }
+        .tam-pecas span { color:var(--suave); white-space:nowrap; font-size:.82rem; }
+        .tam-pecas svg { width:16px; height:16px; color:var(--suave); flex-shrink:0; }
+        .tam-peca + .tam-peca { margin-top:16px; }
+        .tam-peca-nome { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin:0 0 6px; font-size:.9rem; color:var(--tinta); }
+        .tam-peca-nome span { color:var(--suave); font-size:.82rem; white-space:nowrap; }
+        .tam-box.mini { padding:12px 8px 8px; }
+        .tam-box.mini .regua svg { --rg-max:200px; }
         .tam-nota { margin:12px 0 0; font-size:.78rem; color:var(--suave); text-align:center; }
         .rodape-in { border-top:1px solid var(--linha); padding-top:18px; display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; }
         .preco { display:flex; flex-direction:column; gap:2px; }
@@ -430,7 +448,7 @@
 
 <script src="temas.js?v=6.0.0"></script>
 <script src="galeria.js?v=6.0.0"></script>
-<script src="regua.js?v=7.2.0"></script>
+<script src="regua.js?v=7.3.0"></script>
 <script>
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
@@ -596,21 +614,21 @@
     }
     const naSacola = id => (SACOLA.find(s => s.id === id) || {}).qtd || 0;
     function cartao(it) {
-        const fotos = it.fotos || [], qtd = naSacola(it.id), tam = temMedidas(it.medidas);
+        const fotos = it.fotos || [], qtd = naSacola(it.id), tam = temMedidas(it.medidas), tamPecas = tam ? [] : pecasComTamanho(it), selo = tam || tamPecas.length > 0;
         const desconto = it.de ? Math.round((1 - it.preco / it.de) * 100) : 0, economia = it.separadas ? it.separadas - it.preco : 0;
         return `<article class="card" id="item-${it.id}">
-            <div class="fotos ${tam ? 'com-tam' : ''}">
+            <div class="fotos ${selo ? 'com-tam' : ''}">
                 ${fotos.length ? `<div class="trilho" data-id="${it.id}">${fotos.map((f, j) => `<button class="foto" type="button" onclick="verFotos(${it.id}, ${j})" aria-label="Ver foto ${j + 1} de ${esc(it.nome)}"><img src="${esc(f)}" alt="${esc(it.nome)}" loading="${j ? 'lazy' : 'eager'}" onerror="this.src='logo.png'"></button>`).join('')}</div>` : '<div class="sem-foto"><img src="logo.png" alt=""></div>'}
                 <div class="selos">${it.tipo === 'kit' ? '<span class="selo kit">Kit</span>' : ''}<span class="selo ${it.pronta_entrega ? 'pronta' : ''}">${it.pronta_entrega ? 'Pronta entrega' : 'Sob encomenda'}</span>${desconto >= 5 ? `<span class="selo promo">−${desconto}%</span>` : ''}</div>
                 ${fotos.length > 1 ? `<button class="seta esq" type="button" aria-label="Foto anterior" onclick="passar(${it.id}, -1)">${IC.esq}</button><button class="seta dir" type="button" aria-label="Próxima foto" onclick="passar(${it.id}, 1)">${IC.dir}</button>
                     <div class="pontos" id="pontos-${it.id}">${fotos.map((_, j) => `<i class="${j ? '' : 'on'}"></i>`).join('')}</div>` : ''}
-                ${tam ? `<div class="tam-foto" onmouseenter="painelTamanho(this, ${it.id})"><button class="tam-selo" type="button" onclick="verTamanho(${it.id})" onfocus="painelTamanho(this.parentNode, ${it.id})" aria-label="Tamanho ${esc(medidasTxt(it.medidas))}: ver na régua">${IC.regua}<span>${esc(medidasTxt(it.medidas))}</span></button><div class="tam-painel" aria-hidden="true"></div></div>` : ''}
+                ${selo ? `<div class="tam-foto" onmouseenter="painelTamanho(this, ${it.id})"><button class="tam-selo" type="button" onclick="verTamanho(${it.id})" onfocus="painelTamanho(this.parentNode, ${it.id})" aria-label="${tam ? `Tamanho ${esc(medidasTxt(it.medidas))}: ver na régua` : 'Ver o tamanho das peças do kit'}">${IC.regua}<span>${tam ? esc(medidasTxt(it.medidas)) : 'Tamanho das peças'}</span></button><div class="tam-painel" aria-hidden="true"></div></div>` : ''}
             </div>
             <div class="corpo">
                 ${it.categoria ? `<p class="cat">${esc(it.categoria)}</p>` : ''}
                 <h3>${esc(it.nome)}</h3>
                 ${it.descricao ? `<p class="desc">${esc(it.descricao)}</p>` : ''}
-                ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map(p => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}${temMedidas(p.medidas) ? `<small class="vem-tam">${esc(medidasTxt(p.medidas))}</small>` : ''}</span></li>`).join('')}</ul></div>` : ''}
+                ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map((p, j) => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}${temMedidas(p.medidas) ? `<button type="button" class="vem-tam" onclick="verTamanhoPeca(${it.id}, ${j})" aria-label="Tamanho de ${esc(p.nome)}: ${esc(medidasTxt(p.medidas))}. Ver na régua">${IC.regua}${esc(medidasTxt(p.medidas))}</button>` : ''}</span></li>`).join('')}</ul></div>` : ''}
                 <div class="rodape"><div class="rodape-in">
                     <div class="preco">${it.preco ? `${it.de ? `<s>de ${real(it.de)}</s>` : economia > 0 ? `<s>Separadas: ${real(it.separadas)}</s>` : ''}<strong>${real(it.preco)}</strong>${economia > 0 ? `<span class="economia">Você economiza ${real(economia)}</span>` : ''}` : '<span class="consulta">Sob consulta</span>'}</div>
                     <div class="acoes">${qtd ? `<span class="passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span>`
@@ -620,19 +638,42 @@
             </div></article>`;
     }
     // A régua do selo só é desenhada na primeira vez que o mouse passa
+    // Kit sem tamanho próprio: o selo mostra o tamanho de cada peça
+    const pecasComTamanho = it => (it.itens || []).map((p, i) => Object.assign({ i }, p)).filter(p => temMedidas(p.medidas));
+    const fotoPeca = p => `<img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'">`;
     function painelTamanho(caixa, id) {
         const p = caixa && caixa.querySelector('.tam-painel'), it = ITENS.find(i => i.id === id);
-        if (p && !p.innerHTML && it) p.innerHTML = reguaMM(it.medidas, { comparar: true }) + '<small>Clique para ver maior</small>';
+        if (!p || p.innerHTML || !it) return;
+        if (temMedidas(it.medidas)) { p.innerHTML = reguaMM(it.medidas, { comparar: true }) + '<small>Clique para ver maior</small>'; return; }
+        const pecas = pecasComTamanho(it), mostra = pecas.slice(0, 5);
+        p.innerHTML = `<span class="tam-painel-tit">Tamanho das peças</span><ul class="tam-lista">${mostra.map(x => `<li>${fotoPeca(x)}<b>${esc(x.nome)}</b><span>${esc(medidasTxt(x.medidas))}</span></li>`).join('')}</ul>
+            <small>${pecas.length > mostra.length ? `+${pecas.length - mostra.length} · ` : ''}Clique para ver as réguas</small>`;
     }
     // Tamanho do produto: caixa em 3D com uma fita métrica em cada lado
+    // Kit com tamanho próprio (montado): a régua do kit e a lista das peças (tocar abre a régua da peça).
+    // Kit sem tamanho próprio: uma régua de cada peça, uma embaixo da outra.
+    const NOTA_TAM = '<p class="tam-nota">Medidas aproximadas, em centímetros: largura × comprimento × altura.</p>';
     function verTamanho(id) {
-        const it = ITENS.find(i => i.id === id); if (!it || !temMedidas(it.medidas)) return;
-        const pecas = (it.itens || []).filter(p => temMedidas(p.medidas));
-        gaveta(`<h2>Tamanho <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
-            <p class="tam-nome"><b>${esc(it.nome)}</b> · ${esc(medidasTxt(it.medidas))}</p>
+        const it = ITENS.find(i => i.id === id); if (!it) return;
+        const proprio = temMedidas(it.medidas), pecas = pecasComTamanho(it);
+        if (!proprio && !pecas.length) return;
+        const fechar = '<button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button>', pxCm = escalaRegua(pecas.map(p => p.medidas));
+        gaveta(proprio ? `<h2>Tamanho ${fechar}</h2>
+            <p class="tam-nome"><b>${esc(it.nome)}</b> · ${esc(medidasTxt(it.medidas))}${pecas.length ? ' · montado' : ''}</p>
             <div class="tam-box">${reguaMM(it.medidas, { comparar: true })}</div>
-            ${pecas.length ? `<span class="s-rot">Peças do kit</span><ul class="tam-pecas">${pecas.map(p => `<li><b>${p.qtd}× ${esc(p.nome)}</b><span>${esc(medidasTxt(p.medidas))}</span></li>`).join('')}</ul>` : ''}
-            <p class="tam-nota">Medidas aproximadas, em centímetros: largura × comprimento × altura.</p>`, 'Tamanho');
+            ${pecas.length ? `<span class="s-rot">Peças do kit · toque para ver a régua</span><ul class="tam-pecas">${pecas.map(p => `<li><button type="button" onclick="verTamanhoPeca(${it.id}, ${p.i})">${fotoPeca(p)}<b>${p.qtd}× ${esc(p.nome)}</b><span>${esc(medidasTxt(p.medidas))}</span>${IC.dir}</button></li>`).join('')}</ul>` : ''}
+            ${NOTA_TAM}` : `<h2>Tamanho das peças ${fechar}</h2>
+            <p class="tam-nome"><b>${esc(it.nome)}</b>${pecas.length > 1 ? ' · todas na mesma escala, para comparar' : ''}</p>
+            ${pecas.map(p => `<div class="tam-peca"><p class="tam-peca-nome"><b>${p.qtd}× ${esc(p.nome)}</b><span>${esc(medidasTxt(p.medidas))}</span></p><div class="tam-box mini">${reguaMM(p.medidas, { pxCm })}</div></div>`).join('')}
+            ${NOTA_TAM}`, 'Tamanho');
+        if (!proprio) mesmaEscalaRegua($('sacola'));
+    }
+    function verTamanhoPeca(id, i) {
+        const it = ITENS.find(x => x.id === id), p = it && (it.itens || [])[i]; if (!p || !temMedidas(p.medidas)) return;
+        gaveta(`<button class="s-voltar" type="button" onclick="verTamanho(${id})">← ${temMedidas(it.medidas) ? 'Tamanho do kit' : 'Todas as peças'}</button>
+            <h2>Tamanho <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
+            <p class="tam-nome"><b>${esc(p.nome)}</b> · ${esc(medidasTxt(p.medidas))}<br><small>Vem no ${esc(it.nome)}</small></p>
+            <div class="tam-box">${reguaMM(p.medidas, { comparar: true })}</div>${NOTA_TAM}`, 'Tamanho');
     }
     function passar(id, d) { const t = document.querySelector(`.trilho[data-id="${id}"]`); if (t) t.scrollBy({ left: d * t.clientWidth, behavior: 'smooth' }); }
     function verFotos(id, j) { const it = ITENS.find(i => i.id === id); if (it && it.fotos.length) abrirGaleria({ fotos: it.fotos, indice: j, titulo: it.nome }); }

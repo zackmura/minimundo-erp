@@ -87,6 +87,7 @@ window.pfTipo = function(tipo) {
     $('pf-bloco-peca').hidden = tipo !== 'peca'; $('pf-bloco-kit').hidden = tipo !== 'kit';
     $('pf-nome').placeholder = tipo === 'kit' ? 'Ex: Kit festa Corinthians' : 'Ex: Placa profissões';
     if (tipo === 'kit') window.pfRenderKit(); else window.pfCalcular();
+    window.pfMedidas();
 };
 window.pfCarregarImpressora = function() {
     $('pf-watts').value = cfg('imp_watts'); $('pf-kwh').value = cfg('imp_kwh'); $('pf-maq').value = cfg('imp_maq_hora'); $('pf-hora').value = cfg('imp_hora'); $('pf-falha').value = cfg('taxa_falha');
@@ -200,7 +201,7 @@ window.PK = { filtro: 'todas' };
 const pecasParaKit = () => (window.arrayBancoCustos || []).filter(p => p.tipo !== 'kit' && p.ativo !== false && p.linha !== PF.editando);
 const noKit = id => PF.kit.find(i => i.produto_id === id);
 const estAtelie = p => Math.max(0, parseInt(p && p.est_atelie) || 0);
-const mudouKit = () => { window.pfRenderKit(); guardarRascunho(); };
+const mudouKit = () => { window.pfRenderKit(); window.pfMedidas(); guardarRascunho(); };
 window.pfKitMais = function(id) { const it = noKit(id); if (it) it.qtd++; else PF.kit.push({ produto_id: id, qtd: 1 }); mudouKit(); };
 window.pfKitMenos = function(id) { const it = noKit(id); if (!it) return; if (--it.qtd < 1) PF.kit = PF.kit.filter(i => i !== it); mudouKit(); };
 window.pfKitTirar = function(id) { PF.kit = PF.kit.filter(i => i.produto_id !== id); mudouKit(); };
@@ -294,8 +295,24 @@ const preencherMedidas = (pre, m) => MEDIDAS.forEach(([k, x]) => { $(pre + '-' +
 const paraSalvar = m => Object.fromEntries(MEDIDAS.map(([k, x]) => [k, m[x] || '']));
 const camposMedidasHTML = (pre, m, aoMudar) => `<div class="med-campos">${MEDIDAS.map(([k, x, nome]) => `<label class="med-campo ${x}"><span>${nome}</span><input type="text" id="${pre}-${k}" inputmode="decimal" placeholder="0" value="${m && m[x] ? String(m[x]).replace('.', ',') : ''}" oninput="${aoMudar}()"><em>cm</em></label>`).join('')}</div>`;
 const previa = (id, m) => { const box = $(id); if (box) box.innerHTML = window.reguaMM(m) || '<p class="med-vazio">Preencha as medidas para ver a régua.</p>'; };
-window.pfMedidas = () => previa('pf-regua', medidasDos('pf'));
+// Kit montado: a maior largura, o maior comprimento e a maior altura das peças (certo quando elas ficam em cima de uma base, como uma bandeja)
+const sugestaoDoKit = itens => {
+    const ms = (itens || []).map(i => (produtoPorId(i.produto_id) || {}).medidas).filter(window.temMedidas);
+    return ms.length ? { l: Math.max(...ms.map(m => m.l || 0)), c: Math.max(...ms.map(m => m.c || 0)), a: Math.max(...ms.map(m => m.a || 0)) } : null;
+};
+window.pfMedidas = () => {
+    previa('pf-regua', medidasDos('pf'));
+    const kit = PF.tipo === 'kit', caixa = $('pf-med-kit'); if (!caixa) return;
+    caixa.hidden = !kit;
+    $('pf-med-sugerir').hidden = !kit || !sugestaoDoKit(PF.kit);
+};
+window.pfSugerirMedidas = () => {
+    const m = sugestaoDoKit(PF.kit); if (!m) return;
+    preencherMedidas('pf', m); window.pfMedidas(); guardarRascunho();
+    window.toastMM('Confira se é o tamanho com tudo montado');
+};
 window.epMedidas = () => previa('ep-regua', medidasDos('ep'));
+window.epSugerirMedidas = id => { const p = produtoPorId(id), m = p && sugestaoDoKit(p.itens); if (m) { preencherMedidas('ep', m); window.epMedidas(); } };
 // "12 × 8 × 5 cm" pequeno nas listas; o toque abre a régua
 window.chipMedidas = (id, m) => window.temMedidas(m) ? ` <button type="button" class="med-chip" onclick="event.stopPropagation(); verRegua(${id})" aria-label="Tamanho ${window.medidasTxt(m)}: ver na régua">${window.ic('regua')}${window.medidasTxt(m)}</button>` : '';
 window.verRegua = function(id) {
@@ -360,7 +377,7 @@ window.pfCarregarProduto = function(p) {
     $('pf-editando').hidden = false; $('pf-editando-nome').innerText = p.modelo;
     $('pf-excluir').hidden = false; $('pf-titulo-form').innerText = PF.tipo === 'kit' ? 'Editar kit' : 'Editar peça';
     $('pf-salvar').innerHTML = `${window.ic('check')} Salvar alterações`;
-    window.pfRenderKit(); window.pfCalcular();
+    window.pfRenderKit(); window.pfCalcular(); window.pfMedidas();
 };
 
 window.pfSalvar = async function() {
@@ -536,7 +553,7 @@ window.abrirEdicaoProduto = function(id) {
         <div class="input-group"><label>Fotos <small class="rot-dica">toque para ver de perto</small></label>${fotosFaixa(id)}</div>
         <div class="input-group"><label for="ep-nome">Nome *</label><input type="text" id="ep-nome" value="${esc(p.modelo)}" autocomplete="off"></div>
         <div class="input-group"><label for="ep-categoria">Categoria</label><input type="text" id="ep-categoria" list="ep-categorias" value="${esc(p.categoria || '')}" placeholder="Ex: Decoração, Chaveiros…" autocomplete="off"><datalist id="ep-categorias">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
-        <div class="input-group"><label>Tamanho <small class="rot-dica">em cm, opcional · aparece no site</small></label>${camposMedidasHTML('ep', p.medidas, 'epMedidas')}<div class="med-previa mini" id="ep-regua"></div></div>
+        <div class="input-group"><label>Tamanho <small class="rot-dica">em cm, opcional · aparece no site</small></label>${camposMedidasHTML('ep', p.medidas, 'epMedidas')}<div class="med-previa mini" id="ep-regua"></div>${kit ? `<p class="texto-ajuda med-kit-txt">Kit: meça montado (base × altura da peça mais alta). Vazio = o site mostra o tamanho de cada peça.${sugestaoDoKit(p.itens) ? ` <a onclick="epSugerirMedidas(${id})">Sugerir pelas peças</a>` : ''}</p>` : ''}</div>
         <div class="row">
             <div class="col"><div class="input-group"><label for="ep-venda">Preço de venda</label><input type="text" id="ep-venda" class="mask-money" inputmode="numeric" value="${dm(p.preco_venda)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>
             <div class="col"><div class="input-group"><label for="ep-repasse">Repasse (vendedores)</label><input type="text" id="ep-repasse" class="mask-money" inputmode="numeric" value="${dm(p.preco_repasse)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>

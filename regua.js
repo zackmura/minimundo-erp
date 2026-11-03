@@ -74,11 +74,18 @@ function moldura(pontos, es, folga = 8) {
 const rotulo = m => ['l', 'c', 'a'].filter(k => m[k] > 0).map(k => `${NOMES[k]} ${n1(m[k])} cm`).join(', ');
 
 // ---------- As três medidas: caixa em 3D ----------
-function caixa3d(m) {
-    const maior = Math.max(m.l, m.c, m.a);
-    // Medida muito fina (ex.: chaveiro de 0,3 cm) ganha um mínimo para a face continuar visível
-    const w = Math.max(m.l, maior * 0.04), d = Math.max(m.c, maior * 0.04), h = Math.max(m.a, maior * 0.04);
-    const s = 190 / Math.max((w + d) * C30, (w + d) * S30 + h); // px por cm
+// Medida muito fina (ex.: chaveiro de 0,3 cm) ganha um mínimo para a face continuar visível
+const tamanhoDesenho = m => { const maior = Math.max(m.l, m.c, m.a); return { w: Math.max(m.l, maior * 0.04), d: Math.max(m.c, maior * 0.04), h: Math.max(m.a, maior * 0.04) }; };
+// Quantos px vale 1 cm para o desenho ocupar o espaço de sempre
+const escalaPropria = m => {
+    if (!(m.l && m.c && m.a)) return 210 / Math.max(m.l, m.c, m.a);
+    const { w, d, h } = tamanhoDesenho(m); return 190 / Math.max((w + d) * C30, (w + d) * S30 + h);
+};
+const normal = m => ({ l: +m.l || 0, c: +m.c || 0, a: +m.a || 0 });
+// Várias peças na mesma escala (a maior ocupa o espaço de sempre e as outras ficam proporcionais a ela)
+window.escalaRegua = lista => Math.min(...lista.filter(tem).map(m => escalaPropria(normal(m))));
+function caixa3d(m, pxCm) {
+    const { w, d, h } = tamanhoDesenho(m), s = pxCm || escalaPropria(m); // px por cm
     const ux = P(C30, -S30), uz = P(-C30, -S30), uy = P(0, -1);
     const B0 = P(0, 0), B1 = vez(ux, w * s), B2 = vez(uz, d * s), B3 = mais(B1, vez(uz, d * s)), alto = vez(uy, h * s);
     const T0 = alto, T1 = mais(B1, alto), T2 = mais(B2, alto), T3 = mais(B3, alto);
@@ -89,7 +96,7 @@ function caixa3d(m) {
     const centro = vez(B3, 0.5), piso = k => [B0, B1, B3, B2].map(p => mais(centro, vez(mais(p, vez(centro, -1)), k), P(0, 3)));
     const guias = [[B0, nL], [B1, nL], [B0, nC], [B2, nC], [T1, ux]].map(([p, n]) => linha(p, mais(p, vez(n, VAO + LARG)), 'rg-guia')).join('');
     const mo = moldura([B2, B1, T3, T2, T1, ...fL.pontos, ...fC.pontos, ...fA.pontos], es);
-    return `<svg viewBox="${mo.vb}" role="img" aria-label="${rotulo(m)}" style="max-width:${Math.round(mo.w * 1.5)}px">
+    return `<svg viewBox="${mo.vb}" data-w="${r1(mo.w)}" role="img" aria-label="${rotulo(m)}" style="max-width:${Math.round(mo.w * 1.5)}px">
         <polygon class="rg-sombra" points="${pts(...piso(1.1))}"/><polygon class="rg-sombra" points="${pts(...piso(1.04))}"/>
         <g class="rg-caixa"><polygon class="rg-lado2" points="${pts(B0, B2, T2, T0)}"/><polygon class="rg-lado1" points="${pts(B0, B1, T1, T0)}"/><polygon class="rg-topo" points="${pts(T0, T1, T3, T2)}"/></g>
         ${linha(B0, B1, 'rg-aresta rg-l')}${linha(B0, B2, 'rg-aresta rg-c')}${linha(B1, T1, 'rg-aresta rg-a')}
@@ -97,8 +104,8 @@ function caixa3d(m) {
 }
 
 // ---------- Uma ou duas medidas: fitas retas, uma embaixo da outra ----------
-function fitasRetas(m) {
-    const ks = ['l', 'c', 'a'].filter(k => m[k] > 0), maior = Math.max(...ks.map(k => m[k])), L = 210, pxCm = L / maior;
+function fitasRetas(m, escala) {
+    const ks = ['l', 'c', 'a'].filter(k => m[k] > 0), pxCm = escala || escalaPropria(m);
     let svg = '', pontos = [], es = [];
     ks.forEach((k, i) => {
         const y = i * 48, f = fita(k, P(0, y - VAO), P(1, 0), Math.max(m[k] * pxCm, 6), P(0, 1), pxCm);
@@ -106,15 +113,19 @@ function fitasRetas(m) {
         es.push(...etiquetas([{ k, valor: m[k], meio: P(Math.max(m[k] * pxCm, 6), y + LARG / 2), n: P(1, 0) }]));
     });
     const mo = moldura(pontos, es);
-    return `<svg viewBox="${mo.vb}" role="img" aria-label="${rotulo(m)}" style="max-width:${Math.round(mo.w * 1.5)}px"><g class="rg-fitas">${svg}</g>${desenharEtiquetas(es)}</svg>`;
+    return `<svg viewBox="${mo.vb}" data-w="${r1(mo.w)}" role="img" aria-label="${rotulo(m)}" style="max-width:${Math.round(mo.w * 1.5)}px"><g class="rg-fitas">${svg}</g>${desenharEtiquetas(es)}</svg>`;
 }
 
-// Desenho completo. o.comparar = frase "para ter uma ideia" (página do cliente)
+// Desenho completo. o.comparar = frase "para ter uma ideia" (página do cliente); o.pxCm = escala fixa (ver escalaRegua)
+window.mesmaEscalaRegua = caixa => {
+    const svgs = [...caixa.querySelectorAll('.regua svg[data-w]')], maior = Math.max(...svgs.map(s => +s.dataset.w));
+    svgs.forEach(s => { s.style.width = `min(${s.dataset.w}px, ${(+s.dataset.w / maior * 100).toFixed(2)}%)`; s.style.maxWidth = '100%'; s.style.maxHeight = 'none'; });
+};
 window.reguaMM = function(m, o = {}) {
     if (!tem(m)) return '';
-    m = { l: +m.l || 0, c: +m.c || 0, a: +m.a || 0 };
+    m = normal(m);
     const maior = Math.max(m.l, m.c, m.a);
-    return `<figure class="regua ${o.classe || ''}">${m.l && m.c && m.a ? caixa3d(m) : fitasRetas(m)}${o.comparar ? `<figcaption>Para ter uma ideia: ${comparacao(maior)}.</figcaption>` : ''}</figure>`;
+    return `<figure class="regua ${o.classe || ''}">${m.l && m.c && m.a ? caixa3d(m, o.pxCm) : fitasRetas(m, o.pxCm)}${o.comparar ? `<figcaption>Para ter uma ideia: ${comparacao(maior)}.</figcaption>` : ''}</figure>`;
 };
 
 // Estilo da régua (o mesmo no painel e na página de venda; cada um pode trocar as cores pelas variáveis --rg-*)
