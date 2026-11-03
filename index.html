@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=7.0.0">
+    <link rel="stylesheet" href="style.css?v=7.1.0">
 </head>
 <body>
 
@@ -71,6 +71,7 @@
     <symbol id="i-ajuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4.4M12 17.5h.01"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m10 8.5 5.5 3.5-5.5 3.5z"/></symbol>
     <symbol id="i-pontos" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+    <symbol id="i-regua" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
     <symbol id="i-devolver" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
 </svg>
@@ -381,6 +382,17 @@
                             <button type="button" class="btn-limpar ep-link" id="pf-kit-usar-fotos" hidden onclick="pfKitUsarFotos()"><svg class="ic"><use href="#i-imagem"/></svg>Kit sem foto? Usar as fotos das peças</button>
                             <div class="input-group" style="margin-top:14px;"><label for="pf-kit-extras">Extras do kit (caixa, fita, cartão…)</label><input type="text" id="pf-kit-extras" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(pfCalcular)"></div>
                         </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-cabeca"><div class="card-titulo">Tamanho</div><small class="card-opc">opcional · em cm</small></div>
+                        <p class="card-desc">Aparece numa régua aqui no painel e na página de venda, para o cliente ter ideia do tamanho.</p>
+                        <div class="med-campos">
+                            <label class="med-campo l"><span>Largura</span><input type="text" id="pf-largura" inputmode="decimal" placeholder="0" oninput="pfMedidas()"><em>cm</em></label>
+                            <label class="med-campo c"><span>Comprimento</span><input type="text" id="pf-comprimento" inputmode="decimal" placeholder="0" oninput="pfMedidas()"><em>cm</em></label>
+                            <label class="med-campo a"><span>Altura</span><input type="text" id="pf-altura" inputmode="decimal" placeholder="0" oninput="pfMedidas()"><em>cm</em></label>
+                        </div>
+                        <div class="med-previa" id="pf-regua"></div>
                     </div>
                 </div>
 
@@ -1019,21 +1031,22 @@
     <button id="nav-v-ajuda" class="bottom-nav-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg>Ajuda</button>
 </nav>
 
-<script src="galeria.js?v=7.0.0"></script>
-<script src="app.js?v=7.0.0"></script>
-<script src="lista-fotos.js?v=7.0.0"></script>
-<script src="consignado.js?v=7.0.0"></script>
-<script src="vendas.js?v=7.0.0"></script>
-<script src="produtos.js?v=7.0.0"></script>
-<script src="dashboard.js?v=7.0.0"></script>
-<script src="ajustes.js?v=7.0.0"></script>
-<script src="rascunho.js?v=7.0.0"></script>
-<script src="usuarios.js?v=7.0.0"></script>
-<script src="temas.js?v=7.0.0"></script>
-<script src="kits.js?v=7.0.0"></script>
-<script src="paginas.js?v=7.0.0"></script>
-<script src="pedidos.js?v=7.0.0"></script>
-<script src="ajuda.js?v=7.0.0"></script>
+<script src="galeria.js?v=7.1.0"></script>
+<script src="app.js?v=7.1.0"></script>
+<script src="regua.js?v=7.1.0"></script>
+<script src="lista-fotos.js?v=7.1.0"></script>
+<script src="consignado.js?v=7.1.0"></script>
+<script src="vendas.js?v=7.1.0"></script>
+<script src="produtos.js?v=7.1.0"></script>
+<script src="dashboard.js?v=7.1.0"></script>
+<script src="ajustes.js?v=7.1.0"></script>
+<script src="rascunho.js?v=7.1.0"></script>
+<script src="usuarios.js?v=7.1.0"></script>
+<script src="temas.js?v=7.1.0"></script>
+<script src="kits.js?v=7.1.0"></script>
+<script src="paginas.js?v=7.1.0"></script>
+<script src="pedidos.js?v=7.1.0"></script>
+<script src="ajuda.js?v=7.1.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

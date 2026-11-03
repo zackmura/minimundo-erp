@@ -57,11 +57,11 @@ window.renderizarProdutos = function() {
     box.innerHTML = `<div class="tabela-prod"><div class="tp-cab"><span>Produto</span><span>Custo</span><span>Venda</span><span>Repasse</span><span>Margem</span><span>Estoque</span></div>`
         + lista.map(p => {
             const custo = val(p.custo_total), venda = p.preco_venda || 0, margem = venda > 0 ? Math.round((venda - custo) / venda * 100) : null;
-            const sub = p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`;
+            const sub = (p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`);
             // No celular as colunas somem e o resumo (venda · repasse · margem) aparece embaixo do nome
             const resumo = `${venda ? 'Venda ' + window.fmt(venda) : 'sem preço'} · ${p.preco_repasse ? 'repasse ' + window.fmt(p.preco_repasse) : '<b class="neg">sem repasse</b>'}${margem !== null ? ` · <span class="${margem < 30 ? 'neg' : ''}">${margem}%</span>` : ''}`;
             return `<div class="tp-linha ${p.ativo === false ? 'inativo' : ''}" onclick="abrirEdicaoProduto(${p.linha})" role="button" tabindex="0" title="Editar">
-                <div class="tp-prod">${window.fotoRapida(p.linha, fotoDe(p))}<div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small><small class="tp-resumo">${resumo}</small></div></div>
+                <div class="tp-prod">${window.fotoRapida(p.linha, fotoDe(p))}<div><b>${esc(p.modelo)}${p.ativo === false ? ' <span class="tag-inativo">Inativo</span>' : ''}</b><small>${p.categoria ? esc(p.categoria) + ' · ' : ''}${sub}</small><small class="tp-resumo">${resumo}</small>${window.chipMedidas(p.linha, p.medidas)}</div></div>
                 <span class="tp-num" data-rot="Custo">${window.fmt(custo)}</span>
                 <span class="tp-num" data-rot="Venda">${venda ? window.fmt(venda) : '<i>—</i>'}</span>
                 <span class="tp-num" data-rot="Repasse">${p.preco_repasse ? window.fmt(p.preco_repasse) : '<span class="mm-chip vermelho">sem repasse</span>'}</span>
@@ -286,6 +286,28 @@ const somaSeparadas = campo => {
     PF.kit.forEach(i => { const v = parseFloat((produtoPorId(i.produto_id) || {})[campo]) || 0; if (v > 0) soma += v * i.qtd; else sem++; });
     return { soma: n2(soma), sem };
 };
+// ---------- TAMANHO (régua) ----------
+const MEDIDAS = [['largura', 'l', 'Largura'], ['comprimento', 'c', 'Comprimento'], ['altura', 'a', 'Altura']];
+const medidasDos = pre => Object.fromEntries(MEDIDAS.map(([k, m]) => [m, window.numMedida($(pre + '-' + k).value)]));
+const preencherMedidas = (pre, m) => MEDIDAS.forEach(([k, x]) => { $(pre + '-' + k).value = m && m[x] ? String(m[x]).replace('.', ',') : ''; });
+// O que vai para o servidor (vazio = apaga a medida)
+const paraSalvar = m => Object.fromEntries(MEDIDAS.map(([k, x]) => [k, m[x] || '']));
+const camposMedidasHTML = (pre, m, aoMudar) => `<div class="med-campos">${MEDIDAS.map(([k, x, nome]) => `<label class="med-campo ${x}"><span>${nome}</span><input type="text" id="${pre}-${k}" inputmode="decimal" placeholder="0" value="${m && m[x] ? String(m[x]).replace('.', ',') : ''}" oninput="${aoMudar}()"><em>cm</em></label>`).join('')}</div>`;
+const previa = (id, m) => { const box = $(id); if (box) box.innerHTML = window.reguaMM(m) || '<p class="med-vazio">Preencha as medidas para ver a régua.</p>'; };
+window.pfMedidas = () => previa('pf-regua', medidasDos('pf'));
+window.epMedidas = () => previa('ep-regua', medidasDos('ep'));
+// "12 × 8 × 5 cm" pequeno nas listas; o toque abre a régua
+window.chipMedidas = (id, m) => window.temMedidas(m) ? ` <button type="button" class="med-chip" onclick="event.stopPropagation(); verRegua(${id})" aria-label="Tamanho ${window.medidasTxt(m)}: ver na régua">${window.ic('regua')}${window.medidasTxt(m)}</button>` : '';
+window.verRegua = function(id) {
+    const p = produtoPorId(id), e = window.painelEstoque && window.painelEstoque.produtos.find(x => x.id === id),
+        v = window.painelVendedor && (window.painelVendedor.estoque || []).find(x => x.produto_id === id), x = p || e || v;
+    if (!x || !window.temMedidas(x.medidas)) return;
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic('regua')} Tamanho</h3>
+        <p class="regua-nome"><b>${esc(p ? p.modelo : x.nome)}</b><span>${window.medidasTxt(x.medidas)} · largura × comprimento × altura</span></p>
+        ${window.reguaMM(x.medidas, { comparar: true, classe: 'grande' })}
+        ${p || e ? `<button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); abrirEdicaoProduto(${id})">${window.ic('lapis')} Mudar as medidas</button>` : ''}`);
+};
+
 window.pfAplicarValor = function(campo, v) { $(campo).value = window.fmt(v); window.pfCalcular(); };
 
 // ---------- NOVO / EDITAR ----------
@@ -300,7 +322,7 @@ window.pfLimpar = function(silencioso) {
     $('pf-editando').hidden = true; $('pf-excluir').hidden = true; $('pf-ativo-box').hidden = true;
     $('pf-titulo-form').innerText = 'Novo produto'; $('pf-salvar').innerHTML = `${window.ic('check')} Cadastrar produto`;
     window.pfCarregarImpressora(); window.pfMontarListas();
-    window.pfTipo('peca'); window.pfRenderKit();
+    window.pfTipo('peca'); window.pfRenderKit(); window.pfMedidas();
     if (!silencioso) window.scrollTo(0, 0);
 };
 window.editarProduto = function(id) {
@@ -315,6 +337,7 @@ window.pfCarregarProduto = function(p) {
     document.querySelectorAll('#pf-tipo button').forEach(b => b.classList.toggle('active', b.dataset.t === PF.tipo));
     $('pf-bloco-peca').hidden = PF.tipo !== 'peca'; $('pf-bloco-kit').hidden = PF.tipo !== 'kit';
     $('pf-nome').value = p.modelo; $('pf-categoria').value = p.categoria || '';
+    preencherMedidas('pf', p.medidas); window.pfMedidas();
     pfFotoEstado();
     window.pfMontarListas(); $('pf-catalogo').value = String(p.catalogo_id || 0);
     $('pf-ativo-box').hidden = false; $('pf-ativo').checked = p.ativo !== false;
@@ -354,7 +377,7 @@ window.pfSalvar = async function() {
         if (PF.fotoEnvio) { b.innerText = '⏳ Terminando de enviar as fotos…'; await PF.fotoEnvio; b.innerText = '⏳ Salvando…'; }
         const foto = PF.editando ? '' : PF.fotos.join(',');
         const dinheiro = v => v > 0 ? window.fmtPlanilha(v) : '';
-        const comum = { modelo: nome, categoria: $('pf-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), foto, catalogo_id: parseInt($('pf-catalogo').value) || 0, ativo: PF.editando ? $('pf-ativo').checked : true };
+        const comum = { modelo: nome, categoria: $('pf-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), foto, catalogo_id: parseInt($('pf-catalogo').value) || 0, ativo: PF.editando ? $('pf-ativo').checked : true, ...paraSalvar(medidasDos('pf')) };
         let r;
         if (PF.tipo === 'kit') {
             r = await window.apiAcao('salvar_kit', Object.assign(comum, { linha: PF.editando || 0, itens: PF.kit, insumos: window.fmtPlanilha(dinheiroCampo('pf-kit-extras')), calculo: { extras: dinheiroCampo('pf-kit-extras') } }));
@@ -513,6 +536,7 @@ window.abrirEdicaoProduto = function(id) {
         <div class="input-group"><label>Fotos <small class="rot-dica">toque para ver de perto</small></label>${fotosFaixa(id)}</div>
         <div class="input-group"><label for="ep-nome">Nome *</label><input type="text" id="ep-nome" value="${esc(p.modelo)}" autocomplete="off"></div>
         <div class="input-group"><label for="ep-categoria">Categoria</label><input type="text" id="ep-categoria" list="ep-categorias" value="${esc(p.categoria || '')}" placeholder="Ex: Decoração, Chaveiros…" autocomplete="off"><datalist id="ep-categorias">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
+        <div class="input-group"><label>Tamanho <small class="rot-dica">em cm, opcional · aparece no site</small></label>${camposMedidasHTML('ep', p.medidas, 'epMedidas')}<div class="med-previa mini" id="ep-regua"></div></div>
         <div class="row">
             <div class="col"><div class="input-group"><label for="ep-venda">Preço de venda</label><input type="text" id="ep-venda" class="mask-money" inputmode="numeric" value="${dm(p.preco_venda)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>
             <div class="col"><div class="input-group"><label for="ep-repasse">Repasse (vendedores)</label><input type="text" id="ep-repasse" class="mask-money" inputmode="numeric" value="${dm(p.preco_repasse)}" placeholder="R$ 0,00" oninput="setTimeout(epInfo)"></div></div>
@@ -527,7 +551,7 @@ window.abrirEdicaoProduto = function(id) {
         <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>
         <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); duplicarProduto(${id})">${window.ic('copiar')} Criar ${kit ? 'outro kit parecido' : 'outra peça parecida'}</button>
         <button type="button" class="btn-limpar ep-link" onclick="paginasDoProduto(${id})">${window.ic('sacola')} Páginas de venda (onde aparece para os clientes)</button>`);
-    window.epInfo();
+    window.epInfo(); window.epMedidas();
 };
 window.epInfo = function() {
     const p = produtoPorId(epId), box = $('ep-info'); if (!p || !box) return;
@@ -545,7 +569,7 @@ window.salvarEdicaoProduto = async function() {
     const b = $('btn-ep'), txt = b.innerHTML; b.disabled = true; b.innerText = '⏳ Salvando…';
     const dinheiro = v => v > 0 ? window.fmtPlanilha(v) : '';
     try {
-        await window.apiAcao('editar_produto', { linha: id, modelo: nome, categoria: $('ep-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), catalogo_id: parseInt($('ep-catalogo').value) || 0, ativo: $('ep-ativo').checked });
+        await window.apiAcao('editar_produto', { linha: id, modelo: nome, categoria: $('ep-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), catalogo_id: parseInt($('ep-catalogo').value) || 0, ativo: $('ep-ativo').checked, ...paraSalvar(medidasDos('ep')) });
         window.fecharModalMM();
         await window.carregarBancoDeCustos();
         if (window.painelEstoque) window.carregarPainelEstoque();

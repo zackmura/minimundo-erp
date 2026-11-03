@@ -188,7 +188,7 @@ window.renderizarEstoque = function() {
                     <span class="onde atelie ${corAt}" title="No Ateliê">${window.ic('arquivo')}Ateliê <b>${at}</b></span>
                     ${comEles.map(e => `<button type="button" class="onde vend" onclick="abrirVendedor(${e.vendedor_id}, 'pecas')" title="Abrir o controle de ${window.esc(nomeV(e.vendedor_id))}"><i>${window.esc(inicialMM(nomeV(e.vendedor_id)))}</i>${window.esc(nomeV(e.vendedor_id))} <b>${e.qtd}</b></button>`).join('')}
                 </div>
-                <small class="est-precos">${total} no total · ${p.repasse ? `repasse ${window.fmt(p.repasse)}` : '<b class="txt-vermelho">sem repasse</b>'} · custo ${window.fmt(p.custo)}${kit ? ` · <b class="${da > 0 ? 'txt-verde' : ''}">dá para montar ${da}</b>` : ''}</small>
+                <small class="est-precos">${total} no total · ${p.repasse ? `repasse ${window.fmt(p.repasse)}` : '<b class="txt-vermelho">sem repasse</b>'} · custo ${window.fmt(p.custo)}${kit ? ` · <b class="${da > 0 ? 'txt-verde' : ''}">dá para montar ${da}</b>` : ''}</small>${window.chipMedidas(p.id, p.medidas)}
             </div>
             <div class="mm-acoes">${kit
                 ? `<button class="btn-ic verde" title="Montar kit" onclick="abrirMontarKit(${p.id})">${window.ic('camadas')}</button>${at > 0 ? `<button class="btn-ic" title="Desmontar kit (peças voltam soltas)" onclick="desmontarKit(${p.id})">${window.ic('desfazer')}</button>` : ''}`
@@ -773,7 +773,7 @@ window.renderizarVendedorEstoque = function() {
     const t = window.$('v-busca-estoque').value || '';
     const lista = d.estoque.filter(e => window.buscaBate(t, e.nome));
     window.$('v-lista-estoque').innerHTML = d.estoque.length ? lista.map(e => `<div class="mm-card">${window.fotoVendedor(e)}
-        <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">Com você: ${e.qtd}</span><span class="mm-chip amarelo">Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">Sugerido ${window.fmt(e.preco_sugerido)}</span></div></div>
+        <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">Com você: ${e.qtd}</span><span class="mm-chip amarelo">Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">Sugerido ${window.fmt(e.preco_sugerido)}</span>${window.chipMedidas(e.produto_id, e.medidas)}</div></div>
         <div class="mm-acoes"><button class="btn-vendi" onclick="window.abrirBaixa(${e.produto_id})">${window.ic('check')} Vendi</button></div></div>`).join('')
         : '<p class="mm-vazio">Você ainda não tem peças. Quando a Mini Mundo te enviar uma mala, elas aparecem aqui. 🧳</p>';
     window.$('v-vitrine').innerHTML = d.vendedor.codigo_vitrine && d.estoque.length ? `<div class="filtros-box" style="margin-top:20px;text-align:center;">

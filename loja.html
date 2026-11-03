@@ -154,6 +154,20 @@
         .vem li img { width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--ouro3); box-shadow:0 0 0 1px var(--linha), 0 0 0 3px var(--papel); }
         .vem li b { font-family:var(--serif); font-weight:600; color:var(--ouro); margin-right:3px; }
         .rodape { margin-top:auto; padding-top:20px; }
+        .tam { display:inline-flex; align-items:center; gap:8px; align-self:flex-start; margin-top:14px; padding:7px 14px 7px 10px; border-radius:999px; border:1px dashed var(--ouro2); background:var(--fundo); color:var(--tinta); font-size:.82rem; font-weight:600; cursor:pointer; transition:background .15s, border-color .15s; }
+        .tam:hover { background:var(--ouro3); border-color:var(--ouro); }
+        .tam svg { width:17px; height:17px; color:var(--ouro); flex-shrink:0; }
+        .tam em { font-style:normal; font-weight:500; color:var(--suave); }
+        .vem-tam { display:block; font-size:.76rem; color:var(--suave); }
+        body .regua { --rg-caixa:var(--ouro); --rg-borda:var(--tinta2); --rg-l:var(--botao); --rg-c:var(--botao); --rg-a:var(--botao); --rg-pil-txt:var(--botaoTxt); color:var(--suave); }
+        .tam-box { margin:4px 0 6px; padding:18px 10px 12px; border-radius:20px; background:var(--fundo); border:1px solid var(--linha); }
+        .tam-box .regua svg { --rg-max:300px; }
+        .tam-nome { margin:0 0 12px; color:var(--suave); font-size:.92rem; }
+        .tam-nome b { color:var(--tinta); }
+        .tam-pecas { list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px; }
+        .tam-pecas li { display:flex; justify-content:space-between; gap:12px; font-size:.86rem; padding-bottom:8px; border-bottom:1px solid var(--linha); }
+        .tam-pecas li span { color:var(--suave); white-space:nowrap; }
+        .tam-nota { margin:12px 0 0; font-size:.78rem; color:var(--suave); text-align:center; }
         .rodape-in { border-top:1px solid var(--linha); padding-top:18px; display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; }
         .preco { display:flex; flex-direction:column; gap:2px; }
         .preco s { font-size:.8rem; color:var(--suave); }
@@ -407,6 +421,7 @@
 
 <script src="temas.js?v=6.0.0"></script>
 <script src="galeria.js?v=6.0.0"></script>
+<script src="regua.js?v=7.1.0"></script>
 <script>
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
@@ -438,7 +453,8 @@
         share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v5a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-5"/></svg>',
         sacola: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.1a2 2 0 0 1-2 1.9H8.2a2 2 0 0 1-2-1.9Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
         esq: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
-        dir: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>'
+        dir: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+        regua: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></svg>'
     };
     const BOLA = (cor, brilho) => `<svg viewBox="0 0 60 140" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="78" stroke="${brilho}" stroke-width="1.2" opacity=".7"/><rect x="24" y="74" width="12" height="9" rx="2" fill="${brilho}"/><circle cx="30" cy="104" r="22" fill="${cor}"/><ellipse cx="22" cy="96" rx="6" ry="9" fill="#fff" opacity=".28" transform="rotate(25 22 96)"/><path d="M10 104c6 4 34 4 40 0" stroke="${brilho}" stroke-width="1.5" fill="none" opacity=".8"/></svg>`;
 
@@ -584,7 +600,8 @@
                 ${it.categoria ? `<p class="cat">${esc(it.categoria)}</p>` : ''}
                 <h3>${esc(it.nome)}</h3>
                 ${it.descricao ? `<p class="desc">${esc(it.descricao)}</p>` : ''}
-                ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map(p => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}</span></li>`).join('')}</ul></div>` : ''}
+                ${temMedidas(it.medidas) ? `<button class="tam" type="button" onclick="verTamanho(${it.id})">${IC.regua}<span>${esc(medidasTxt(it.medidas))}</span><em>ver tamanho</em></button>` : ''}
+                ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map(p => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}${temMedidas(p.medidas) ? `<small class="vem-tam">${esc(medidasTxt(p.medidas))}</small>` : ''}</span></li>`).join('')}</ul></div>` : ''}
                 <div class="rodape"><div class="rodape-in">
                     <div class="preco">${it.preco ? `${it.de ? `<s>de ${real(it.de)}</s>` : economia > 0 ? `<s>Separadas: ${real(it.separadas)}</s>` : ''}<strong>${real(it.preco)}</strong>${economia > 0 ? `<span class="economia">Você economiza ${real(economia)}</span>` : ''}` : '<span class="consulta">Sob consulta</span>'}</div>
                     <div class="acoes">${qtd ? `<span class="passo"><button type="button" onclick="mudar(${it.id}, -1)" aria-label="Tirar um">−</button><b>${qtd}</b><button type="button" onclick="mudar(${it.id}, 1)" aria-label="Mais um">+</button></span>`
@@ -592,6 +609,16 @@
                         <button class="btn-share" type="button" onclick="compartilhar(${it.id})" aria-label="Compartilhar ${esc(it.nome)}">${IC.share}</button></div>
                 </div></div>
             </div></article>`;
+    }
+    // Tamanho do produto: caixa em 3D com uma fita métrica em cada lado
+    function verTamanho(id) {
+        const it = ITENS.find(i => i.id === id); if (!it || !temMedidas(it.medidas)) return;
+        const pecas = (it.itens || []).filter(p => temMedidas(p.medidas));
+        gaveta(`<h2>Tamanho <button type="button" onclick="fecharSacola()" aria-label="Fechar">✕</button></h2>
+            <p class="tam-nome"><b>${esc(it.nome)}</b> · ${esc(medidasTxt(it.medidas))}</p>
+            <div class="tam-box">${reguaMM(it.medidas, { comparar: true })}</div>
+            ${pecas.length ? `<span class="s-rot">Peças do kit</span><ul class="tam-pecas">${pecas.map(p => `<li><b>${p.qtd}× ${esc(p.nome)}</b><span>${esc(medidasTxt(p.medidas))}</span></li>`).join('')}</ul>` : ''}
+            <p class="tam-nota">Medidas aproximadas, em centímetros: largura × comprimento × altura.</p>`, 'Tamanho');
     }
     function passar(id, d) { const t = document.querySelector(`.trilho[data-id="${id}"]`); if (t) t.scrollBy({ left: d * t.clientWidth, behavior: 'smooth' }); }
     function verFotos(id, j) { const it = ITENS.find(i => i.id === id); if (it && it.fotos.length) abrirGaleria({ fotos: it.fotos, indice: j, titulo: it.nome }); }
@@ -629,7 +656,7 @@
         $('barra').hidden = !n; if ($('zap-flutuante').innerHTML) $('zap-flutuante').hidden = !!n;
         if (n) $('barra').innerHTML = `${IC.sacola}<span>Sua sacola<b>${n} ${n === 1 ? 'item' : 'itens'} · ${real(total)}${semPreco ? ' +' : ''}</b></span><em>Ver e pedir</em>`;
     }
-    const gaveta = html => { $('sacola-box').innerHTML = `<div class="fundo-sacola" onclick="fecharSacola()"></div><div class="sacola" id="sacola" role="dialog" aria-modal="true" aria-label="Sua sacola"><div class="alca"></div>${html}</div>`; };
+    const gaveta = (html, rotulo = 'Sua sacola') => { $('sacola-box').innerHTML = `<div class="fundo-sacola" onclick="fecharSacola()"></div><div class="sacola" id="sacola" role="dialog" aria-modal="true" aria-label="${esc(rotulo)}"><div class="alca"></div>${html}</div>`; };
     function abrirSacola() {
         ETAPA = 'sacola';
         const { total, semPreco, n } = totais();

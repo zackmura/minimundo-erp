@@ -29,7 +29,7 @@ const FORMS = {
             // Produto novo: fotos já enviadas (rascunho antigo guardava só uma, em "fotoUrl")
             if (!PF.editando) PF.fotos = Array.isArray(x.fotos) ? x.fotos.filter(Boolean) : x.fotoUrl ? [x.fotoUrl] : [];
             window.pfFotoEstado(); $('pf-filamento').dataset.mexeu = '1';
-            window.pfRenderKit(); window.pfCalcular();
+            window.pfRenderKit(); window.pfCalcular(); window.pfMedidas();
         },
         limpar: () => window.pfLimpar()
     },
