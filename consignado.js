@@ -41,6 +41,8 @@ window.copiarTexto = function(txt, msg) {
     if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => window.mostrarAlerta("Copiado!", msg || "Copiado!", "success")).catch(() => window.mostrarParaCopiar(txt));
     else window.mostrarParaCopiar(txt);
 };
+// Foto para as listas de escolha: kit sem foto própria usa a da primeira peça que tiver
+window.fotoNaLista = p => p.foto || (p.tipo === 'kit' ? (p.itens || []).map(i => ((window.painelEstoque || { produtos: [] }).produtos.find(x => x.id === i.produto_id) || {}).foto).find(Boolean) || '' : '');
 window.imgProduto = (foto, estilo = '') => `<img src="${window.esc(foto || 'logo.png')}" class="mm-foto" style="${estilo}" onerror="this.src='logo.png'">`;
 // Vendedor: tocar na foto abre as fotos da peça em tela cheia, com zoom (bom para mostrar ao cliente)
 window.fotoVendedor = (e, estilo = '') => { const n = (e.fotos || []).length; return n ? `<button type="button" class="foto-ver" data-n="${n > 1 ? n : ''}" onclick="verFotosVendedor(${e.produto_id})" title="Ver as fotos">${window.imgProduto(e.foto, estilo)}</button>` : window.imgProduto(e.foto, estilo); };
@@ -75,7 +77,7 @@ window.abrirModalEditarModelo = function(linha) {
     const custo = window.limparValorPlanilha(p.custo_total), c = window.configMM || {};
     const mk = parseFloat(c.markup_repasse), mg = parseFloat(c.margem_vendedor);
     const sugRep = custo * (1 + (isNaN(mk) ? 100 : mk) / 100), baseSug = p.preco_repasse || sugRep, sugVenda = baseSug * (1 + (isNaN(mg) ? 50 : mg) / 100);
-    const optsCat = '<option value="0">— nenhum —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${p.catalogo_id === k.linha ? 'selected' : ''}>${window.esc(k.nome)}</option>`).join('');
+    const optsCat = '<option value="0">— nenhum —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" data-foto="${window.esc(window.primeiraFotoMM(k.foto))}" ${p.catalogo_id === k.linha ? 'selected' : ''}>${window.esc(k.nome)}</option>`).join('');
     window.abrirModalMM(`
         <h3 class="modal-title">✏️ Editar Modelo</h3>
         <div class="foto-atual-box" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">${window.imgProduto(p.foto)}<span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;">🏠 Ateliê: <b>${p.est_atelie}</b> · 👥 Com vendedores: <b>${p.est_vendedores}</b></span></div>
@@ -86,7 +88,7 @@ window.abrirModalEditarModelo = function(linha) {
             <button class="btn-limpar" style="margin-top:6px;" onclick="window.$('em-repasse').value='${window.fmt(sugRep)}'">💡 Usar sugestão: ${window.fmt(sugRep)}</button></div>
         <div class="input-group"><label>💡 Preço sugerido ao vendedor (opcional)</label><input type="text" id="em-sugerido" class="mask-money" value="${p.preco_sugerido ? window.fmt(p.preco_sugerido) : ''}" placeholder="Vazio = ${window.fmt(sugVenda)} (margem dos Ajustes)"></div>
         <div class="input-group"><label>Foto do produto (vazio = mantém)</label><input type="file" id="em-foto" accept="image/*"></div>
-        <div class="row"><div class="col"><div class="input-group"><label>Item da vitrine (Catálogo)</label><select id="em-catalogo">${optsCat}</select></div></div>
+        <div class="row"><div class="col"><div class="input-group"><label>Item da vitrine (Catálogo)</label><select id="em-catalogo" data-fotos>${optsCat}</select></div></div>
             <div class="col"><div class="input-group"><label>Status</label><select id="em-ativo"><option value="true" ${p.ativo !== false ? 'selected' : ''}>🟢 Ativo</option><option value="false" ${p.ativo === false ? 'selected' : ''}>🔴 Inativo</option></select></div></div></div>
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button class="btn-magic btn-excluir" style="margin-top:0; flex:1;" onclick="window.excluirModelo(${p.linha})">🗑️ Excluir</button>
@@ -185,7 +187,7 @@ window.abrirMontarKit = function(kitId) {
     const sel = kitId || kits[0].id;
     window.abrirModalMM(`<h3 class="modal-title">${window.ic('camadas')} Montar kit</h3>
         <p class="texto-ajuda" style="margin-top:0;">As peças saem do Ateliê e o kit pronto entra no Ateliê.</p>
-        <div class="row"><div class="col"><div class="input-group"><label>Kit</label><select id="mk-kit" onchange="atualizarMontarKit()">${kits.map(k => `<option value="${k.id}" ${k.id === sel ? 'selected' : ''}>${window.esc(k.nome)}</option>`).join('')}</select></div></div>
+        <div class="row"><div class="col"><div class="input-group"><label>Kit</label><select id="mk-kit" data-fotos onchange="atualizarMontarKit()">${kits.map(k => `<option value="${k.id}" data-foto="${window.esc(window.fotoNaLista(k))}" ${k.id === sel ? 'selected' : ''}>${window.esc(k.nome)}</option>`).join('')}</select></div></div>
             <div class="col" style="max-width:150px;"><div class="input-group"><label>Quantos kits?</label><input type="number" id="mk-qtd" value="1" min="1" oninput="atualizarMontarKit()"></div></div></div>
         <div id="mk-tabela"></div>
         <label class="chave" style="margin:14px 0 4px;"><input type="checkbox" id="mk-imprimir" onchange="atualizarMontarKit()"> Imprimir o que faltar (lança as peças que faltam como produção)</label>
@@ -228,11 +230,11 @@ window.desmontarKit = async function(kitId) {
 
 window.abrirProducao = function(pid) {
     const P = window.painelEstoque; if (!P) return;
-    const opts = P.produtos.filter(p => p.ativo).map(p => `<option value="${p.id}" ${p.id === pid ? 'selected' : ''}>${window.esc(p.nome)} (Ateliê: ${window.qtdEm(p.id, 0)})</option>`).join('');
+    const opts = P.produtos.filter(p => p.ativo).map(p => `<option value="${p.id}" data-foto="${window.esc(window.fotoNaLista(p))}" data-sub="${p.tipo === 'kit' ? 'Kit · ' : ''}No Ateliê: ${window.qtdEm(p.id, 0)}" ${p.id === pid ? 'selected' : ''}>${window.esc(p.nome)}</option>`).join('');
     if (!opts) return window.mostrarAlerta("Atenção", "Cadastre um modelo em Precificar primeiro.", "warning");
     window.abrirModalMM(`<h3 class="modal-title">🖨️ Registrar Produção</h3>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-top:-8px;">Peças prontas que saíram da impressora entram no estoque do Ateliê.</p>
-        <div class="input-group"><label>Produto</label><input type="search" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('pr-produto', this.value)"><select id="pr-produto">${opts}</select></div>
+        <div class="input-group"><label>Produto</label><input type="search" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('pr-produto', this.value)"><select data-fotos id="pr-produto">${opts}</select></div>
         <div class="row"><div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="pr-qtd" value="1" min="1"></div></div><div class="col"><div class="input-group"><label>Observação</label><input type="text" id="pr-obs" placeholder="Ex: lote azul"></div></div></div>
         <button class="btn-magic btn-global" id="btn-pr" onclick="window.confirmarProducao()">✅ Entrar no Ateliê</button>`);
 };
@@ -506,7 +508,7 @@ window.abrirConferencia = function(vid) {
     window.abrirModalMM(`<h3 class="modal-title">📋 Conferir estoque de ${window.esc(d.vendedor.nome)}</h3>
         <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-top:-8px;">Conte as peças que estão com ele(a) e corrija os números. Só as diferenças são lançadas.</p>
         <div id="conf-lista">${d.estoque.map(e => window.linhaConferencia(e.produto_id, e.nome, e.qtd)).join('')}</div>
-        ${outros.length ? `<div class="input-group" style="margin-top:10px;"><label>➕ Achou peça que não está na lista?</label><select onchange="window.adicionarLinhaConferencia(this)"><option value="">— escolher produto —</option>${outros.map(p => `<option value="${p.id}">${window.esc(p.nome)}</option>`).join('')}</select></div>` : ''}
+        ${outros.length ? `<div class="input-group" style="margin-top:10px;"><label>➕ Achou peça que não está na lista?</label><select data-fotos onchange="window.adicionarLinhaConferencia(this)"><option value="">— escolher produto —</option>${outros.map(p => `<option value="${p.id}" data-foto="${window.esc(window.fotoNaLista(p))}">${window.esc(p.nome)}</option>`).join('')}</select></div>` : ''}
         <div class="input-group"><label>Se faltar peça, ela foi...</label><select id="conf-tratamento"><option value="venda">✅ Vendida (gera baixa e cobra o repasse)</option><option value="perda">⚠️ Perdida/quebrada (não cobra)</option></select></div>
         <div class="input-group"><label>Observação</label><input type="text" id="conf-motivo" placeholder="Ex: conferência mensal"></div>
         <div class="mm-total" id="conf-resumo">Nenhuma diferença.</div>
@@ -686,7 +688,7 @@ window.renderizarVendedorAcerto = function() {
 window.renderizarVendedorEncomendas = function() {
     const d = window.painelVendedor; if (!d) return;
     const sel = window.$('ve-produto'), atual = sel.value;
-    sel.innerHTML = '<option value="">✏️ Peça personalizada / outra</option>' + d.produtos.map(p => `<option value="${p.id}">${window.esc(p.nome)}</option>`).join(''); sel.value = atual;
+    sel.innerHTML = '<option value="">✏️ Peça personalizada / outra</option>' + d.produtos.map(p => `<option value="${p.id}" data-foto="${window.esc(p.foto || '')}">${window.esc(p.nome)}</option>`).join(''); sel.value = atual;
     window.filtrarSelect('ve-produto', window.$('ve-busca') ? window.$('ve-busca').value : '', true);
     const cor = { Pendente: 'amarelo', Produzindo: 'azul', Pronta: 'verde', Entregue: 'verde', Cancelada: 'vermelho' };
     window.$('v-lista-encomendas').innerHTML = d.encomendas.length ? d.encomendas.map(e => `<div class="mm-card"><div class="mm-info"><h4>${e.qtd}x ${window.esc(e.descricao)}</h4>

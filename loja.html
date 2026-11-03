@@ -405,8 +405,8 @@
     <div id="sacola-box"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="temas.js?v=5.9.0"></script>
-<script src="galeria.js?v=5.9.0"></script>
+<script src="temas.js?v=6.0.0"></script>
+<script src="galeria.js?v=6.0.0"></script>
 <script>
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
@@ -424,8 +424,14 @@
     const linkPedido = codigo => `${BASE}?pedido=${encodeURIComponent(codigo)}`;
     const PARAMS = new URLSearchParams(location.search);
     // Aceita loja?p=natal e também loja?natal
-    let SLUG = (PARAMS.get('p') || (!PARAMS.get('pedido') && [...PARAMS.keys()].find(k => !['i', 'pedido', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign'].includes(k) && !PARAMS.get(k))) || '').toLowerCase();
+    let SLUG = (PARAMS.get('p') || (!PARAMS.get('pedido') && [...PARAMS.keys()].find(k => !['i', 'pedido', 'de', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign'].includes(k) && !PARAMS.get(k))) || '').toLowerCase();
     const CODIGO = (PARAMS.get('pedido') || '').toUpperCase();
+    // De onde veio o link (?de=instagram…; sem ele, o navegador de dentro do Instagram/Facebook se apresenta). Conta na visita e no pedido.
+    const DE = (() => {
+        const curto = { ig: 'instagram', fb: 'facebook', wa: 'whatsapp', zap: 'whatsapp' }, d0 = (PARAMS.get('de') || PARAMS.get('utm_source') || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 20);
+        const d = curto[d0] || d0 || (/Instagram/i.test(navigator.userAgent) ? 'instagram' : /FBAN|FBAV|FB_IAB/i.test(navigator.userAgent) ? 'facebook' : '');
+        try { if (d) sessionStorage.setItem('mm_de', d); return d || sessionStorage.getItem('mm_de') || ''; } catch (e) { return d; }
+    })();
     const IC = {
         zap: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91A9.85 9.85 0 0 0 12.04 2Zm5.8 14.13c-.25.69-1.44 1.32-1.98 1.37-.5.05-.98.24-3.32-.69-2.8-1.1-4.58-3.97-4.72-4.15-.14-.19-1.13-1.5-1.13-2.87 0-1.36.71-2.03.97-2.31.25-.28.55-.35.73-.35l.53.01c.17 0 .4-.06.62.48.25.6.85 2.06.92 2.21.08.15.12.32.03.51-.1.19-.14.31-.28.48-.14.16-.3.37-.42.49-.14.14-.29.29-.12.57.16.28.73 1.2 1.57 1.95 1.08.96 1.99 1.26 2.27 1.4.28.14.45.12.61-.07.17-.19.71-.83.9-1.11.19-.28.37-.23.63-.14.25.09 1.62.76 1.9.9.28.14.46.21.53.33.07.11.07.66-.18 1.35Z"/></svg>',
         insta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
@@ -496,7 +502,7 @@
             SACOLA = ler(chaveSacola(), []).filter(s => s && s.qtd > 0 && ITENS.some(i => i.id === s.id));
             montarContato(); montarFiltros(); renderizar(); atualizarBarra(); mostrarOutras(DADOS.outras, 'Veja também');
             marcarDoLink();
-            if (!sessionStorage.getItem('mm_visita_' + SLUG)) { sessionStorage.setItem('mm_visita_' + SLUG, '1'); post({ acao: 'registrar_pagina', p: SLUG }).catch(() => {}); }
+            if (!sessionStorage.getItem('mm_visita_' + SLUG)) { sessionStorage.setItem('mm_visita_' + SLUG, '1'); post({ acao: 'registrar_pagina', p: SLUG, de: DE }).catch(() => {}); }
         } catch (e) {
             montarTopo({ titulo: CODIGO ? 'Pedido não encontrado' : 'Mini Mundo' }, 'padrao');
             $('conteudo').innerHTML = `<div class="aviso"><h2>${e.negocio ? esc(e.message) : 'Não conseguimos abrir a página agora'}</h2><p>${e.negocio ? 'Se precisar, fale com a gente pelo WhatsApp.' : 'Verifique a internet e tente de novo em instantes.'}</p><button class="pilula" onclick="location.reload()">Tentar de novo</button></div>`;
@@ -671,7 +677,7 @@
         guardar('mm_cliente', { nome, telefone: tel, endereco, entrega: CHECKOUT.entrega, pagamento: CHECKOUT.pagamento });
         const b = $('s-enviar'), txt = b.innerHTML; b.disabled = true; b.textContent = 'Enviando seu pedido…';
         try {
-            const r = await post({ acao: 'fazer_pedido', p: SLUG, site: $('s-site').value, itens: SACOLA.map(s => ({ id: s.id, qtd: s.qtd })),
+            const r = await post({ acao: 'fazer_pedido', p: SLUG, de: DE, site: $('s-site').value, itens: SACOLA.map(s => ({ id: s.id, qtd: s.qtd })),
                 cliente: { nome, telefone: tel, entrega: CHECKOUT.entrega, endereco, pagamento: CHECKOUT.pagamento, obs } });
             const resumo = SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); return it ? `${s.qtd}× ${it.nome}` : ''; }).filter(Boolean);
             const meus = ler('mm_pedidos', []); meus.unshift({ codigo: r.codigo, numero: r.numero, pagina: DADOS.pagina.titulo, data: new Date().toISOString().slice(0, 10) }); guardar('mm_pedidos', meus.slice(0, 20));

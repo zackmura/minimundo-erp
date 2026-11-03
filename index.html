@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.9.0">
+    <link rel="stylesheet" href="style.css?v=6.0.0">
 </head>
 <body>
 
@@ -190,6 +190,7 @@
                 <button onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button>
                 <button onclick="fazerLogout()"><svg class="ic"><use href="#i-sair"/></svg>Sair</button>
             </div>
+            <button class="menu-personalizar" onclick="personalizarBarra()"><svg class="ic"><use href="#i-lapis"/></svg><span><b>Personalizar a barra de baixo</b><small>Escolha quais telas ficam nos atalhos e em que ordem</small></span></button>
         </div>
 
         <!-- ========================================== -->
@@ -322,7 +323,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col"><div class="input-group"><label for="pf-catalogo">Item da vitrine (Catálogo)</label><select id="pf-catalogo"></select></div></div>
+                            <div class="col"><div class="input-group"><label for="pf-catalogo">Item da vitrine (Catálogo)</label><select id="pf-catalogo" data-fotos></select></div></div>
                             <div class="col" id="pf-ativo-box" hidden><div class="input-group"><label>Situação</label><label class="chave" style="margin-top:10px;"><input type="checkbox" id="pf-ativo" checked> Produto ativo</label></div></div>
                         </div>
                     </div>
@@ -747,7 +748,7 @@
             <div class="card card-destaque">
                 <div class="card-titulo">🎁 Pedir peça para a fábrica</div>
                 <p class="card-desc">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
-                <div class="input-group"><label>Produto (opcional)</label><input type="search" id="ve-busca" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('ve-produto', this.value)"><select id="ve-produto"></select></div>
+                <div class="input-group"><label>Produto (opcional)</label><input type="search" id="ve-busca" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('ve-produto', this.value)"><select id="ve-produto" data-fotos></select></div>
                 <div class="input-group"><label>Descrição / personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
                 <div class="row">
                     <div class="col"><div class="input-group"><label>Quantidade</label><input type="number" id="ve-qtd" value="1" min="1"></div></div>
@@ -989,19 +990,20 @@
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
 </nav>
 
-<script src="galeria.js?v=5.9.0"></script>
-<script src="app.js?v=5.9.0"></script>
-<script src="consignado.js?v=5.9.0"></script>
-<script src="vendas.js?v=5.9.0"></script>
-<script src="produtos.js?v=5.9.0"></script>
-<script src="dashboard.js?v=5.9.0"></script>
-<script src="ajustes.js?v=5.9.0"></script>
-<script src="rascunho.js?v=5.9.0"></script>
-<script src="usuarios.js?v=5.9.0"></script>
-<script src="temas.js?v=5.9.0"></script>
-<script src="kits.js?v=5.9.0"></script>
-<script src="paginas.js?v=5.9.0"></script>
-<script src="pedidos.js?v=5.9.0"></script>
+<script src="galeria.js?v=6.0.0"></script>
+<script src="app.js?v=6.0.0"></script>
+<script src="lista-fotos.js?v=6.0.0"></script>
+<script src="consignado.js?v=6.0.0"></script>
+<script src="vendas.js?v=6.0.0"></script>
+<script src="produtos.js?v=6.0.0"></script>
+<script src="dashboard.js?v=6.0.0"></script>
+<script src="ajustes.js?v=6.0.0"></script>
+<script src="rascunho.js?v=6.0.0"></script>
+<script src="usuarios.js?v=6.0.0"></script>
+<script src="temas.js?v=6.0.0"></script>
+<script src="kits.js?v=6.0.0"></script>
+<script src="paginas.js?v=6.0.0"></script>
+<script src="pedidos.js?v=6.0.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

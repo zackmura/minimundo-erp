@@ -77,7 +77,7 @@ window.renderizarProdutos = function() {
 window.pfMontarListas = function() {
     const ps = window.arrayBancoCustos || [];
     if ($('pf-categorias')) $('pf-categorias').innerHTML = [...new Set(ps.map(p => p.categoria).filter(Boolean))].sort().map(c => `<option value="${esc(c)}">`).join('');
-    if ($('pf-catalogo')) { const sel = $('pf-catalogo').value; $('pf-catalogo').innerHTML = '<option value="0">— não aparece na vitrine —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${String(k.linha) === sel ? 'selected' : ''}>${esc(k.nome)}</option>`).join(''); }
+    if ($('pf-catalogo')) { const sel = $('pf-catalogo').value; $('pf-catalogo').innerHTML = '<option value="0">— não aparece na vitrine —</option>' + (window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" data-foto="${esc(window.primeiraFotoMM(k.foto))}" ${String(k.linha) === sel ? 'selected' : ''}>${esc(k.nome)}</option>`).join(''); }
     if (window.PF.tipo === 'kit') window.pfRenderKit();
 };
 window.pfTipo = function(tipo) {
@@ -519,7 +519,7 @@ window.abrirEdicaoProduto = function(id) {
         </div>
         <div class="row">
             <div class="col"><div class="input-group"><label for="ep-sugerido">Sugerido ao vendedor</label><input type="text" id="ep-sugerido" class="mask-money" inputmode="numeric" value="${dm(p.preco_sugerido)}" placeholder="Vazio = automático"></div></div>
-            <div class="col"><div class="input-group"><label for="ep-catalogo">Item da vitrine</label><select id="ep-catalogo"><option value="0">— não aparece na vitrine —</option>${(window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" ${String(k.linha) === String(p.catalogo_id) ? 'selected' : ''}>${esc(k.nome)}</option>`).join('')}</select></div></div>
+            <div class="col"><div class="input-group"><label for="ep-catalogo">Item da vitrine</label><select id="ep-catalogo" data-fotos><option value="0">— não aparece na vitrine —</option>${(window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" data-foto="${esc(window.primeiraFotoMM(k.foto))}" ${String(k.linha) === String(p.catalogo_id) ? 'selected' : ''}>${esc(k.nome)}</option>`).join('')}</select></div></div>
         </div>
         <label class="chave" style="margin:0 0 12px;"><input type="checkbox" id="ep-ativo" ${p.ativo !== false ? 'checked' : ''}> Produto ativo (aparece para vender e para a mala)</label>
         <p class="texto-ajuda" id="ep-info" style="margin:0 0 14px;"></p>

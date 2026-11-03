@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v5.9.0";
+const VERSAO_APP = "v6.0.0";
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -197,10 +197,10 @@ window.categoriaBate = (p, cat) => !cat || (cat === '-' ? !String(p.categoria ||
 // "recarregou" = as opções acabaram de ser montadas de novo e precisam ser guardadas outra vez.
 window.filtrarSelect = function(id, termo, recarregou) {
     const sel = window.$(id); if (!sel) return;
-    if (recarregou || !sel._todas) sel._todas = [...sel.options].map(o => ({ v: o.value, t: o.text }));
+    if (recarregou || !sel._todas) sel._todas = [...sel.options].map(o => ({ v: o.value, t: o.text, f: o.dataset.foto || '', s: o.dataset.sub || '' }));
     const atual = sel.value, tem = String(termo || '').trim();
     const fixas = sel._todas.filter(o => o.v === ''), bate = sel._todas.filter(o => o.v !== '' && window.buscaBate(termo, o.t));
-    const opc = o => `<option value="${window.esc(o.v)}">${window.esc(o.t)}</option>`;
+    const opc = o => `<option value="${window.esc(o.v)}"${o.f ? ` data-foto="${window.esc(o.f)}"` : ''}${o.s ? ` data-sub="${window.esc(o.s)}"` : ''}>${window.esc(o.t)}</option>`;
     sel.innerHTML = fixas.map(opc).join('') + bate.map(opc).join('') + (tem && !bate.length ? '<option value="" disabled>Nada encontrado</option>' : '');
     // Digitou algo: já deixa escolhido o primeiro que bate (é só confirmar)
     sel.value = bate.some(o => o.v === atual) ? atual : tem && bate.length ? bate[0].v : (fixas[0] ? '' : (bate[0] || {}).v || '');
@@ -239,6 +239,55 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(tabName==='imas') window.carregarImas();
     if (window.atualizarBarraPDV) window.atualizarBarraPDV();
 };
+
+// ==========================================
+// 📱 BARRA DE BAIXO DO CELULAR: você escolhe os atalhos e a ordem (fica guardado neste aparelho)
+// ==========================================
+// O "Menu" fica sempre no fim, porque é por ele que se chega em todas as telas.
+window.BARRA_OPCOES = { dashboard_erp: 'Início', vendas: 'Vendas', pedidos: 'Pedidos', precificar: 'Precificar', modelos: 'Produtos', kits: 'Kits', custos: 'Custos', estoque: 'Estoque', vendedores: 'Vendedores',
+    paginas: 'Páginas', loja: 'Catálogo', imas: 'Ímãs', anuncios: 'Anúncios', analytics: 'Analytics', quiz: 'Quiz', usuarios: 'Usuários', config: 'Ajustes' };
+const BARRA_PADRAO = ['dashboard_erp', 'vendas', 'estoque', 'vendedores'], BARRA_MAX = 5;
+window.barraAtalhos = function() {
+    try { const l = JSON.parse(localStorage.getItem('mm_barra') || 'null'); if (Array.isArray(l)) { const v = [...new Set(l)].filter(id => window.BARRA_OPCOES[id]).slice(0, BARRA_MAX); if (v.length) return v; } }
+    catch (e) { /* aparelho sem armazenamento: usa o padrão */ }
+    return BARRA_PADRAO.slice();
+};
+window.montarBarra = function() {
+    const nav = window.$('bottom-nav-admin'); if (!nav) return;
+    const ids = window.barraAtalhos(), ativa = ((document.querySelector('.tab-content.active') || {}).id || '').replace('tab-', '');
+    nav.innerHTML = [...ids, 'menu_mobile'].map(id => `<button id="nav-${id}" class="bottom-nav-btn ${id === ativa ? 'active' : ''}" onclick="switchTab('${id}')">${window.ic(window.TELAS[id][0])}<span>${id === 'menu_mobile' ? 'Menu' : window.BARRA_OPCOES[id]}</span>${id === 'pedidos' ? '<b class="aviso-num" data-aviso-pedidos hidden></b>' : ''}</button>`).join('');
+    nav.dataset.n = ids.length + 1;
+    if (window.pintarAvisoPedidos) window.pintarAvisoPedidos();
+};
+window.personalizarBarra = function() {
+    window.BB = window.barraAtalhos();
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic('grade')} Barra de baixo</h3>
+        <p class="texto-ajuda" style="margin-top:0;">Escolha até ${BARRA_MAX} atalhos e a ordem deles. O <b>Menu</b> fica sempre no fim. Vale para este aparelho.</p>
+        <div class="bb-previa" id="bb-previa"></div>
+        <div class="bb-tit">Na barra <small id="bb-conta"></small></div><div id="bb-na-barra"></div>
+        <div class="bb-tit">Outras telas <small>toque para pôr na barra</small></div><div class="bb-outras" id="bb-outras"></div>
+        <button class="btn-magic btn-global" onclick="salvarBarra()">${window.ic('check')} Salvar</button>
+        <button class="btn-limpar" style="width:100%;margin-top:8px;" onclick="window.BB = ${JSON.stringify(BARRA_PADRAO).replace(/"/g, "'")}; desenharEditorBarra()">Voltar ao padrão</button>`);
+    window.desenharEditorBarra();
+};
+window.desenharEditorBarra = function() {
+    const B = window.BB, rot = id => window.BARRA_OPCOES[id], ic = id => window.ic(window.TELAS[id][0]);
+    window.$('bb-previa').innerHTML = [...B, 'menu_mobile'].map(id => `<span>${ic(id)}<small>${id === 'menu_mobile' ? 'Menu' : rot(id)}</small></span>`).join('');
+    window.$('bb-conta').textContent = `${B.length} de ${BARRA_MAX}`;
+    window.$('bb-na-barra').innerHTML = B.map((id, i) => `<div class="bb-linha">${ic(id)}<b>${rot(id)}</b>
+        <button type="button" class="bb-bt" title="Mais para a esquerda" aria-label="Mover ${rot(id)} para a esquerda" ${i === 0 ? 'disabled' : ''} onclick="moverNaBarra(${i}, -1)">${window.ic('cima', 'esq')}</button>
+        <button type="button" class="bb-bt" title="Mais para a direita" aria-label="Mover ${rot(id)} para a direita" ${i === B.length - 1 ? 'disabled' : ''} onclick="moverNaBarra(${i}, 1)">${window.ic('cima', 'dir')}</button>
+        <button type="button" class="bb-bt tirar" title="Tirar da barra" aria-label="Tirar ${rot(id)} da barra" ${B.length === 1 ? 'disabled' : ''} onclick="window.BB.splice(${i}, 1); desenharEditorBarra()">${window.ic('x')}</button></div>`).join('');
+    const cheia = B.length >= BARRA_MAX;
+    window.$('bb-outras').innerHTML = Object.keys(window.BARRA_OPCOES).filter(id => !B.includes(id)).map(id => `<button type="button" ${cheia ? 'disabled' : ''} onclick="window.BB.push('${id}'); desenharEditorBarra()">${ic(id)}<span>${rot(id)}</span><i>+</i></button>`).join('')
+        + (cheia ? `<p class="texto-ajuda" style="grid-column:1/-1;margin:4px 0 0;">A barra está cheia. Tire um atalho para pôr outro.</p>` : '');
+};
+window.moverNaBarra = function(i, d) { const B = window.BB, j = i + d; if (j < 0 || j >= B.length) return; [B[i], B[j]] = [B[j], B[i]]; window.desenharEditorBarra(); };
+window.salvarBarra = function() {
+    try { localStorage.setItem('mm_barra', JSON.stringify(window.BB)); } catch (e) { return window.mostrarAlerta('Não deu para guardar', 'Este aparelho não deixou guardar a escolha (modo anônimo?).', 'warning'); }
+    window.montarBarra(); window.fecharModalMM(); window.toastMM('Barra de baixo atualizada');
+};
+window.montarBarra();
 
 // ==========================================
 // COMPONENTES REUTILIZÁVEIS E MODAIS GERAIS

@@ -19,6 +19,10 @@ const ROT_HIST = { novo: 'Pedido recebido', confirmado: 'Confirmado', producao: 
 const ORIGENS = ['WhatsApp', 'Instagram', 'Feira', 'Indicação', 'Loja física'];
 const PAGAMENTOS = ['Pix', 'Cartão', 'Dinheiro', 'A combinar'];
 const FORMAS_VENDA = ['Pix', 'Dinheiro', 'Cartão de crédito', 'Cartão de débito', 'Outro'];
+const REDES = { whatsapp: 'WhatsApp', instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', qrcode: 'QR code', outro: 'outro link' };
+// Entregou (ou vai entregar) e o cliente ainda não pagou
+const aReceber = p => !p.pago && p.status !== 'cancelado' && p.total > 0;
+const viaRede = p => p.veio_de ? ` · via ${REDES[p.veio_de] || esc(p.veio_de)}` : '';
 const produtoPorId = id => (window.arrayBancoCustos || []).find(p => p.linha === id);
 const pedidoPorId = id => PC.lista.find(p => p.id === id);
 const paginas = () => (window.PG && window.PG.lista) || [];
@@ -53,6 +57,7 @@ function mosaico(p) {
 function pintarAviso() {
     document.querySelectorAll('[data-aviso-pedidos]').forEach(el => { el.textContent = PC.novos || ''; el.hidden = !PC.novos; });
 }
+window.pintarAvisoPedidos = pintarAviso;
 window.vigiarPedidos = function() {
     const olhar = async () => {
         if (!document.body.classList.contains('logado') || document.body.classList.contains('modo-vendedor')) return;
@@ -74,7 +79,8 @@ window.carregarPedidos = async function() {
     if ($('lista-pedidos') && !PC.lista.length) $('lista-pedidos').innerHTML = '<p class="mm-vazio">Carregando os pedidos…</p>';
     try {
         const [r] = await Promise.all([window.apiAcao('listar_pedidos_clientes'), (window.arrayBancoCustos || []).length ? null : window.carregarBancoDeCustos(),
-            !paginas().length && window.carregarListaPaginas ? window.carregarListaPaginas() : null]);
+            !paginas().length && window.carregarListaPaginas ? window.carregarListaPaginas() : null,
+            PC.cfg ? null : window.apiAcao('obter_config').then(c => { PC.cfg = c.config || {}; }).catch(() => {})]);
         PC.lista = (r.pedidos || []).map(p => ({ ...p, historico: p.historico || [], avisos: p.avisos || 0 })); PC.erro = '';
     } catch (e) { PC.erro = servidorAntigo(e); }
     PC.novos = PC.lista.filter(p => p.status === 'novo').length; pintarAviso();
@@ -86,19 +92,19 @@ window.renderizarPedidos = function() {
     if (PC.erro) { box.innerHTML = `<div class="mm-alerta">${window.ic('alerta')} <span>${esc(PC.erro)}</span></div>`; return; }
     const t = $('pc-busca').value, todos = PC.lista, conta = { abertos: 0, todos: todos.length }, valor = {};
     Object.keys(ETAPAS).forEach(s => { const l = todos.filter(p => p.status === s); conta[s] = l.length; valor[s] = l.reduce((v, p) => v + p.total, 0); });
-    conta.abertos = ABERTOS.reduce((n, s) => n + conta[s], 0);
+    conta.abertos = ABERTOS.reduce((n, s) => n + conta[s], 0); conta.receber = todos.filter(aReceber).length;
     // Quadros das etapas em aberto (tocar filtra; tocar de novo volta para todos em aberto)
     $('pc-painel').innerHTML = ABERTOS.map(s => `<button type="button" class="pc-tile ${ETAPAS[s][1]} ${PC.filtro === s ? 'on' : ''}" onclick="filtroPedidos('${PC.filtro === s ? 'abertos' : s}')">
         <span class="pc-tile-ic">${ETAPAS[s][2]}</span><b>${conta[s]}</b><small>${ETAPAS[s][0]}</small><em>${conta[s] ? window.fmt(valor[s]) : '—'}</em></button>`).join('');
-    $('pc-filtros').innerHTML = [['abertos', 'Em aberto'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']]
+    $('pc-filtros').innerHTML = [['abertos', 'Em aberto'], ['receber', '💸 A receber'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']]
         .map(([f, r]) => `<button class="chip-op ${PC.filtro === f ? 'active' : ''}" onclick="filtroPedidos('${f}')">${r} <em>${conta[f] || ''}</em></button>`).join('');
-    const abertos = todos.filter(p => ABERTOS.includes(p.status)), aReceber = abertos.filter(p => !p.pago).reduce((s, p) => s + p.total, 0);
+    const abertos = todos.filter(p => ABERTOS.includes(p.status)), receber = todos.filter(aReceber).reduce((s, p) => s + p.total, 0);
     const semana = abertos.filter(p => { const d = diasAte(p.data_entrega); return d !== null && d <= 7; }).length, atrasados = abertos.filter(p => (diasAte(p.data_entrega) ?? 0) < 0).length;
-    $('pc-resumo').innerHTML = [aReceber ? `<b>${window.fmt(aReceber)}</b> a receber` : '', semana ? `${semana} para entregar em 7 dias` : '', atrasados ? `<b class="pc-atraso">${atrasados} atrasado${atrasados > 1 ? 's' : ''}</b>` : ''].filter(Boolean).join(' · ');
-    const lista = todos.filter(p => (PC.filtro === 'todos' || (PC.filtro === 'abertos' ? ABERTOS.includes(p.status) : p.status === PC.filtro))
+    $('pc-resumo').innerHTML = [receber ? `<b>${window.fmt(receber)}</b> a receber` : '', semana ? `${semana} para entregar em 7 dias` : '', atrasados ? `<b class="pc-atraso">${atrasados} atrasado${atrasados > 1 ? 's' : ''}</b>` : ''].filter(Boolean).join(' · ');
+    const lista = todos.filter(p => (PC.filtro === 'todos' || (PC.filtro === 'abertos' ? ABERTOS.includes(p.status) : PC.filtro === 'receber' ? aReceber(p) : p.status === PC.filtro))
         && window.buscaBate(t, '#' + p.id, p.cliente, p.telefone, p.origem, p.pagina_titulo, p.itens.map(i => i.nome).join(' ')));
     if (!lista.length) {
-        box.innerHTML = `<div class="vazio-box">${window.ic('recibo')}<b>${!todos.length ? 'Nenhum pedido ainda' : t.trim() ? `Nada encontrado para "${esc(t)}"` : 'Nenhum pedido nessa etapa'}</b>
+        box.innerHTML = `<div class="vazio-box">${window.ic('recibo')}<b>${!todos.length ? 'Nenhum pedido ainda' : t.trim() ? `Nada encontrado para "${esc(t)}"` : PC.filtro === 'receber' ? 'Ninguém está devendo 🎉' : 'Nenhum pedido nessa etapa'}</b>
             <span>${!todos.length ? 'Os pedidos feitos nas páginas de venda aparecem aqui. Você também pode anotar pedidos do WhatsApp ou do Instagram.' : ''}</span></div>`;
         return;
     }
@@ -110,10 +116,10 @@ window.renderizarPedidos = function() {
                     <div class="pc-topo"><b>#${p.id}</b>${chip(p.status)}<small>${haQuanto(p.criado_em)}</small></div>
                     <div class="pc-cliente">${esc(p.cliente)}</div>
                     <div class="pc-itens">${p.itens.map(i => `<span>${i.qtd}× ${esc(i.nome)}</span>`).join('')}</div>
-                    <div class="pc-origem">${p.origem === 'Site' ? `${window.ic('sacola')} ${esc(p.pagina_titulo || 'Site')}` : `${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`}</div>
+                    <div class="pc-origem">${p.origem === 'Site' ? `${window.ic('sacola')} ${esc(p.pagina_titulo || 'Site')}${viaRede(p)}` : `${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`}</div>
                 </div></div>
             ${barra(p.status)}
-            <div class="pc-rodape"><b>${window.fmt(p.total)}${semPreco ? ' +' : ''}</b>${p.pago ? '<span class="mm-chip verde">pago</span>' : ''}${prazo(p)}${p.avisos ? '<span class="pc-sino" title="O cliente recebe aviso no celular">🔔</span>' : ''}${p.venda_pedido_id ? `<span class="mm-chip">venda #${p.venda_pedido_id}</span>` : ''}</div>
+            <div class="pc-rodape"><b>${window.fmt(p.total)}${semPreco ? ' +' : ''}</b>${p.pago ? '<span class="mm-chip verde">pago</span>' : aReceber(p) && !ABERTOS.includes(p.status) ? '<span class="mm-chip amarelo">falta receber</span>' : ''}${prazo(p)}${p.avisos ? '<span class="pc-sino" title="O cliente recebe aviso no celular">🔔</span>' : ''}${p.venda_pedido_id ? `<span class="mm-chip">venda #${p.venda_pedido_id}</span>` : ''}</div>
             ${prox ? `<div class="pc-botoes" onclick="event.stopPropagation()"><button class="btn-magic btn-pequeno" onclick="mudarEtapa(${p.id}, '${prox[0]}')">${window.ic('check')} ${prox[1]}</button>${p.telefone ? `<a class="btn-limpar" href="${esc(window.linkZap(p.telefone, mensagemEtapa(p, p.status)))}" target="_blank" rel="noopener">${window.ic('zap')} WhatsApp</a>` : ''}</div>` : ''}
         </div>`;
     }).join('');
@@ -134,6 +140,12 @@ function mensagemEtapa(p, st, recado) {
     return `${m}${recado ? `\n\n${recado}` : ''}\n\nAcompanhe aqui: ${link}`;
 }
 
+// Lembrete de pagamento (com a chave Pix dos Ajustes das páginas, se tiver)
+function mensagemCobranca(p) {
+    const nome = (p.cliente || '').split(' ')[0], pix = String((PC.cfg || {}).pagina_pix || '').trim();
+    return `Olá, ${nome}! Tudo bem? Passando para lembrar do pagamento do pedido *#${p.id}*: ${window.fmt(p.total)}.${pix ? `\nChave Pix: ${pix}` : ''}\n\nQualquer dúvida, é só falar. Obrigado! 💛`;
+}
+
 // ---------- Detalhe ----------
 window.abrirPedido = function(id) {
     const p = pedidoPorId(id); if (!p) return;
@@ -142,7 +154,7 @@ window.abrirPedido = function(id) {
     const atual = PASSOS.indexOf(p.status), avisar = PC.avisar && PC.avisar.id === id ? PC.avisar : null; PC.avisar = null;
     const zapLink = (st, recado) => p.telefone ? window.linkZap(p.telefone, mensagemEtapa(p, st, recado)) : '';
     window.abrirModalMM(`<div class="pd-cab"><div><h3 class="modal-title">Pedido #${p.id} ${chip(p.status)}</h3>
-            <p>${p.origem === 'Site' ? `Feito no site · ${esc(p.pagina_titulo)}` : `Anotado por ${esc(p.criado_por || '—')} · ${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`} · ${dataHora(p.criado_em)}</p></div></div>
+            <p>${p.origem === 'Site' ? `Feito no site · ${esc(p.pagina_titulo)}${viaRede(p)}` : `Anotado por ${esc(p.criado_por || '—')} · ${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`} · ${dataHora(p.criado_em)}</p></div></div>
         <div class="pd-passos">${PASSOS.map((s, i) => `<button type="button" class="${p.status === 'cancelado' ? '' : i < atual || p.status === 'entregue' ? 'feito' : i === atual ? 'agora' : ''}" onclick="mudarEtapa(${p.id}, '${s}', true)">
             <i>${i < atual || p.status === 'entregue' ? '✓' : ETAPAS[s][2]}</i><b>${ETAPAS[s][0]}</b><small>${quando[s] ? dataHora(quando[s]) : ''}</small></button>`).join('')}</div>
         ${avisar ? `<div class="pd-avisar">${window.ic('check')}<div><b>${avisar.recado ? 'Recado enviado.' : `Agora está "${ETAPAS[avisar.status] ? ETAPAS[avisar.status][0] : ''}".`}</b>
@@ -161,7 +173,9 @@ window.abrirPedido = function(id) {
             ${p.desconto || p.taxa_entrega ? `<div class="pc-linha"><span>Produtos</span><b>${window.fmt(subtotal)}</b></div>` : ''}
             ${p.desconto ? `<div class="pc-linha"><span>Desconto</span><b>− ${window.fmt(p.desconto)}</b></div>` : ''}${p.taxa_entrega ? `<div class="pc-linha"><span>Entrega</span><b>${window.fmt(p.taxa_entrega)}</b></div>` : ''}
             <div class="pc-total"><span>Total${semPreco ? ' <small>(+ itens a combinar)</small>' : ''}</span><b>${window.fmt(p.total)}</b></div>
-            <label class="chave" style="margin:12px 0 0;"><input type="checkbox" ${p.pago ? 'checked' : ''} onchange="marcarPago(${p.id}, this.checked)"> Já foi pago${p.pagamento ? ` <small class="rot-dica">${esc(p.pagamento)}</small>` : ''}</label>
+            ${p.pago ? `<div class="pd-pgto ok"><span>✅ <b>Pago</b>${p.pagamento && p.pagamento !== 'A combinar' ? ` · ${esc(p.pagamento)}` : ''}</span><a onclick="marcarPago(${p.id}, false)">desfazer</a></div>`
+                : p.status === 'cancelado' ? '' : `<div class="pd-pgto"><span>⏳ <b>Falta receber ${window.fmt(p.total)}</b>${p.pagamento ? ` · ${esc(p.pagamento)}` : ''}</span>
+                <div><button class="btn-magic btn-pequeno" onclick="marcarPago(${p.id}, true)">${window.ic('check')} Recebi o pagamento</button>${p.telefone ? `<a class="btn-limpar" href="${esc(window.linkZap(p.telefone, mensagemCobranca(p)))}" target="_blank" rel="noopener">${window.ic('zap')} Cobrar no WhatsApp</a>` : ''}</div></div>`}
         </div>
         <h4 class="pd-tit">Cliente</h4>
         <div class="pc-bloco">
@@ -176,8 +190,8 @@ window.abrirPedido = function(id) {
         <h4 class="pd-tit">Histórico <small>o cliente vê as etapas e os recados</small></h4>
         <ol class="pd-hist">${p.historico.slice().reverse().map(h => `<li class="${h.status === 'pago' ? 'verde' : ETAPAS[h.status] ? ETAPAS[h.status][1] : ''}"><span><b>${ROT_HIST[h.status] || esc(h.status)}</b><small>${dataHora(h.quando)}${h.por ? ` · ${h.por === 'site' ? 'pelo site' : esc(h.por)}` : ''}</small>
             ${h.recado ? `<em>💬 ${esc(h.recado)} <a onclick="apagarRecado(${h.id}, ${p.id})">apagar</a></em>` : ''}</span></li>`).join('') || '<li><span><small>Sem histórico.</small></span></li>'}</ol>
-        ${p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas (pedido #${p.venda_pedido_id})</p>`
-            : `<button class="btn-magic btn-global" onclick="lancarVenda(${p.id})">${window.ic('carrinho')} Lançar como venda</button><p class="texto-ajuda" style="margin:-4px 0 12px;">Aparece em Vendas e no financeiro. Faça quando o pedido for pago ou entregue.</p>`}
+        ${p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas (pedido #${p.venda_pedido_id}${p.pago ? '' : ', pendente'})</p>`
+            : `<button class="btn-magic btn-global" onclick="lancarVenda(${p.id})">${window.ic('carrinho')} Lançar como venda</button><p class="texto-ajuda" style="margin:-4px 0 12px;">Aparece em Vendas e no financeiro. Pode lançar ao entregar, mesmo que o cliente vá pagar depois.</p>`}
         <div class="pc-acoes">
             ${p.telefone ? `<a class="btn-limpar" href="${esc(zapLink(p.status))}" target="_blank" rel="noopener">${window.ic('zap')} Mensagem: ${ETAPAS[p.status][0].toLowerCase()}</a>` : ''}
             <button class="btn-limpar" onclick="copiarTexto('${esc(linkAcompanhar(p.codigo))}', 'Link para o cliente acompanhar copiado!')">${window.ic('copiar')} Copiar link de acompanhar</button>
@@ -237,9 +251,12 @@ window.lancarVenda = function(id) {
     const forma = { Pix: 'Pix', Cartão: 'Cartão de crédito', Dinheiro: 'Dinheiro' }[p.pagamento] || 'Pix';
     window.abrirModalMM(`<h3 class="modal-title">${window.ic('carrinho')} Lançar o pedido #${p.id} nas Vendas</h3>
         <p class="texto-ajuda" style="margin-top:0;">${esc(p.cliente)} · ${window.fmt(p.total)}${p.taxa_entrega ? ' (com a entrega)' : ''}</p>
-        <div class="input-group"><label for="lv-forma">Forma de pagamento</label><select id="lv-forma">${FORMAS_VENDA.map(f => `<option ${f === forma ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+        <div class="lv-opcoes" role="radiogroup" aria-label="O cliente já pagou?">
+            <label class="lv-op"><input type="radio" name="lv-pago" value="0" ${p.pago ? '' : 'checked'}><span><i>⏳</i><b>Vai pagar depois</b><small>Fica "Pendente" em Vendas e em "A receber" até você marcar que recebeu</small></span></label>
+            <label class="lv-op"><input type="radio" name="lv-pago" value="1" ${p.pago ? 'checked' : ''}><span><i>✅</i><b>Já pagou</b><small>Entra como recebido</small></span></label>
+        </div>
+        <div class="input-group"><label for="lv-forma">Forma de pagamento <small class="rot-dica">a combinada, se ainda não pagou</small></label><select id="lv-forma">${FORMAS_VENDA.map(f => `<option ${f === forma ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
         <div class="input-group"><label for="lv-canal">Canal</label><input type="text" id="lv-canal" value="${esc(p.origem === 'Site' ? 'Site' : p.origem)}" maxlength="100"></div>
-        <label class="chave" style="margin:0 0 10px;"><input type="checkbox" id="lv-pago" ${p.pago ? 'checked' : ''}> Já foi pago</label>
         <label class="chave" style="margin:0 0 6px;"><input type="checkbox" id="lv-estoque" ${daParaTirar ? 'checked' : ''}> Tirar as peças do estoque do Ateliê</label>
         <p class="texto-ajuda" style="margin:0 0 14px;">${daParaTirar ? 'Tem tudo no Ateliê.' : 'Falta peça no Ateliê para tirar tudo. Monte os kits ou registre a produção antes, ou lance sem tirar do estoque.'}</p>
         <button class="btn-magic btn-global" id="btn-lv" onclick="confirmarLancarVenda(${p.id})">${window.ic('check')} Lançar venda</button>`);
@@ -247,10 +264,11 @@ window.lancarVenda = function(id) {
 window.confirmarLancarVenda = async function(id) {
     const b = $('btn-lv'); b.disabled = true;
     try {
-        const pago = $('lv-pago').checked;
+        const pago = (document.querySelector('input[name="lv-pago"]:checked') || {}).value === '1';
         const r = await window.apiAcao('lancar_venda_pedido', { id, forma_pgto: $('lv-forma').value, plataforma: $('lv-canal').value.trim(), pago, baixar_estoque: $('lv-estoque').checked });
         window.fecharModalMM(); window.carregarPedidos(); window.carregarBancoDeCustos();
-        window.mostrarAlerta('Venda lançada!', `O pedido #${id} agora está em Vendas (pedido #${r.venda}).`, 'success');
+        window.mostrarAlerta('Venda lançada!', pago ? `O pedido #${id} agora está em Vendas (pedido #${r.venda}), já pago.`
+            : `O pedido #${id} está em Vendas (pedido #${r.venda}) como pendente. Quando o cliente pagar, abra o pedido e toque em "Recebi o pagamento" (ou marque como pago em Vendas: os dois ficam iguais).`, 'success');
     } catch (e) { window.mostrarAlerta('Não deu para lançar', servidorAntigo(e), 'error'); b.disabled = false; }
 };
 
