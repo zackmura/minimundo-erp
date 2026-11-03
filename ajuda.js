@@ -61,7 +61,7 @@ const GUIAS = [
     ] },
     { id: 'tamanho', grupo: 'Produção e estoque', icone: 'regua', titulo: 'Colocar o tamanho do produto (régua)', desc: 'Largura, comprimento e altura numa régua, no painel e no site.', tour: [
         { alvo: '#pf-largura', titulo: 'Medidas em centímetros', texto: 'No Precificar, no cartão Tamanho, coloque a largura, o comprimento e a altura em cm. Pode usar vírgula: 12,5.', antes: () => window.switchTab('precificar') },
-        { alvo: '#pf-regua', titulo: 'A régua', texto: 'A régua aparece na hora, proporcional ao produto. Depois de salvar, o cliente vê a mesma régua na página de venda, no botão "ver tamanho".' },
+        { alvo: '#pf-regua', titulo: 'A régua', texto: 'A régua aparece na hora, proporcional ao produto. Depois de salvar, o cliente vê o tamanho num selo em cima da foto, na página de venda, e toca nele para ver a mesma régua.' },
         { alvo: ['.med-chip', '#lista-produtos'], titulo: 'Nas listas', texto: 'Em Produtos e no Estoque o tamanho aparece ao lado do produto: toque nele para ver a régua grande. Para mudar as medidas de um produto já cadastrado, toque no produto e use os campos de Tamanho.', antes: () => window.switchTab('modelos') }
     ] },
     { id: 'producao', grupo: 'Produção e estoque', icone: 'impressora', titulo: 'Registrar o que foi impresso', desc: 'Peças prontas entram no estoque do Ateliê.', tour: [
@@ -299,11 +299,15 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v7.2', data: '03/11/2026', titulo: 'Tamanho mais à vista', itens: [
+        'Página de venda: o tamanho agora fica num selo em cima da foto do produto. No computador, passar o mouse no selo mostra a régua por cima da foto; no celular, tocar abre a régua grande.',
+        'Vendas: o tamanho aparece na lista de produtos, no "Ver todos" e no produto escolhido (toque para ver a régua).'
+    ] },
     { v: 'v7.1', data: '03/11/2026', titulo: 'Tamanho dos produtos na régua', itens: [
         'Novo cartão "Tamanho" no Precificar e na edição do produto: largura, comprimento e altura em centímetros (opcional).',
         'Com as medidas, aparece uma régua: o produto desenhado em 3D, do tamanho proporcional, com uma fita métrica em cada lado.',
         'Em Produtos, no Estoque e no painel dos vendedores o tamanho aparece ao lado do produto. Toque nele para ver a régua grande.',
-        'Na página de venda o cliente vê o botão "ver tamanho", com a régua e uma comparação para ter ideia (ex.: um cartão de crédito tem 8,6 cm). Nos kits, cada peça mostra o seu tamanho.'
+        'Na página de venda o cliente vê o tamanho no produto, com a régua e uma comparação para ter ideia (ex.: um cartão de crédito tem 8,6 cm). Nos kits, cada peça mostra o seu tamanho.'
     ] },
     { v: 'v7.0', data: '03/11/2026', titulo: 'Visual novo e mais controle', itens: [
         'Visual do sistema todo reorganizado: botões com cores que dizem o que fazem (verde = pagar/confirmar, laranja = a receber, vermelho = excluir, azul = editar) e menos coisa repetida.',

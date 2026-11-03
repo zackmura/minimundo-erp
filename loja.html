@@ -154,10 +154,19 @@
         .vem li img { width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--ouro3); box-shadow:0 0 0 1px var(--linha), 0 0 0 3px var(--papel); }
         .vem li b { font-family:var(--serif); font-weight:600; color:var(--ouro); margin-right:3px; }
         .rodape { margin-top:auto; padding-top:20px; }
-        .tam { display:inline-flex; align-items:center; gap:8px; align-self:flex-start; margin-top:14px; padding:7px 14px 7px 10px; border-radius:999px; border:1px dashed var(--ouro2); background:var(--fundo); color:var(--tinta); font-size:.82rem; font-weight:600; cursor:pointer; transition:background .15s, border-color .15s; }
-        .tam:hover { background:var(--ouro3); border-color:var(--ouro); }
-        .tam svg { width:17px; height:17px; color:var(--ouro); flex-shrink:0; }
-        .tam em { font-style:normal; font-weight:500; color:var(--suave); }
+        /* Tamanho na foto: selo sempre visível; ao passar o mouse no selo, a régua aparece por cima da foto (no celular, o toque abre a régua grande) */
+        .tam-foto { position:absolute; inset:0; pointer-events:none; z-index:3; }
+        .tam-selo { position:absolute; left:14px; bottom:17px; z-index:2; pointer-events:auto; display:inline-flex; align-items:center; gap:7px; padding:7px 13px 7px 10px; border:none; border-radius:999px; background:rgba(255,253,249,.94); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:var(--tinta); font-size:.78rem; font-weight:700; font-variant-numeric:tabular-nums; box-shadow:0 2px 10px rgba(0,0,0,.16); cursor:pointer; transition:transform .15s, box-shadow .15s; }
+        .tam-selo svg { width:16px; height:16px; color:var(--ouro); flex-shrink:0; }
+        .tam-selo:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.2); }
+        .tam-painel { position:absolute; left:10px; right:10px; bottom:10px; z-index:1; padding:14px 12px 50px; border-radius:20px; background:rgba(255,253,249,.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 12px 32px -10px rgba(0,0,0,.4); color:var(--suave); opacity:0; visibility:hidden; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s, visibility 0s .2s; }
+        .tam-painel .regua svg { --rg-max:180px; }
+        .tam-painel .regua figcaption { font-size:.74rem; margin-top:4px; }
+        .tam-painel > small { position:absolute; right:16px; bottom:24px; font-size:.72rem; font-weight:600; }
+        @media (hover:hover) and (pointer:fine) {
+            .tam-foto:hover .tam-painel, .tam-selo:focus-visible + .tam-painel { opacity:1; visibility:visible; transform:none; pointer-events:auto; transition:opacity .2s, transform .2s; }
+        }
+        .fotos.com-tam .pontos { justify-content:flex-end; padding-right:18px; bottom:29px; }
         .vem-tam { display:block; font-size:.76rem; color:var(--suave); }
         body .regua { --rg-caixa:var(--ouro); --rg-borda:var(--tinta2); --rg-l:var(--botao); --rg-c:var(--botao); --rg-a:var(--botao); --rg-pil-txt:var(--botaoTxt); color:var(--suave); }
         .tam-box { margin:4px 0 6px; padding:18px 10px 12px; border-radius:20px; background:var(--fundo); border:1px solid var(--linha); }
@@ -421,7 +430,7 @@
 
 <script src="temas.js?v=6.0.0"></script>
 <script src="galeria.js?v=6.0.0"></script>
-<script src="regua.js?v=7.1.0"></script>
+<script src="regua.js?v=7.2.0"></script>
 <script>
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
@@ -587,20 +596,20 @@
     }
     const naSacola = id => (SACOLA.find(s => s.id === id) || {}).qtd || 0;
     function cartao(it) {
-        const fotos = it.fotos || [], qtd = naSacola(it.id);
+        const fotos = it.fotos || [], qtd = naSacola(it.id), tam = temMedidas(it.medidas);
         const desconto = it.de ? Math.round((1 - it.preco / it.de) * 100) : 0, economia = it.separadas ? it.separadas - it.preco : 0;
         return `<article class="card" id="item-${it.id}">
-            <div class="fotos">
+            <div class="fotos ${tam ? 'com-tam' : ''}">
                 ${fotos.length ? `<div class="trilho" data-id="${it.id}">${fotos.map((f, j) => `<button class="foto" type="button" onclick="verFotos(${it.id}, ${j})" aria-label="Ver foto ${j + 1} de ${esc(it.nome)}"><img src="${esc(f)}" alt="${esc(it.nome)}" loading="${j ? 'lazy' : 'eager'}" onerror="this.src='logo.png'"></button>`).join('')}</div>` : '<div class="sem-foto"><img src="logo.png" alt=""></div>'}
                 <div class="selos">${it.tipo === 'kit' ? '<span class="selo kit">Kit</span>' : ''}<span class="selo ${it.pronta_entrega ? 'pronta' : ''}">${it.pronta_entrega ? 'Pronta entrega' : 'Sob encomenda'}</span>${desconto >= 5 ? `<span class="selo promo">−${desconto}%</span>` : ''}</div>
                 ${fotos.length > 1 ? `<button class="seta esq" type="button" aria-label="Foto anterior" onclick="passar(${it.id}, -1)">${IC.esq}</button><button class="seta dir" type="button" aria-label="Próxima foto" onclick="passar(${it.id}, 1)">${IC.dir}</button>
                     <div class="pontos" id="pontos-${it.id}">${fotos.map((_, j) => `<i class="${j ? '' : 'on'}"></i>`).join('')}</div>` : ''}
+                ${tam ? `<div class="tam-foto" onmouseenter="painelTamanho(this, ${it.id})"><button class="tam-selo" type="button" onclick="verTamanho(${it.id})" onfocus="painelTamanho(this.parentNode, ${it.id})" aria-label="Tamanho ${esc(medidasTxt(it.medidas))}: ver na régua">${IC.regua}<span>${esc(medidasTxt(it.medidas))}</span></button><div class="tam-painel" aria-hidden="true"></div></div>` : ''}
             </div>
             <div class="corpo">
                 ${it.categoria ? `<p class="cat">${esc(it.categoria)}</p>` : ''}
                 <h3>${esc(it.nome)}</h3>
                 ${it.descricao ? `<p class="desc">${esc(it.descricao)}</p>` : ''}
-                ${temMedidas(it.medidas) ? `<button class="tam" type="button" onclick="verTamanho(${it.id})">${IC.regua}<span>${esc(medidasTxt(it.medidas))}</span><em>ver tamanho</em></button>` : ''}
                 ${it.itens && it.itens.length ? `<div class="vem"><span class="vem-rot">Vem no kit</span><ul>${it.itens.map(p => `<li><img src="${esc(p.foto || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'"><span><b>${p.qtd}×</b> ${esc(p.nome)}${temMedidas(p.medidas) ? `<small class="vem-tam">${esc(medidasTxt(p.medidas))}</small>` : ''}</span></li>`).join('')}</ul></div>` : ''}
                 <div class="rodape"><div class="rodape-in">
                     <div class="preco">${it.preco ? `${it.de ? `<s>de ${real(it.de)}</s>` : economia > 0 ? `<s>Separadas: ${real(it.separadas)}</s>` : ''}<strong>${real(it.preco)}</strong>${economia > 0 ? `<span class="economia">Você economiza ${real(economia)}</span>` : ''}` : '<span class="consulta">Sob consulta</span>'}</div>
@@ -609,6 +618,11 @@
                         <button class="btn-share" type="button" onclick="compartilhar(${it.id})" aria-label="Compartilhar ${esc(it.nome)}">${IC.share}</button></div>
                 </div></div>
             </div></article>`;
+    }
+    // A régua do selo só é desenhada na primeira vez que o mouse passa
+    function painelTamanho(caixa, id) {
+        const p = caixa && caixa.querySelector('.tam-painel'), it = ITENS.find(i => i.id === id);
+        if (p && !p.innerHTML && it) p.innerHTML = reguaMM(it.medidas, { comparar: true }) + '<small>Clique para ver maior</small>';
     }
     // Tamanho do produto: caixa em 3D com uma fita métrica em cada lado
     function verTamanho(id) {

@@ -42,7 +42,7 @@ const taxaDe = (canal, total) => { const p = plataformaDe(canal); return p && to
 const produtosParaVender = () => (window.arrayBancoCustos || []).filter(p => p.ativo !== false)
     .sort((a, b) => ((estoqueDe(b) > 0) - (estoqueDe(a) > 0)) || String(a.modelo).localeCompare(String(b.modelo), 'pt-BR'));
 const opcoesComFoto = () => produtosParaVender().map(p => ({ v: p.linha, t: p.modelo, f: fotoDe(p),
-    s: `${window.precoVendaDe(p) ? window.fmt(window.precoVendaDe(p)) : 'sem preço'} · ${estoqueDe(p) > 0 ? `${estoqueDe(p)} no Ateliê` : 'sem estoque'}${p.tipo === 'kit' ? ' · Kit' : ''}` }));
+    s: `${window.precoVendaDe(p) ? window.fmt(window.precoVendaDe(p)) : 'sem preço'} · ${estoqueDe(p) > 0 ? `${estoqueDe(p)} no Ateliê` : 'sem estoque'}${p.tipo === 'kit' ? ' · Kit' : ''}${window.temMedidas(p.medidas) ? ' · ' + window.medidasTxt(p.medidas) : ''}` }));
 
 // ---------- SUB-ABAS ----------
 window.abaVendas = function(qual) {
@@ -114,7 +114,7 @@ window.renderizarCatalogoPDV = function() {
         return `<button type="button" class="pdv-sug ${noCar ? 'no-carrinho' : ''} ${est > 0 ? '' : 'sem'}" onclick="addPDV(${p.linha})">
             <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">
             <span class="pdv-sug-info"><b>${p.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${esc(p.modelo)}</b>
-                <small><span class="pl-preco">${preco ? window.fmt(preco) : 'sem preço'}</span> · <span class="pp-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sem estoque · sob encomenda'}</span></small></span>
+                <small><span class="pl-preco">${preco ? window.fmt(preco) : 'sem preço'}</span> · <span class="pp-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sem estoque · sob encomenda'}</span></small>${window.temMedidas(p.medidas) ? `<small class="pdv-tam">${window.ic('regua')}${window.medidasTxt(p.medidas)}</small>` : ''}</span>
             ${noCar ? `<span class="pdv-sug-qtd">${noCar.qtd}</span>` : `<span class="pl-add" aria-hidden="true">${window.ic('mais')}</span>`}
         </button>`;
     }).join('') + `<div class="pdv-sug-rodape"><span>${lista.length > 80 ? `Mostrando 80 de ${lista.length}. Digite para achar mais rápido.` : `${lista.length} produto${lista.length > 1 ? 's' : ''}`}</span><button type="button" onclick="fecharListaPDV()">Fechar lista</button></div>`;
@@ -157,7 +157,7 @@ window.renderizarCarrinhoPDV = function() {
         const nota = b.baixar ? `<span class="pi-nota ok">Sai do Ateliê (tem ${b.est})</span>` : b.est > 0 ? `<span class="pi-nota aviso">Só ${b.est} no Ateliê — não dá baixa</span>` : `<span class="pi-nota aviso">Sem estoque — sob encomenda</span>`;
         return `<div class="pdv-item">
             <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
-            <div class="pi-info"><b>${esc(it.nome)}</b>${nota}</div>
+            <div class="pi-info"><b>${esc(it.nome)}</b>${nota}${p ? window.chipMedidas(p.linha, p.medidas) : ''}</div>
             <div class="pi-qtd"><button type="button" onclick="qtdPDV(${i},-1)" aria-label="Menos">−</button><input type="number" min="1" value="${it.qtd}" onchange="qtdPDVSet(${i},this.value)" aria-label="Quantidade"><button type="button" onclick="qtdPDV(${i},1)" aria-label="Mais">+</button></div>
             <div class="pi-preco"><input type="text" class="mask-money" value="${window.fmt(it.unit)}" oninput="setTimeout(()=>precoPDV(${i},this.value))" aria-label="Preço unitário"><small>${it.sugerido ? 'sugerido · un.' : 'por unidade'}</small></div>
             <b class="pi-total" data-pi-total="${i}">${window.fmt(it.unit * it.qtd)}</b>

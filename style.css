@@ -1950,3 +1950,7 @@ label.cvb { cursor:pointer; }
     .med-campo em { right:8px; }
 }
 .tp-prod .med-chip, .est-info .med-chip { margin-top:5px; }
+/* Vendas: tamanho na lista de produtos e no produto escolhido */
+.pdv-tam { display:flex !important; align-items:center; gap:4px; margin-top:2px; color:#5b4bc4 !important; font-weight:700; }
+.pdv-tam svg.ic { width:12px; height:12px; flex-shrink:0; }
+.pi-info .med-chip { margin-top:5px; }
