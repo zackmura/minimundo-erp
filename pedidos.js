@@ -190,7 +190,7 @@ window.abrirPedido = function(id) {
         <h4 class="pd-tit">Histórico <small>o cliente vê as etapas e os recados</small></h4>
         <ol class="pd-hist">${p.historico.slice().reverse().map(h => `<li class="${h.status === 'pago' ? 'verde' : ETAPAS[h.status] ? ETAPAS[h.status][1] : ''}"><span><b>${ROT_HIST[h.status] || esc(h.status)}</b><small>${dataHora(h.quando)}${h.por ? ` · ${h.por === 'site' ? 'pelo site' : esc(h.por)}` : ''}</small>
             ${h.recado ? `<em>💬 ${esc(h.recado)} <a onclick="apagarRecado(${h.id}, ${p.id})">apagar</a></em>` : ''}</span></li>`).join('') || '<li><span><small>Sem histórico.</small></span></li>'}</ol>
-        ${p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas (pedido #${p.venda_pedido_id}${p.pago ? '' : ', pendente'})</p>`
+        ${p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas: <a onclick="fecharModalMM(); verVenda(${p.venda_pedido_id})">venda #${p.venda_pedido_id}</a>${p.pago ? '' : ' (a receber)'}</p>`
             : `<button class="btn-magic btn-global" onclick="lancarVenda(${p.id})">${window.ic('carrinho')} Lançar como venda</button><p class="texto-ajuda" style="margin:-4px 0 12px;">Aparece em Vendas e no financeiro. Pode lançar ao entregar, mesmo que o cliente vá pagar depois.</p>`}
         <div class="pc-acoes">
             ${p.telefone ? `<a class="btn-limpar" href="${esc(zapLink(p.status))}" target="_blank" rel="noopener">${window.ic('zap')} Mensagem: ${ETAPAS[p.status][0].toLowerCase()}</a>` : ''}

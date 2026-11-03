@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=6.0.0">
+    <link rel="stylesheet" href="style.css?v=7.0.0">
 </head>
 <body>
 
@@ -67,6 +67,12 @@
     <symbol id="i-imagem" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
     <symbol id="i-estrela" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
     <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-historico" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+    <symbol id="i-ajuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4.4M12 17.5h.01"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m10 8.5 5.5 3.5-5.5 3.5z"/></symbol>
+    <symbol id="i-pontos" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-devolver" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
 </svg>
 
 <!-- ========================================== -->
@@ -98,31 +104,36 @@
         </div>
 
         <nav class="sb-nav" id="menu-abas">
-            <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg><span>Dashboard</span></button>
+            <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg><span>Início</span></button>
 
-            <div class="sb-grupo">Vendas e produção</div>
+            <div class="sb-grupo">Vender</div>
             <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vendas</span></button>
             <button id="btn-pedidos" class="tab-btn" onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg><span>Pedidos</span><b class="aviso-num" data-aviso-pedidos hidden></b></button>
-            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
+            <button id="btn-paginas" class="tab-btn" onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg><span>Páginas de venda</span></button>
+
+            <div class="sb-grupo">Produção e estoque</div>
             <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos</span></button>
+            <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
             <button id="btn-kits" class="tab-btn" onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg><span>Kits</span></button>
-            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg><span>Custos</span></button>
-
-            <div class="sb-grupo">Consignado</div>
             <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Estoque</span></button>
-            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Vendedores</span></button>
 
-            <div class="sb-grupo">Loja e marketing</div>
-            <button id="btn-paginas" class="tab-btn" onclick="switchTab('paginas')"><svg class="ic"><use href="#i-sacola"/></svg><span>Páginas de venda</span></button>
-            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Catálogo</span></button>
+            <div class="sb-grupo">Equipe e dinheiro</div>
+            <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Vendedores</span></button>
+            <button id="btn-custos" class="tab-btn" onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg><span>Custos e compras</span></button>
+
+            <div class="sb-grupo">Site e extras</div>
+            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Catálogo do site</span></button>
             <button id="btn-imas" class="tab-btn" onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg><span>Ímãs NFC</span></button>
-            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg><span>Anúncios</span></button>
+            <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-estrela"/></svg><span>Anúncios</span></button>
             <button id="btn-analytics" class="tab-btn" onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg><span>Analytics</span></button>
             <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz')"><svg class="ic"><use href="#i-controle"/></svg><span>Quiz</span></button>
 
             <div class="sb-grupo">Sistema</div>
             <button id="btn-usuarios" class="tab-btn" onclick="switchTab('usuarios')"><svg class="ic"><use href="#i-escudo"/></svg><span>Usuários</span></button>
             <button id="btn-config" class="tab-btn" onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg><span>Ajustes</span></button>
+            <button id="btn-registros" class="tab-btn" onclick="switchTab('registros')"><svg class="ic"><use href="#i-historico"/></svg><span>Registros</span></button>
+            <button id="btn-novidades" class="tab-btn" onclick="switchTab('novidades')"><svg class="ic"><use href="#i-presente"/></svg><span>Novidades</span><b class="aviso-num ponto" data-aviso-novidades hidden></b></button>
+            <button id="btn-ajuda" class="tab-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg><span>Ajuda e tutoriais</span></button>
         </nav>
 
         <nav class="sb-nav" id="menu-abas-vendedor">
@@ -130,6 +141,7 @@
             <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Meu estoque</span></button>
             <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg><span>Meu acerto</span></button>
             <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg><span>Encomendas</span></button>
+            <button class="tab-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg><span>Ajuda</span></button>
         </nav>
 
         <div class="sb-rodape">
@@ -160,27 +172,31 @@
 
         <!-- ABA MENU (celular) -->
         <div id="tab-menu_mobile" class="tab-content">
-            <div class="menu-grupo">Vendas e produção</div>
+            <button class="menu-ajuda" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg><span><b>Ajuda e tutoriais</b><small>Passo a passo de cada tarefa, mostrando onde tocar</small></span><svg class="ic"><use href="#i-seta-dir"/></svg></button>
+            <div class="menu-grupo">Vender</div>
             <div class="grid-menu">
-                <button onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Dashboard</button>
                 <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
                 <button onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg>Pedidos<b class="aviso-num" data-aviso-pedidos hidden></b></button>
-                <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
+                <button onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg>Páginas de venda</button>
+            </div>
+            <div class="menu-grupo">Produção e estoque</div>
+            <div class="grid-menu">
                 <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos</button>
+                <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
                 <button onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg>Kits</button>
-                <button onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg>Custos</button>
-            </div>
-            <div class="menu-grupo">Consignado</div>
-            <div class="grid-menu">
                 <button onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
-                <button onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg>Vendedores</button>
             </div>
-            <div class="menu-grupo">Loja e marketing</div>
+            <div class="menu-grupo">Equipe e dinheiro</div>
             <div class="grid-menu">
-                <button onclick="switchTab('paginas')"><svg class="ic"><use href="#i-sacola"/></svg>Páginas de venda</button>
-                <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Catálogo</button>
+                <button onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Início</button>
+                <button onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg>Vendedores</button>
+                <button onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg>Custos e compras</button>
+            </div>
+            <div class="menu-grupo">Site e extras</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Catálogo do site</button>
                 <button onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg>Ímãs NFC</button>
-                <button onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-megafone"/></svg>Anúncios</button>
+                <button onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-estrela"/></svg>Anúncios</button>
                 <button onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg>Analytics</button>
                 <button onclick="switchTab('quiz')"><svg class="ic"><use href="#i-controle"/></svg>Quiz</button>
             </div>
@@ -188,6 +204,8 @@
             <div class="grid-menu">
                 <button onclick="switchTab('usuarios')"><svg class="ic"><use href="#i-escudo"/></svg>Usuários</button>
                 <button onclick="switchTab('config')"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button>
+                <button onclick="switchTab('registros')"><svg class="ic"><use href="#i-historico"/></svg>Registros</button>
+                <button onclick="switchTab('novidades')"><svg class="ic"><use href="#i-presente"/></svg>Novidades<b class="aviso-num ponto" data-aviso-novidades hidden></b></button>
                 <button onclick="fazerLogout()"><svg class="ic"><use href="#i-sair"/></svg>Sair</button>
             </div>
             <button class="menu-personalizar" onclick="personalizarBarra()"><svg class="ic"><use href="#i-lapis"/></svg><span><b>Personalizar a barra de baixo</b><small>Escolha quais telas ficam nos atalhos e em que ordem</small></span></button>
@@ -226,13 +244,15 @@
                 <div class="pdv">
                     <div class="pdv-esq">
                         <div class="pdv-card">
-                            <div class="pdv-cab"><span class="pdv-passo">1</span><b>Escolha os produtos</b><span class="info-lista" id="pdv-info"></span></div>
-                            <div class="busca-linha"><div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pdv-busca" placeholder="Buscar produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarCatalogoPDV()"></div><select id="pdv-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarCatalogoPDV()" hidden></select></div>
-                            <div class="linha-opcao">
-                                <div class="seg-mini" id="pdv-tipos"><button class="active" data-t="todos" onclick="filtroTipoPDV('todos')">Todos</button><button data-t="peca" onclick="filtroTipoPDV('peca')">Peças</button><button data-t="kit" onclick="filtroTipoPDV('kit')">Kits</button></div>
-                                <label class="chave"><input type="checkbox" id="pdv-sem-estoque" onchange="renderizarCatalogoPDV()"> Mostrar também sem estoque</label>
+                            <div class="pdv-cab"><span class="pdv-passo">1</span><b>Produtos</b><span class="info-lista" id="pdv-info"></span><button class="btn-limpar" id="pdv-esvaziar" hidden onclick="limparPDV()">Tirar todos</button></div>
+                            <div class="pdv-busca" id="pdv-busca-box">
+                                <div class="busca-linha">
+                                    <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pdv-busca" placeholder="Toque para escolher ou digite o nome…" autocomplete="off" enterkeyhint="search" oninput="renderizarCatalogoPDV()" onfocus="abrirListaPDV()"></div>
+                                    <button type="button" class="btn-limpar pdv-ver-todos" onclick="verTodosPDV()"><svg class="ic"><use href="#i-imagem"/></svg>Ver todos</button>
+                                </div>
+                                <div id="pdv-grade" class="pdv-sugestoes" hidden></div>
                             </div>
-                            <div id="pdv-grade" class="pdv-lista"></div>
+                            <div id="pdv-itens" class="pdv-escolhidos"></div>
                         </div>
                         <div class="pdv-card">
                             <div class="pdv-cab"><span class="pdv-passo">2</span><b>Cliente e pagamento</b></div>
@@ -242,7 +262,7 @@
                             </div>
                             <div class="row">
                                 <div class="col" style="max-width:210px;"><div class="input-group"><label>Data da venda</label><input type="date" id="pdv-data"></div></div>
-                                <div class="col"><div class="input-group"><label>Situação</label><div class="seg-mini largo" id="pdv-status"><button class="active" data-s="Pago" onclick="selecionarStatusPDV('Pago')">Pago</button><button data-s="Pendente" onclick="selecionarStatusPDV('Pendente')">A receber</button></div></div></div>
+                                <div class="col"><div class="input-group"><label>Já pagou?</label><div class="seg-mini largo seg-situacao" id="pdv-status"><button class="active pago" data-s="Pago" onclick="selecionarStatusPDV('Pago')"><svg class="ic"><use href="#i-check"/></svg>Pago</button><button class="pend" data-s="Pendente" onclick="selecionarStatusPDV('Pendente')"><svg class="ic"><use href="#i-relogio"/></svg>Vai pagar depois</button></div></div></div>
                             </div>
                             <label>Canal da venda</label><div class="chips-op" id="pdv-canais"></div>
                             <label>Forma de pagamento</label><div class="chips-op" id="pdv-formas"></div>
@@ -251,8 +271,7 @@
                     </div>
                     <div class="pdv-dir">
                         <div class="pdv-card pdv-carrinho" id="pdv-carrinho">
-                            <div class="pdv-cab"><span class="pdv-passo">3</span><b>Conferir e finalizar</b><button class="btn-limpar" onclick="limparPDV()">Esvaziar</button></div>
-                            <div id="pdv-itens"></div>
+                            <div class="pdv-cab"><span class="pdv-passo">3</span><b>Total e finalizar</b></div>
                             <div class="pdv-desconto"><label for="pdv-desconto">Desconto no pedido</label><input type="text" id="pdv-desconto" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(renderizarTotaisPDV)"></div>
                             <div id="pdv-totais"></div>
                             <button class="btn-magic btn-global btn-finalizar" id="pdv-finalizar" onclick="finalizarPedido()">Finalizar venda</button>
@@ -264,35 +283,28 @@
 
             <section id="vendas-historico" hidden>
                 <div class="hv-topo">
-                    <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="hv-busca" placeholder="Buscar cliente, produto ou nº do pedido…" list="lista-clientes-venda" autocomplete="off" oninput="HV.limite=30; filtrarVendas()"></div>
-                    <div class="chips-rolagem" id="hv-chips">
-                        <button class="chip-op" data-p="tudo" onclick="periodoHV('tudo')">Tudo</button>
-                        <button class="chip-op" data-p="hoje" onclick="periodoHV('hoje')">Hoje</button>
-                        <button class="chip-op" data-p="7d" onclick="periodoHV('7d')">7 dias</button>
-                        <button class="chip-op active" data-p="mes" onclick="periodoHV('mes')">Este mês</button>
-                        <button class="chip-op" data-p="mesant" onclick="periodoHV('mesant')">Mês passado</button>
-                        <button class="chip-op" data-p="ano" onclick="periodoHV('ano')">Este ano</button>
-                        <button class="chip-op destaque" data-p="areceber" onclick="periodoHV('areceber')">A receber</button>
-                    </div>
-                    <div class="hv-acoes">
+                    <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="text" id="hv-busca" placeholder="Buscar cliente, produto ou nº da venda…" list="lista-clientes-venda" autocomplete="off" oninput="HV.limite=30; filtrarVendas()"></div>
+                    <div class="hv-linha">
+                        <label class="hv-periodo"><svg class="ic"><use href="#i-relogio"/></svg><select id="hv-periodo" aria-label="Período" onchange="periodoHV(this.value)">
+                            <option value="hoje">Hoje</option><option value="7d">Últimos 7 dias</option><option value="mes" selected>Este mês</option><option value="mesant">Mês passado</option><option value="ano">Este ano</option><option value="tudo">Tudo</option><option value="personalizado">Escolher datas…</option>
+                        </select></label>
                         <button class="btn-limpar" id="hv-btn-filtros" onclick="toggleFiltrosHV()"><svg class="ic"><use href="#i-filtro"/></svg>Filtros</button>
-                        <button class="btn-limpar" id="hv-extrato" hidden onclick="copiarExtratoCliente()"></button>
-                        <button class="btn-limpar" onclick="abrirModalAcoesLote()"><svg class="ic"><use href="#i-recibo"/></svg>Cobranças e recibos em lote</button>
+                        <button class="btn-limpar" onclick="maisAcoesHV()" aria-label="Mais opções"><svg class="ic"><use href="#i-grade"/></svg>Mais</button>
                     </div>
+                    <div class="seg-situacao-lista" id="hv-situacao" role="group" aria-label="Situação"></div>
                     <div class="hv-filtros" id="hv-filtros" hidden>
                         <div class="row">
-                            <div class="col"><label>Canal</label><select id="hv-canal" onchange="filtrarVendas()"></select></div>
-                            <div class="col"><label>Pagamento</label><select id="hv-forma" onchange="filtrarVendas()"><option value="">Todas as formas</option><option>Pix</option><option>Dinheiro</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Pela plataforma</option><option>Outro</option></select></div>
-                            <div class="col"><label>Situação</label><select id="hv-status" onchange="filtrarVendas()"><option value="">Todas</option><option value="Pago">Pago</option><option value="Pendente">A receber</option></select></div>
+                            <div class="col"><label for="hv-canal">Canal</label><select id="hv-canal" onchange="filtrarVendas()"></select></div>
+                            <div class="col"><label for="hv-forma">Pagamento</label><select id="hv-forma" onchange="filtrarVendas()"><option value="">Todas as formas</option><option>Pix</option><option>Dinheiro</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Pela plataforma</option><option>Outro</option></select></div>
                         </div>
                         <div class="row">
-                            <div class="col"><label>De</label><input type="date" id="hv-de" onchange="periodoHV('personalizado')"></div>
-                            <div class="col"><label>Até</label><input type="date" id="hv-ate" onchange="periodoHV('personalizado')"></div>
-                            <div class="col" style="display:flex;align-items:flex-end;"><button class="btn-limpar" style="width:100%;margin-bottom:14px;" onclick="limparFiltrosVendas()">Limpar filtros</button></div>
+                            <div class="col"><label for="hv-de">De</label><input type="date" id="hv-de" onchange="periodoHV('personalizado')"></div>
+                            <div class="col"><label for="hv-ate">Até</label><input type="date" id="hv-ate" onchange="periodoHV('personalizado')"></div>
                         </div>
+                        <button class="btn-limpar" style="width:100%;" onclick="limparFiltrosVendas()">Limpar filtros</button>
                     </div>
                 </div>
-                <div class="kpis" id="hv-kpis"></div>
+                <div id="hv-kpis"></div>
                 <div id="loading-vendas" class="loading-mm">⏳ Carregando vendas...</div>
                 <div id="lista-vendas"></div>
             </section>
@@ -461,18 +473,24 @@
         <!-- ========================================== -->
         <div id="tab-estoque" class="tab-content">
             <div id="estoque-resumo"></div>
-            <div class="barra-acoes">
+            <div class="barra-acoes-v7">
                 <button class="btn-magic btn-global" onclick="abrirProducao()"><svg class="ic"><use href="#i-impressora"/></svg>Registrar produção</button>
-                <button class="btn-magic btn-roxo" onclick="abrirMontarKit()"><svg class="ic"><use href="#i-camadas"/></svg>Montar kit</button>
-                <button class="btn-magic btn-secundario" onclick="switchTab('kits')"><svg class="ic"><use href="#i-olho"/></svg>Ver kits</button>
-                <button class="btn-magic" onclick="abrirMala()"><svg class="ic"><use href="#i-mala"/></svg>Enviar mala</button>
-                <button class="btn-magic btn-secundario" onclick="abrirMovimentos()"><svg class="ic"><use href="#i-relogio"/></svg>Histórico</button>
+                <div class="acoes-sec">
+                    <button class="btn-limpar" onclick="abrirMala()"><svg class="ic"><use href="#i-mala"/></svg>Enviar peças</button>
+                    <button class="btn-limpar" onclick="abrirMontarKit()"><svg class="ic"><use href="#i-camadas"/></svg>Montar kit</button>
+                    <button class="btn-limpar" onclick="abrirMovimentos()"><svg class="ic"><use href="#i-historico"/></svg>Entradas e saídas</button>
+                </div>
             </div>
-            <div class="filtros-box" style="padding:14px;">
+            <div class="filtros-box est-filtros">
+                <div class="seg-mini largo" id="estoque-visao"><button data-v="produto" class="active" onclick="estoqueVisao('produto')"><svg class="ic"><use href="#i-pacote"/></svg>Por produto</button><button data-v="vendedor" onclick="estoqueVisao('vendedor')"><svg class="ic"><use href="#i-usuarios"/></svg>Por vendedor</button></div>
                 <div class="busca-linha"><div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="busca-estoque" placeholder="Buscar produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarEstoque()"></div><select id="estoque-categoria" class="filtro-cat" aria-label="Categoria" onchange="renderizarEstoque()" hidden></select></div>
-                <div class="linha-opcao" style="margin:0;"><label class="chave"><input type="checkbox" id="estoque-mostrar-sem" onchange="renderizarEstoque()"> Mostrar também produtos sem estoque</label><span id="estoque-info-lista" class="info-lista"></span></div>
+                <div class="linha-opcao" style="margin:0;">
+                    <label class="hv-periodo"><svg class="ic"><use href="#i-filtro"/></svg><select id="estoque-onde" aria-label="Onde está" onchange="estoqueOnde(this.value)"></select></label>
+                    <label class="chave"><input type="checkbox" id="estoque-mostrar-sem" onchange="renderizarEstoque()"> Mostrar sem estoque</label>
+                    <span id="estoque-info-lista" class="info-lista"></span>
+                </div>
             </div>
-            <div id="loading-estoque" class="loading-mm">⏳ Carregando estoque...</div>
+            <div id="loading-estoque" class="loading-mm">Carregando estoque…</div>
             <div id="lista-estoque"></div>
         </div>
 
@@ -480,21 +498,18 @@
         <!-- 🤝 VENDEDORES, ACERTOS E ENCOMENDAS         -->
         <!-- ========================================== -->
         <div id="tab-vendedores" class="tab-content">
-            <div id="vendedores-resumo"></div>
-            <details class="box-novo">
-                <summary>➕ Cadastrar novo vendedor</summary>
-                <div class="row">
-                    <div class="col"><div class="input-group"><label>Usuário (login)</label><input type="text" id="nv-usuario" placeholder="Ex: Kamila" autocomplete="off"></div></div>
-                    <div class="col"><div class="input-group"><label>Senha inicial</label><input type="text" id="nv-senha" placeholder="Mín. 4 caracteres" autocomplete="off"></div></div>
-                    <div class="col"><div class="input-group"><label>WhatsApp</label><input type="text" id="nv-telefone" placeholder="11999998888"></div></div>
+            <div id="vd-lista-box">
+                <div id="vendedores-resumo"></div>
+                <div class="pl-topo">
+                    <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="vd-busca" placeholder="Buscar vendedor…" autocomplete="off" enterkeyhint="search" oninput="renderizarVendedores()"></div>
+                    <button class="btn-magic btn-pequeno" onclick="novoVendedor()"><svg class="ic"><use href="#i-mais"/></svg>Novo vendedor</button>
                 </div>
-                <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarNovoVendedor()">🤝 Cadastrar vendedor</button>
-            </details>
-            <div class="section-title" style="margin-top:0;">👥 Equipe</div>
-            <div id="loading-vendedores" class="loading-mm">⏳ Carregando equipe...</div>
-            <div id="lista-vendedores"></div>
-            <div class="section-title">🎁 Encomendas dos vendedores</div>
-            <div id="lista-encomendas-admin"></div>
+                <div id="loading-vendedores" class="loading-mm">Carregando equipe…</div>
+                <div id="lista-vendedores" class="vend-grade"></div>
+                <div class="secao-tit"><svg class="ic"><use href="#i-presente"/></svg>Encomendas dos vendedores</div>
+                <div id="lista-encomendas-admin"></div>
+            </div>
+            <div id="vd-controle" hidden></div>
         </div>
 
         <!-- ========================================== -->
@@ -625,8 +640,7 @@
         <div id="tab-paginas" class="tab-content">
             <div id="pg-lista-box">
                 <div class="pg-topo">
-                    <p class="texto-ajuda">Uma página por data especial (Natal, Dia das Mães…), com kits e peças avulsas. O cliente monta a sacola e manda o pedido no seu WhatsApp.</p>
-                    <div class="pg-topo-bt"><button class="btn-magic btn-pequeno" onclick="novaPagina()"><svg class="ic"><use href="#i-mais"/></svg>Nova página</button><button class="btn-limpar" onclick="abrirAjustesPaginas()"><svg class="ic"><use href="#i-ajustes"/></svg>Ajustes</button></div>
+                                        <div class="pg-topo-bt"><button class="btn-magic btn-pequeno" onclick="novaPagina()"><svg class="ic"><use href="#i-mais"/></svg>Nova página</button><button class="btn-limpar" onclick="abrirAjustesPaginas()"><svg class="ic"><use href="#i-ajustes"/></svg>WhatsApp, Pix e site</button></div>
                 </div>
                 <div id="pg-aviso"></div>
                 <div id="pg-lista" class="pg-grade"></div>
@@ -729,6 +743,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- 📜 REGISTROS, NOVIDADES E AJUDA             -->
+        <!-- ========================================== -->
+        <div id="tab-registros" class="tab-content">
+            <div class="pl-topo">
+                <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="rg-busca" placeholder="Buscar: cliente, produto, vendedor, nº…" autocomplete="off" enterkeyhint="search" oninput="renderizarRegistros()"></div>
+                <select id="rg-usuario" class="filtro-cat" aria-label="Quem fez" onchange="renderizarRegistros()"></select>
+            </div>
+            <div class="chips-rolagem" id="rg-filtros"></div>
+            <div id="rg-lista"></div>
+        </div>
+        <div id="tab-novidades" class="tab-content"><div id="nv-lista"></div></div>
+        <div id="tab-ajuda" class="tab-content"><div id="aj-conteudo"></div></div>
 
         <!-- ========================================== -->
         <!-- 🧑‍💼 TELAS DO VENDEDOR                         -->
@@ -988,22 +1016,24 @@
     <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
     <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg>Acerto</button>
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Pedidos</button>
+    <button id="nav-v-ajuda" class="bottom-nav-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg>Ajuda</button>
 </nav>
 
-<script src="galeria.js?v=6.0.0"></script>
-<script src="app.js?v=6.0.0"></script>
-<script src="lista-fotos.js?v=6.0.0"></script>
-<script src="consignado.js?v=6.0.0"></script>
-<script src="vendas.js?v=6.0.0"></script>
-<script src="produtos.js?v=6.0.0"></script>
-<script src="dashboard.js?v=6.0.0"></script>
-<script src="ajustes.js?v=6.0.0"></script>
-<script src="rascunho.js?v=6.0.0"></script>
-<script src="usuarios.js?v=6.0.0"></script>
-<script src="temas.js?v=6.0.0"></script>
-<script src="kits.js?v=6.0.0"></script>
-<script src="paginas.js?v=6.0.0"></script>
-<script src="pedidos.js?v=6.0.0"></script>
+<script src="galeria.js?v=7.0.0"></script>
+<script src="app.js?v=7.0.0"></script>
+<script src="lista-fotos.js?v=7.0.0"></script>
+<script src="consignado.js?v=7.0.0"></script>
+<script src="vendas.js?v=7.0.0"></script>
+<script src="produtos.js?v=7.0.0"></script>
+<script src="dashboard.js?v=7.0.0"></script>
+<script src="ajustes.js?v=7.0.0"></script>
+<script src="rascunho.js?v=7.0.0"></script>
+<script src="usuarios.js?v=7.0.0"></script>
+<script src="temas.js?v=7.0.0"></script>
+<script src="kits.js?v=7.0.0"></script>
+<script src="paginas.js?v=7.0.0"></script>
+<script src="pedidos.js?v=7.0.0"></script>
+<script src="ajuda.js?v=7.0.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

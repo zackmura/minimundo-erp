@@ -15,7 +15,8 @@ function miniatura(o) {
 }
 const textos = o => `<span class="lf-txt"><b>${esc(o ? o.text : 'Escolher…')}</b>${o && o.dataset.sub ? `<small>${esc(o.dataset.sub)}</small>` : ''}</span>`;
 function rotuloDe(sel) {
-    const l = (sel.id && document.querySelector(`label[for="${sel.id}"]`)) || (sel.closest('.input-group') || {}).querySelector?.('label');
+    if (sel.dataset.titulo) return sel.dataset.titulo;
+    const l =(sel.id && document.querySelector(`label[for="${sel.id}"]`)) || (sel.closest('.input-group') || {}).querySelector?.('label');
     if (!l) return 'Escolha';
     const c = l.cloneNode(true); c.querySelectorAll('small').forEach(x => x.remove());
     return c.textContent.trim() || 'Escolha';
@@ -81,6 +82,15 @@ function abrir(sel) {
     document.addEventListener('keydown', teclas, true);
     const on = lista.querySelector('.lf-op.on'); if (on) on.scrollIntoView({ block: 'center' });
 }
+
+// Lista com foto sem <select> na página: escolherComFotos({ titulo, opcoes: [{ v, t, f, s }], aoEscolher(v) })
+window.escolherComFotos = function(o) {
+    const sel = document.createElement('select'); sel.dataset.titulo = o.titulo || 'Escolher';
+    sel.innerHTML = (o.opcoes || []).map(x => `<option value="${esc(x.v)}"${x.f ? ` data-foto="${esc(x.f)}"` : ''}${x.s ? ` data-sub="${esc(x.s)}"` : ''}>${esc(x.t)}</option>`).join('');
+    sel.value = '';
+    sel.addEventListener('change', () => { if (sel.value) o.aoEscolher(sel.value); });
+    abrir(sel);
+};
 
 // Procura listas novas (as janelas são montadas na hora)
 let agendado = false;

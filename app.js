@@ -2,7 +2,8 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v6.0.0";
+const VERSAO_APP = "v7.0.0";
+window.VERSAO_APP_MM = VERSAO_APP;
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
 // Para testar com outro servidor: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
@@ -123,7 +124,8 @@ window.iniciarApp = function(){
     if("Notification" in window && Notification.permission!=="granted" && Notification.permission!=="denied") window.$('btn-notifica').style.display="inline-flex";
     setInterval(()=>window.carregarAnunciosAdmin(true), 120000);
     if (window.vigiarPedidos) window.vigiarPedidos();
-    window.switchTab('dashboard_erp');
+    window.navComecar(); window.switchTab('dashboard_erp', null, true);
+    if (window.boasVindasMM) window.boasVindasMM();
 };
 
 // Nome, inicial e cargo no rodapé do menu lateral; "logado" libera a barra de baixo do celular
@@ -140,23 +142,26 @@ window.ic = (nome, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use 
 
 // Cada tela: ícone, título e a frase que aparece embaixo do título
 window.TELAS = {
-    dashboard_erp: ['painel', 'Dashboard', 'Como está o negócio no período'],
-    vendas: ['carrinho', 'Vendas', 'Lance pedidos e acompanhe os recebimentos'],
+    dashboard_erp: ['painel', 'Início', 'Como está o negócio no período'],
+    vendas: ['carrinho', 'Vendas', 'Lance vendas e acompanhe o que falta receber'],
     precificar: ['calculadora', 'Precificar', 'Calcule o custo e cadastre peças e kits'],
     modelos: ['pacote', 'Produtos', 'Peças e kits com custo, preços e estoque'],
-    kits: ['camadas', 'Kits', 'Todos os kits com foto: montar e divulgar'],
-    paginas: ['sacola', 'Páginas de venda', 'Natal, Dia das Mães…: venda e divulgue'],
+    kits: ['camadas', 'Kits', 'Kits com foto: montar e ver o que falta'],
+    paginas: ['megafone', 'Páginas de venda', 'Sua loja para cada data especial'],
     pedidos: ['recibo', 'Pedidos', 'Pedidos do site e anotados: do recebido ao entregue'],
-    custos: ['carteira', 'Custos', 'Compras e despesas do ateliê'],
-    estoque: ['arquivo', 'Estoque', 'Ateliê, kits e peças com os vendedores'],
-    vendedores: ['usuarios', 'Vendedores', 'Equipe, acertos e encomendas'],
-    loja: ['sacola', 'Catálogo da loja', 'Produtos da vitrine online'],
+    custos: ['carteira', 'Custos e compras', 'Compras e despesas do ateliê'],
+    estoque: ['arquivo', 'Estoque', 'Onde está cada peça: Ateliê e vendedores'],
+    vendedores: ['usuarios', 'Vendedores', 'Peças com cada um, vendas e acertos'],
+    loja: ['sacola', 'Catálogo do site', 'Produtos da vitrine online'],
     imas: ['ima', 'Ímãs NFC', 'Ímãs com vídeo para os clientes'],
-    anuncios: ['megafone', 'Anúncios', 'Patrocinadores do site'],
+    anuncios: ['estrela', 'Anúncios', 'Patrocinadores do site'],
     analytics: ['barras', 'Analytics', 'Toques nos chaveiros NFC'],
     quiz: ['controle', 'Quiz', 'Perguntas geradas pela IA'],
     usuarios: ['escudo', 'Usuários', 'Admins e vendedores: acessos e senhas'],
     config: ['ajustes', 'Ajustes', 'Parâmetros, taxas e chaves de acesso'],
+    registros: ['historico', 'Registros', 'Tudo o que foi feito no sistema, por quem e quando'],
+    novidades: ['presente', 'Novidades', 'O que mudou em cada versão'],
+    ajuda: ['ajuda', 'Ajuda e tutoriais', 'Passo a passo de cada tarefa'],
     menu_mobile: ['grade', 'Menu', 'Todas as telas do sistema'],
     v_estoque: ['arquivo', 'Meu estoque', 'Peças que estão com você'],
     v_acerto: ['dinheiro', 'Meu acerto', 'O que você deve e o que já pagou'],
@@ -206,7 +211,12 @@ window.filtrarSelect = function(id, termo, recarregou) {
     sel.value = bate.some(o => o.v === atual) ? atual : tem && bate.length ? bate[0].v : (fixas[0] ? '' : (bate[0] || {}).v || '');
 };
 
-window.switchTab = function(tabName, tituloAba = null) {
+// semHistorico: a troca veio do botão voltar (não cria passo novo no histórico)
+window.switchTab = function(tabName, tituloAba = null, semHistorico = false) {
+    const anterior = window.telaAtualMM();
+    if (!semHistorico && anterior !== tabName) window.navTrocouTela(tabName);
+    // Saiu da tela: a tela "de dentro" dela (controle do vendedor, editor da página) volta para a lista
+    if (anterior !== tabName) { window.NAV.sub = null; const sair = (window.aoSairDaTela || {})[anterior]; if (sair) sair(); }
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -237,15 +247,90 @@ window.switchTab = function(tabName, tituloAba = null) {
     if(tabName==='pedidos') window.carregarPedidos();
     if(tabName==='dashboard_erp') window.carregarDashboardERP();
     if(tabName==='imas') window.carregarImas();
+    if(tabName==='registros' && window.carregarRegistros) window.carregarRegistros();
+    if(tabName==='novidades' && window.renderizarNovidades) window.renderizarNovidades();
+    if(tabName==='ajuda' && window.renderizarAjuda) window.renderizarAjuda();
     if (window.atualizarBarraPDV) window.atualizarBarraPDV();
 };
+
+// ==========================================
+// ⬅️ BOTÃO VOLTAR DO CELULAR
+// ==========================================
+// Antes o "voltar" do Android fechava o app. Agora cada tela e cada janela que abre ganha um passo no
+// histórico do navegador, e o "voltar": fecha a janela de cima → sai da tela de dentro (editor da página,
+// controle do vendedor) → volta para a tela anterior → vai para o Início. No Início, pede um segundo toque.
+// Janela fechada pelo × deixa um passo "vazio" no histórico; quando o voltar cai nele, pula sozinho.
+window.NAV = { sub: null, abertas: 0 };
+const NAV = window.NAV;
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.telaAtualMM = () => ((document.querySelector('.tab-content.active') || {}).id || '').replace('tab-', '');
+const telaInicial = () => document.body.classList.contains('modo-vendedor') ? 'v_estoque' : 'dashboard_erp';
+const passoAtual = () => history.state || {};
+const logadoNav = () => document.body.classList.contains('logado');
+function novoPasso(s) { try { history.pushState(s, ''); } catch (e) { /* navegador sem histórico: segue sem */ } }
+// Passo novo só quando veio de um toque: o Chrome pula no voltar os passos criados sem toque
+const tocouAgora = () => !navigator.userActivation || navigator.userActivation.isActive;
+window.navComecar = function() { try { history.replaceState({ mm: 'raiz' }, ''); } catch (e) { /* idem */ } NAV.abertas = 0; NAV.sub = null; };
+window.navTrocouTela = function(tela) {
+    if (!logadoNav()) return;
+    const st = passoAtual();
+    // Passo vazio (janela já fechada) é reaproveitado; senão a tela nova ganha um passo
+    if ((st.mm === 'janela' || st.mm === 'sub') && !NAV.abertas) { try { history.replaceState({ mm: 'tela', tela }, ''); } catch (e) { /* idem */ } }
+    else if (tocouAgora()) novoPasso({ mm: 'tela', tela });
+    else { try { history.replaceState(st.mm === 'raiz' || st.mm === 'guarda' ? st : { mm: 'tela', tela }, ''); } catch (e) { /* idem */ } }
+};
+// Tela "de dentro" (editor da página, controle do vendedor): o voltar chama fechar()
+window.navSubTela = function(fechar) { NAV.sub = fechar; if (passoAtual().mm !== 'sub') novoPasso({ mm: 'sub', tela: window.telaAtualMM() }); };
+window.navSaiuSubTela = function() { NAV.sub = null; };
+// Janelas abertas agora, da de cima para a de baixo, cada uma com o jeito de fechar
+function janelasAbertas() {
+    const $ = window.$, l = [];
+    document.querySelectorAll('.lf-fundo').forEach(f => l.push(() => f.querySelector('.lf-fechar').click()));
+    if (document.querySelector('.tour-fundo')) l.push(() => window.fecharTour());
+    if (document.querySelector('.gal:not([hidden])')) l.push(() => window.fecharGaleria());
+    if (window.perguntaAtual) l.push(() => window.responderPergunta(false));
+    if ($('custom-modal') && $('custom-modal').style.display === 'flex') l.push(() => window.fecharAlerta());
+    [...document.querySelectorAll('.modal-overlay, .modal-overlay-alert')].reverse()
+        .filter(m => m.style.display === 'flex' && m.id !== 'custom-modal' && m.id !== 'modal-pergunta')
+        .forEach(m => l.push(m.id === 'modal-mm' ? () => window.fecharModalMM() : () => { m.style.display = 'none'; }));
+    return l;
+}
+// Abriu janela (toque da pessoa) → um passo a mais no histórico para o voltar fechar
+new MutationObserver(() => {
+    if (!logadoNav()) return;
+    const n = janelasAbertas().length;
+    if (n > NAV.abertas && tocouAgora()) for (let i = NAV.abertas; i < n; i++) { if (i === NAV.abertas && passoAtual().mm === 'janela' && !NAV.abertas) continue; novoPasso({ mm: 'janela', tela: window.telaAtualMM() }); }
+    NAV.abertas = n;
+}).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'hidden'] });
+window.addEventListener('popstate', () => {
+    if (!logadoNav()) return;
+    const abertas = janelasAbertas();
+    if (abertas.length) { NAV.abertas = abertas.length - 1; abertas[0](); return; }
+    if (NAV.sub) { const f = NAV.sub; NAV.sub = null; f(); return; }
+    const st = passoAtual(), atual = window.telaAtualMM();
+    if (st.mm === 'janela' || st.mm === 'sub') return history.back();
+    if (st.mm === 'tela' && st.tela && window.$('tab-' + st.tela)) {
+        if (document.body.classList.contains('vendo-como') && !st.tela.startsWith('v_')) return window.sairVisaoVendedor(true);
+        if (st.tela !== atual) return window.switchTab(st.tela, null, true);
+        return history.back();
+    }
+    // Chegou no começo
+    if (document.body.classList.contains('vendo-como')) return window.sairVisaoVendedor(true);
+    if (atual !== telaInicial()) return window.switchTab(telaInicial(), null, true);
+    if (st.mm === 'guarda') return history.back();
+    window.toastMM('Toque em voltar de novo para sair');
+});
+// No Início, o primeiro toque põe um passo de guarda: o voltar avisa antes de fechar o app
+document.addEventListener('pointerdown', () => {
+    if (logadoNav() && passoAtual().mm === 'raiz' && window.telaAtualMM() === telaInicial() && !NAV.abertas) novoPasso({ mm: 'guarda' });
+}, true);
 
 // ==========================================
 // 📱 BARRA DE BAIXO DO CELULAR: você escolhe os atalhos e a ordem (fica guardado neste aparelho)
 // ==========================================
 // O "Menu" fica sempre no fim, porque é por ele que se chega em todas as telas.
 window.BARRA_OPCOES = { dashboard_erp: 'Início', vendas: 'Vendas', pedidos: 'Pedidos', precificar: 'Precificar', modelos: 'Produtos', kits: 'Kits', custos: 'Custos', estoque: 'Estoque', vendedores: 'Vendedores',
-    paginas: 'Páginas', loja: 'Catálogo', imas: 'Ímãs', anuncios: 'Anúncios', analytics: 'Analytics', quiz: 'Quiz', usuarios: 'Usuários', config: 'Ajustes' };
+    paginas: 'Páginas', loja: 'Catálogo', imas: 'Ímãs', anuncios: 'Anúncios', analytics: 'Analytics', quiz: 'Quiz', usuarios: 'Usuários', config: 'Ajustes', registros: 'Registros', ajuda: 'Ajuda' };
 const BARRA_PADRAO = ['dashboard_erp', 'vendas', 'estoque', 'vendedores'], BARRA_MAX = 5;
 window.barraAtalhos = function() {
     try { const l = JSON.parse(localStorage.getItem('mm_barra') || 'null'); if (Array.isArray(l)) { const v = [...new Set(l)].filter(id => window.BARRA_OPCOES[id]).slice(0, BARRA_MAX); if (v.length) return v; } }

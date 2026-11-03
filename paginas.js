@@ -44,36 +44,57 @@ window.carregarPaginas = async function() {
 // ---------- Lista de páginas ----------
 window.renderizarPaginas = function() {
     const box = $('pg-lista'); if (!box) return;
+    if (PG.editando) window.navSaiuSubTela();
     PG.editando = null; $('pg-editor').hidden = true; $('pg-lista-box').hidden = false;
     const c = PG.cfg || {};
     $('pg-aviso').innerHTML = PG.erro ? `<div class="mm-alerta">${window.ic('alerta')} <span>${esc(PG.erro)}</span></div>`
         : PG.cfg && !c.pagina_whatsapp ? `<div class="mm-alerta">${window.ic('alerta')} <span>Falta o WhatsApp que recebe os pedidos. Sem ele os clientes não conseguem mandar a sacola. <a onclick="abrirAjustesPaginas()">Colocar agora</a></span></div>` : '';
     if (!PG.lista.length) {
         box.innerHTML = `<div class="pg-vazio"><span class="pg-vazio-emoji">🎄</span><b>Crie a sua primeira página de venda</b>
-            <span>Uma página por data especial, com os kits e as peças que você escolher, fotos, preços e pedido pelo site.</span>
+            <span>Uma página por data especial (Natal, Dia das Mães…), com os kits e as peças que você escolher. O cliente monta a sacola e faz o pedido pelo site.</span>
             <button class="btn-magic" onclick="novaPagina('natal')">${window.ic('mais')} Criar a página de Natal</button>
             <button class="btn-limpar" onclick="novaPagina()">Escolher outro tema</button></div>`;
         return;
     }
     box.innerHTML = PG.lista.map(p => {
         const t = window.temaMM(p.tema), capa = p.capa || (p.itens.map(i => fotoPrincipal(produtoPorId(i.produto_id))).find(Boolean) || '');
-        const fundo = t.hero ? t.hero.fundo : t.cores.ouro3;
+        const fundo = t.hero ? t.hero.fundo : t.cores.ouro3, conv = p.visitas ? Math.round(p.pedidos / p.visitas * 100) : 0;
         return `<div class="pg-card ${p.ativa ? '' : 'pausada'}">
-            <button type="button" class="pg-capa" onclick="abrirEditorPagina(${p.id})" style="background-color:${fundo};${capa ? `background-image:url('${esc(capa).replace(/'/g, '%27')}')` : ''}">
+            <button type="button" class="pg-capa" onclick="abrirEditorPagina(${p.id})" style="background-color:${fundo};${capa ? `background-image:url('${esc(capa).replace(/'/g, '%27')}')` : ''}" aria-label="Editar ${esc(p.titulo)}">
                 <span class="pg-emoji">${t.emoji}</span><span class="pg-status ${p.ativa ? 'on' : ''}">${p.ativa ? 'No ar' : 'Pausada'}</span></button>
             <div class="pg-corpo">
                 <b>${esc(p.titulo)}</b>
                 <small>${esc(t.nome)} · ${p.itens.length} produto${p.itens.length === 1 ? '' : 's'}${p.pedidos_ate ? ` · encomendas até ${dataBR(p.pedidos_ate)}` : ''}</small>
-                <div class="pg-numeros"><span title="Vezes que a página foi aberta">${window.ic('olho')} ${p.visitas} visita${p.visitas === 1 ? '' : 's'}</span><span title="Pedidos feitos pela página">${window.ic('zap')} ${p.pedidos} pedido${p.pedidos === 1 ? '' : 's'}</span></div>
-                ${window.origensPg(p) ? `<small class="pg-origens">De onde vieram: ${window.origensPg(p)}</small>` : ''}
+                <div class="pg-stats"><div><b>${p.visitas}</b><small>visita${p.visitas === 1 ? '' : 's'}</small></div><div><b>${p.pedidos}</b><small>pedido${p.pedidos === 1 ? '' : 's'}</small></div><div><b>${conv}%</b><small>viraram pedido</small></div></div>
+                ${window.origensPg(p) ? `<small class="pg-origens">${window.ic('link')} ${window.origensPg(p)}</small>` : ''}
             </div>
             <div class="pg-botoes">
-                <button class="btn-magic btn-pequeno" onclick="abrirArte(${p.id})">${window.ic('imagem')} Divulgar</button>
-                <button class="btn-limpar" onclick="abrirEditorPagina(${p.id})">${window.ic('lapis')} Editar</button>
-                <a class="btn-limpar" href="${esc(window.linkSitePg(p.slug))}" target="_blank" rel="noopener">${window.ic('olho')} Ver</a>
-                <button class="btn-limpar" onclick="compartilharPaginaPg(${p.id})">${window.ic('zap')} Mensagem</button>
+                <button class="btn-magic" onclick="abrirArte(${p.id})">${window.ic('megafone')} Divulgar</button>
+                <div class="pg-botoes-sec">
+                    <button class="btn-limpar" onclick="abrirEditorPagina(${p.id})">${window.ic('lapis')} Editar</button>
+                    <a class="btn-limpar" href="${esc(window.linkSitePg(p.slug))}" target="_blank" rel="noopener">${window.ic('olho')} Ver</a>
+                    <button class="btn-limpar" onclick="maisPaginaPg(${p.id})" aria-label="Mais opções">${window.ic('pontos')} Mais</button>
+                </div>
             </div></div>`;
     }).join('');
+};
+window.maisPaginaPg = function(id) {
+    const p = paginaPorId(id); if (!p) return;
+    window.abrirModalMM(`<h3 class="modal-title">${esc(p.titulo)}</h3>
+        <div class="menu-acoes">
+            <button onclick="fecharModalMM(); compartilharPaginaPg(${p.id})">${window.ic('zap')}<span><b>Mandar mensagem</b><small>Texto pronto com o link para WhatsApp ou Facebook</small></span></button>
+            <button onclick="fecharModalMM(); copiarTexto(window.linkSitePg('${esc(p.slug)}'), 'Link da página copiado!')">${window.ic('copiar')}<span><b>Copiar o link</b><small>${esc(window.linkSitePg(p.slug).replace(/^https?:\/\//, ''))}</small></span></button>
+            ${['instagram', 'whatsapp', 'facebook'].map(r => `<button onclick="fecharModalMM(); copiarTexto(window.linkRedePg('${esc(p.slug)}', 0, '${r}'), 'Link copiado! Ele conta as visitas que vierem dessa rede.')">${window.ic('link')}<span><b>Link para o ${r === 'whatsapp' ? 'WhatsApp' : r === 'instagram' ? 'Instagram' : 'Facebook'}</b><small>Mostra em "De onde vieram" quantos clientes vieram de lá</small></span></button>`).join('')}
+            <button onclick="ligarPaginaPg(${p.id})">${window.ic(p.ativa ? 'x' : 'check')}<span><b>${p.ativa ? 'Pausar a página' : 'Colocar no ar'}</b><small>${p.ativa ? 'Os clientes deixam de conseguir abrir (o link continua guardado)' : 'Os clientes voltam a conseguir abrir e pedir'}</small></span></button>
+            <button class="perigo" onclick="fecharModalMM(); excluirPaginaPg(${p.id})">${window.ic('lixo')}<span><b>Excluir a página</b><small>Os produtos continuam cadastrados</small></span></button>
+        </div>`);
+};
+window.ligarPaginaPg = async function(id) {
+    const p = paginaPorId(id); if (!p) return;
+    try {
+        await window.apiAcao('salvar_pagina', { id: p.id, titulo: p.titulo, texto: p.texto, tema: p.tema, slug: p.slug, pedidos_ate: p.pedidos_ate, capa: p.capa || '', ativa: !p.ativa });
+        p.ativa = !p.ativa; window.fecharModalMM(); window.renderizarPaginas(); window.toastMM(p.ativa ? 'Página no ar' : 'Página pausada');
+    } catch (e) { window.mostrarAlerta('Não deu certo', servidorAntigo(e), 'error'); }
 };
 
 // ---------- Nova página (escolher o tema) ----------
@@ -111,16 +132,32 @@ window.criarPagina = async function() {
 };
 
 // ---------- Editor ----------
+// Três abas: Produtos (o que mais se mexe), Aparência (tema, textos, link, capa) e Divulgar.
+// É uma tela "de dentro": o voltar do celular volta para a lista de páginas.
 window.abrirEditorPagina = function(id) {
     const p = paginaPorId(id); if (!p) return window.renderizarPaginas();
+    const outra = PG.editando !== id;
     PG.editando = id; PG.temaEditor = p.tema; PG.capaEditor = p.capa;
+    if (outra) PG.abaEditor = p.itens.length ? 'produtos' : 'produtos';
     $('pg-lista-box').hidden = true; $('pg-editor').hidden = false;
-    const social = window.linkSitePg(p.slug);
+    if (!window.NAV.sub) window.navSubTela(() => { window.renderizarPaginas(); window.scrollTo(0, 0); });
+    const social = window.linkSitePg(p.slug), conv = p.visitas ? Math.round(p.pedidos / p.visitas * 100) : 0;
     $('pg-editor').innerHTML = `
         <div class="pg-ed-topo"><button class="btn-limpar" onclick="renderizarPaginas(); window.scrollTo(0, 0)">${window.ic('voltar')} Páginas</button>
-            <a class="btn-limpar" href="${esc(window.linkSitePg(p.slug))}" target="_blank" rel="noopener">${window.ic('olho')} Ver página</a></div>
-        <div class="pg-ed-grade">
-        <div class="card">
+            <div class="pg-ed-tit"><b>${esc(p.titulo)}</b><span class="pilula ${p.ativa ? 'pago' : 'canc'}">${p.ativa ? 'No ar' : 'Pausada'}</span></div>
+            <a class="btn-limpar" href="${esc(social)}" target="_blank" rel="noopener">${window.ic('olho')} Ver</a></div>
+        <div class="sub-abas pg-ed-abas" id="pg-ed-abas">
+            <button data-a="produtos" onclick="abaEditorPg('produtos')">${window.ic('pacote')}Produtos<em class="badge-num" id="pe-conta"></em></button>
+            <button data-a="aparencia" onclick="abaEditorPg('aparencia')">${window.ic('imagem')}Aparência</button>
+            <button data-a="divulgar" onclick="abaEditorPg('divulgar')">${window.ic('megafone')}Divulgar</button>
+        </div>
+        <section class="card" data-aba="produtos">
+            <div class="card-titulo">Produtos da página</div>
+            <p class="card-desc">Kits e peças avulsas. O <b>lápis</b> muda nome, texto e preço só nesta página; as setas mudam a ordem. Fica salvo na hora.</p>
+            <div class="pe-acoes"><button class="btn-magic btn-pequeno" onclick="escolherProdutosPg()">${window.ic('mais')} Adicionar produtos</button><button class="btn-limpar" id="pe-ia-itens" onclick="iaTextosItens()">✨ Textos com IA</button></div>
+            <div id="pe-itens"></div>
+        </section>
+        <section class="card" data-aba="aparencia">
             <div class="card-titulo">Tema e textos</div><p class="card-desc">O que o cliente vê no topo da página.</p>
             <div class="temas-grade mini" id="pe-temas">${cardsTema(p.tema, 'peTema')}</div>
             <div class="input-group" style="margin-top:14px;"><label for="pe-titulo">Título</label><input type="text" id="pe-titulo" value="${esc(p.titulo)}" maxlength="120"></div>
@@ -132,29 +169,33 @@ window.abrirEditorPagina = function(id) {
             </div>
             <div class="input-group"><label>Foto de capa <small class="rot-dica">opcional, larga, aparece embaixo do título</small></label><div class="pe-capa" id="pe-capa"></div></div>
             <label class="chave" style="margin:4px 0 16px;"><input type="checkbox" id="pe-ativa" ${p.ativa ? 'checked' : ''}> Página no ar (clientes conseguem abrir)</label>
-            <button class="btn-magic btn-global" id="btn-pe" onclick="salvarPaginaPg()">${window.ic('check')} Salvar tema e textos</button>
-        </div>
-        <div>
-            <div class="card">
-                <div class="card-cabeca"><div class="card-titulo">Divulgar</div></div>
-                <p class="card-desc" style="margin-top:-8px;">Link da página no seu site, para WhatsApp, Instagram e Facebook.</p>
-                <div class="pe-link"><code>${esc(social.replace(/^https?:\/\//, ''))}</code><button class="btn-limpar" onclick="copiarTexto(this.dataset.l, 'Link da página copiado!')" data-l="${esc(social)}">${window.ic('copiar')} Copiar</button></div>
-                ${p.links_antigos && p.links_antigos.length ? `<p class="texto-ajuda pe-antigos">${window.ic('check')} Links antigos que continuam funcionando: ${p.links_antigos.map(s => `<code>${esc(s)}</code>`).join(' ')}</p>` : ''}
-                <div class="pe-divulgar"><button class="btn-magic btn-pequeno" onclick="abrirArte(${p.id})">${window.ic('imagem')} Criar posts: story, feed, carrossel, enquete e vídeo</button><button class="btn-limpar" onclick="compartilharPaginaPg(${p.id})">${window.ic('zap')} Mandar mensagem</button></div>
-                <div class="pe-redes"><span>Copiar link para:</span>${['instagram', 'whatsapp', 'facebook'].map(r => `<button class="chip-op" onclick="copiarTexto(window.linkRedePg('${esc(p.slug)}', 0, '${r}'), 'Link copiado! Ele conta as visitas que vierem dessa rede.')">${r === 'whatsapp' ? 'WhatsApp' : r === 'instagram' ? 'Instagram' : 'Facebook'}</button>`).join('')}</div>
-                <div class="pg-numeros grande"><span>${window.ic('olho')} <b>${p.visitas}</b> visita${p.visitas === 1 ? '' : 's'}</span><span>${window.ic('recibo')} <b>${p.pedidos}</b> pedido${p.pedidos === 1 ? '' : 's'} pela página</span><a onclick="switchTab('pedidos')">Ver pedidos →</a></div>
-                ${window.origensPg(p) ? `<p class="pg-origens">De onde vieram: ${window.origensPg(p)}</p>` : ''}
+            <button class="btn-magic btn-global" id="btn-pe" onclick="salvarPaginaPg()">${window.ic('check')} Salvar aparência</button>
+            <button class="btn-limpar perigo ep-link" style="margin-top:18px;" onclick="excluirPaginaPg(${p.id})">${window.ic('lixo')} Excluir esta página</button>
+        </section>
+        <section class="card" data-aba="divulgar">
+            <div class="pg-div-hero">
+                <button class="btn-magic" onclick="abrirArte(${p.id})">${window.ic('imagem')}<span><b>Criar posts para as redes</b><small>Story, feed, carrossel, enquete e vídeo</small></span></button>
+                <button class="btn-magic btn-zap" onclick="compartilharPaginaPg(${p.id})">${window.ic('zap')}<span><b>Mandar mensagem</b><small>Texto pronto com o link</small></span></button>
             </div>
-            <div class="card">
-                <div class="card-cabeca"><div class="card-titulo">Produtos <span class="kit-conta" id="pe-conta"></span></div></div>
-                <p class="card-desc" style="margin-top:-8px;">Kits e peças avulsas. Em cada produto, o <b>lápis</b> muda nome, texto e preço só nesta página. Fica salvo na hora.</p>
-                <div class="pe-acoes"><button class="btn-magic btn-pequeno" onclick="escolherProdutosPg()">${window.ic('mais')} Adicionar produtos</button><button class="btn-limpar" id="pe-ia-itens" onclick="iaTextosItens()">✨ Textos com IA</button></div>
-                <div id="pe-itens"></div>
-            </div>
-            <button class="btn-limpar perigo ep-link" onclick="excluirPaginaPg(${p.id})">${window.ic('lixo')} Excluir esta página</button>
-        </div></div>`;
-    pintarCapa(); window.renderizarItensPg(); window.scrollTo(0, 0);
+            <label>Link da página</label>
+            <div class="pe-link"><code>${esc(social.replace(/^https?:\/\//, ''))}</code><button class="btn-limpar" onclick="copiarTexto(this.dataset.l, 'Link da página copiado!')" data-l="${esc(social)}">${window.ic('copiar')} Copiar</button></div>
+            <div class="pe-redes"><span>Link que conta de onde veio o cliente:</span>${['instagram', 'whatsapp', 'facebook'].map(r => `<button class="chip-op" onclick="copiarTexto(window.linkRedePg('${esc(p.slug)}', 0, '${r}'), 'Link copiado! Ele conta as visitas que vierem dessa rede.')">${window.ic('link')}${r === 'whatsapp' ? 'WhatsApp' : r === 'instagram' ? 'Instagram' : 'Facebook'}</button>`).join('')}</div>
+            ${p.links_antigos && p.links_antigos.length ? `<p class="texto-ajuda pe-antigos">${window.ic('check')} Links antigos que continuam funcionando: ${p.links_antigos.map(s => `<code>${esc(s)}</code>`).join(' ')}</p>` : ''}
+            <div class="card-titulo" style="margin-top:18px;">Resultados</div>
+            <div class="pg-stats grande"><div><b>${p.visitas}</b><small>visita${p.visitas === 1 ? '' : 's'}</small></div><div><b>${p.pedidos}</b><small>pedido${p.pedidos === 1 ? '' : 's'}</small></div><div><b>${conv}%</b><small>viraram pedido</small></div></div>
+            ${window.origensPg(p) ? `<p class="pg-origens">${window.ic('link')} De onde vieram: ${window.origensPg(p)}</p>` : ''}
+            <button class="btn-limpar" style="width:100%;margin-top:12px;" onclick="switchTab('pedidos')">${window.ic('recibo')} Ver os pedidos</button>
+        </section>`;
+    pintarCapa(); window.renderizarItensPg(); window.abaEditorPg(PG.abaEditor || 'produtos');
+    if (outra) window.scrollTo(0, 0);
 };
+window.abaEditorPg = function(a) {
+    PG.abaEditor = a;
+    document.querySelectorAll('#pg-ed-abas button').forEach(b => b.classList.toggle('active', b.dataset.a === a));
+    document.querySelectorAll('#pg-editor section[data-aba]').forEach(s => { s.hidden = s.dataset.aba !== a; });
+};
+window.aoSairDaTela = window.aoSairDaTela || {};
+window.aoSairDaTela.paginas = () => { if (PG.editando) window.renderizarPaginas(); };
 window.peTema = function(id) {
     PG.temaEditor = id;
     document.querySelectorAll('#pe-temas .tema-op').forEach(b => b.classList.toggle('on', b.dataset.tema === id));
@@ -185,7 +226,7 @@ window.salvarPaginaPg = async function() {
     const dados = { id: p.id, titulo: $('pe-titulo').value.trim(), texto: $('pe-texto').value.trim(), tema: PG.temaEditor, slug, pedidos_ate: $('pe-ate').value, capa: PG.capaEditor || '', ativa: $('pe-ativa').checked };
     if (!dados.titulo) { $('pe-titulo').focus(); return window.mostrarAlerta('Falta o título', 'Dê um título para a página.', 'warning'); }
     if (slug !== p.slug && !await window.confirmarMM({ icone: '🔗', titulo: 'Mudar o link?', texto: `O link vai ficar …/p/${slug}.\nQuem tiver o link antigo (…/p/${p.slug}) não vai mais encontrar a página.`, ok: 'Mudar o link' })) return;
-    const b = $('btn-pe'), txt = b.innerHTML; b.disabled = true; b.innerText = '⏳ Salvando…';
+    const b = $('btn-pe'), txt = b.innerHTML; b.disabled = true; b.innerText = 'Salvando…';
     try {
         await window.apiAcao('salvar_pagina', dados);
         Object.assign(p, dados); window.toastMM('Página salva');

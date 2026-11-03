@@ -127,49 +127,94 @@ window.qtdEm = (pid, local) => { const e = window.painelEstoque.estoque.find(x =
 window.repasseParaVendedor = (vid, produto) => { const esp = window.painelEstoque.especiais.find(x => x.vendedor_id === vid && x.produto_id === produto.id); return esp ? esp.preco : (produto.repasse || 0); };
 window.nomeDoLocal = id => { if (id === 0) return '🏠 Ateliê'; if (id === null || id === undefined) return '—'; const v = window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === id); return v ? `👤 ${window.esc(v.nome)}` : `#${id}`; };
 
+// Onde está cada peça: "Por produto" mostra o Ateliê e cada vendedor que tem aquele produto;
+// "Por vendedor" mostra o que está com cada um. O filtro "Onde está" mostra só um lugar.
+window.EST = { visao: 'produto', onde: '' };
+const inicialMM = nome => (String(nome || '?').trim()[0] || '?').toUpperCase();
+window.estoqueVisao = function(v) { window.EST.visao = v; window.renderizarEstoque(); };
+window.estoqueOnde = function(o) { window.EST.onde = o; if (o !== '' && window.EST.visao === 'vendedor' && o === '0') window.EST.visao = 'produto'; window.renderizarEstoque(); };
+window.estoqueBaixo = function() { window.EST.onde = '0'; window.EST.visao = 'produto'; window.EST.baixo = true; window.renderizarEstoque(); };
 window.renderizarEstoque = function() {
-    const P = window.painelEstoque; if (!P || !window.$('lista-estoque')) return;
+    const P = window.painelEstoque, E = window.EST; if (!P || !window.$('lista-estoque')) return;
     const minimo = parseInt(P.config.estoque_minimo) || 0;
+    const produto = id => P.produtos.find(x => x.id === id);
     let noAtelie = 0, comVend = 0, valorComVend = 0;
-    P.estoque.forEach(e => { const p = P.produtos.find(x => x.id === e.produto_id); if (e.vendedor_id === 0) noAtelie += e.qtd; else { comVend += e.qtd; if (p) valorComVend += e.qtd * window.repasseParaVendedor(e.vendedor_id, p); } });
+    P.estoque.forEach(e => { const p = produto(e.produto_id); if (e.vendedor_id === 0) noAtelie += e.qtd; else { comVend += e.qtd; if (p) valorComVend += e.qtd * window.repasseParaVendedor(e.vendedor_id, p); } });
     const aReceber = P.pendentes.reduce((s, x) => s + x.total, 0);
     const semRepasse = P.produtos.filter(p => p.ativo && !p.repasse).length;
-    const baixos = P.produtos.filter(p => p.ativo && minimo > 0 && window.qtdEm(p.id, 0) > 0 && window.qtdEm(p.id, 0) <= minimo).length;
-    const kpi = (ic, rot, v, cor) => `<div class="kpi kpi-ic ${cor}"><span class="kpi-icone">${window.ic(ic)}</span><span class="kpi-rotulo">${rot}</span><span class="kpi-valor">${v}</span></div>`;
-    window.$('estoque-resumo').innerHTML = `
-        <div class="kpis">${kpi('arquivo', 'Peças no Ateliê', noAtelie, '')}${kpi('usuarios', 'Com vendedores', comVend, 'roxo')}${kpi('dinheiro', 'Em repasse na rua', window.fmt(valorComVend), 'azul')}${kpi('relogio', 'A receber', window.fmt(aReceber), 'laranja')}</div>
-        ${semRepasse ? `<div class="mm-alerta">${window.ic('alerta')} <span>${semRepasse} produto(s) ativo(s) sem preço de repasse — não dá pra enviar pra vendedor. <a onclick="switchTab('modelos'); filtroProdutos('semrepasse')">Definir em Produtos</a></span></div>` : ''}
-        ${baixos ? `<div class="mm-alerta">${window.ic('alerta')} <span>${baixos} produto(s) com estoque baixo no Ateliê (≤ ${minimo}).</span></div>` : ''}`;
-    // Por padrão só aparece o que tem peça (no Ateliê ou com vendedor); a chave mostra o resto
+    const ehBaixo = p => p.ativo && minimo > 0 && window.qtdEm(p.id, 0) > 0 && window.qtdEm(p.id, 0) <= minimo;
+    const baixos = P.produtos.filter(ehBaixo).length;
+    window.$('estoque-resumo').innerHTML = `<div class="resumo-faixa">
+            <button type="button" class="rf" onclick="estoqueOnde('0')"><small>No Ateliê</small><b>${noAtelie}</b><i>peças prontas</i></button>
+            <button type="button" class="rf roxo" onclick="estoqueVisao('vendedor')"><small>Com vendedores</small><b>${comVend}</b><i>${window.fmt(valorComVend)} em repasse</i></button>
+            <button type="button" class="rf laranja" onclick="switchTab('vendedores')"><small>Falta acertar</small><b>${window.fmt(aReceber)}</b><i>vendas dos vendedores</i></button>
+        </div>
+        ${semRepasse || baixos ? `<div class="avisos-linha">
+            ${semRepasse ? `<button type="button" class="aviso-chip" onclick="switchTab('modelos'); filtroProdutos('semrepasse')">${window.ic('alerta')}${semRepasse} sem preço de repasse</button>` : ''}
+            ${baixos ? `<button type="button" class="aviso-chip" onclick="estoqueBaixo()">${window.ic('alerta')}${baixos} com estoque baixo no Ateliê</button>` : ''}</div>` : ''}`;
+    // Filtro "Onde está": Ateliê, qualquer vendedor ou um vendedor
+    const pecasDe = vid => P.estoque.filter(e => e.vendedor_id === vid).reduce((s, e) => s + e.qtd, 0);
+    const sel = window.$('estoque-onde');
+    sel.innerHTML = `<option value="">Todos os lugares</option><option value="0">Só no Ateliê</option><option value="v">Com vendedores</option>`
+        + P.vendedores.filter(v => pecasDe(v.id) > 0).map(v => `<option value="${v.id}">Com ${window.esc(v.nome)} (${pecasDe(v.id)})</option>`).join('');
+    if (![...sel.options].some(o => o.value === E.onde)) E.onde = '';
+    sel.value = E.onde;
+    document.querySelectorAll('#estoque-visao button').forEach(b => b.classList.toggle('active', b.dataset.v === E.visao));
     const t = window.$('busca-estoque').value || '', mostrarSem = window.$('estoque-mostrar-sem').checked;
     const totalDe = pid => P.estoque.filter(e => e.produto_id === pid).reduce((s, e) => s + e.qtd, 0);
-    const visiveis = P.produtos.filter(p => p.ativo || totalDe(p.id) > 0), comPecas = visiveis.filter(p => totalDe(p.id) > 0);
+    const visiveis = P.produtos.filter(p => p.ativo || totalDe(p.id) > 0);
     window.montarFiltroCategoria('estoque-categoria', visiveis); const cat = window.$('estoque-categoria').value;
-    const lista = (mostrarSem ? visiveis : comPecas).filter(p => window.categoriaBate(p, cat) && window.produtoBate(p, t));
-    window.$('estoque-info-lista').innerText = mostrarSem ? `${visiveis.length} produtos` : `${comPecas.length} de ${visiveis.length} com peças`;
+    window.$('estoque-mostrar-sem').closest('label').hidden = E.visao === 'vendedor' || E.onde !== '';
+    if (E.visao === 'vendedor') return window.renderizarEstoquePorVendedor(t, cat);
+
+    const noLugar = p => E.onde === '' ? (mostrarSem || totalDe(p.id) > 0) : E.onde === '0' ? window.qtdEm(p.id, 0) > 0 : E.onde === 'v' ? P.estoque.some(e => e.produto_id === p.id && e.vendedor_id > 0 && e.qtd > 0) : window.qtdEm(p.id, parseInt(E.onde)) > 0;
+    const lista = visiveis.filter(p => noLugar(p) && (!E.baixo || ehBaixo(p)) && window.categoriaBate(p, cat) && window.produtoBate(p, t));
+    window.$('estoque-info-lista').innerHTML = `${lista.length} produto${lista.length === 1 ? '' : 's'}${E.baixo ? ` · <a onclick="EST.baixo = false; EST.onde = ''; renderizarEstoque()">ver todos</a>` : ''}`;
     if (!lista.length) {
-        window.$('lista-estoque').innerHTML = !visiveis.length ? `<p class="mm-vazio">Nenhum produto. Cadastre modelos em <b>Precificar</b>.</p>`
-            : t || cat ? `<p class="mm-vazio">Nada encontrado${t ? ` para "${window.esc(t)}"` : ' nessa categoria'}.${mostrarSem ? '' : ' Ligue <b>Mostrar também produtos sem estoque</b> para procurar em todos.'}</p>`
-            : `<p class="mm-vazio">Nenhuma peça em estoque agora. Use <b>🖨️ Registrar produção</b> ou ligue <b>Mostrar também produtos sem estoque</b>.</p>`;
+        window.$('lista-estoque').innerHTML = !visiveis.length ? `<div class="vazio-box">${window.ic('pacote')}<b>Nenhum produto ainda</b><span>Cadastre em <a onclick="switchTab('precificar')">Precificar</a>.</span></div>`
+            : `<div class="vazio-box">${window.ic('busca')}<b>Nada aqui</b><span>${t || cat ? 'Tente outra busca ou categoria.' : E.onde === '' ? 'Nenhuma peça em estoque. Use <b>Registrar produção</b> ou ligue <b>Mostrar sem estoque</b>.' : 'Nenhuma peça nesse lugar.'}</span></div>`;
         return;
     }
     window.$('lista-estoque').innerHTML = lista.map(p => {
-        const at = window.qtdEm(p.id, 0);
-        const comEles = P.estoque.filter(e => e.produto_id === p.id && e.vendedor_id > 0 && e.qtd > 0);
-        const totalVend = comEles.reduce((s, e) => s + e.qtd, 0);
-        const corAt = at <= 0 ? '' : (minimo > 0 && at <= minimo ? 'amarelo' : 'verde');
-        const detalhe = comEles.map(e => `${window.nomeDoLocal(e.vendedor_id)}: ${e.qtd}`).join(' · ');
+        const at = window.qtdEm(p.id, 0), total = totalDe(p.id);
+        const comEles = P.estoque.filter(e => e.produto_id === p.id && e.vendedor_id > 0 && e.qtd > 0).sort((a, b) => b.qtd - a.qtd);
+        const corAt = at <= 0 ? 'zero' : (minimo > 0 && at <= minimo ? 'baixo' : '');
         const kit = p.tipo === 'kit', da = kit ? window.kitsMontaveis(p) : 0;
-        return `<div class="mm-card" style="${p.ativo ? '' : 'opacity:0.6;'}">${window.fotoRapida(p.id, p.foto)}
-            <div class="mm-info"><h4>${window.esc(p.nome)} ${kit ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : ''} ${p.ativo ? '' : '<span class="tag-inativo">Inativo</span>'}</h4>
-                <div class="mm-chips"><span class="mm-chip ${corAt}">Ateliê: ${at}</span><span class="mm-chip azul">Vendedores: ${totalVend}</span>
-                ${p.repasse ? `<span class="mm-chip">Repasse ${window.fmt(p.repasse)}</span>` : '<span class="mm-chip vermelho">sem repasse</span>'}<span class="mm-chip">custo ${window.fmt(p.custo)}</span>
-                ${kit ? `<span class="mm-chip ${da > 0 ? 'verde' : ''}">dá para montar ${da}</span>` : ''}</div>
-                ${detalhe ? `<span class="mm-sub">${detalhe}</span>` : ''}</div>
+        const nomeV = vid => (P.vendedores.find(v => v.id === vid) || { nome: `#${vid}` }).nome;
+        return `<div class="est-card ${p.ativo ? '' : 'inativo'}">${window.fotoRapida(p.id, p.foto)}
+            <div class="est-info">
+                <h4>${window.esc(p.nome)}${kit ? ` <span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : ''}${p.ativo ? '' : ' <span class="tag-inativo">Inativo</span>'}</h4>
+                <div class="est-onde">
+                    <span class="onde atelie ${corAt}" title="No Ateliê">${window.ic('arquivo')}Ateliê <b>${at}</b></span>
+                    ${comEles.map(e => `<button type="button" class="onde vend" onclick="abrirVendedor(${e.vendedor_id}, 'pecas')" title="Abrir o controle de ${window.esc(nomeV(e.vendedor_id))}"><i>${window.esc(inicialMM(nomeV(e.vendedor_id)))}</i>${window.esc(nomeV(e.vendedor_id))} <b>${e.qtd}</b></button>`).join('')}
+                </div>
+                <small class="est-precos">${total} no total · ${p.repasse ? `repasse ${window.fmt(p.repasse)}` : '<b class="txt-vermelho">sem repasse</b>'} · custo ${window.fmt(p.custo)}${kit ? ` · <b class="${da > 0 ? 'txt-verde' : ''}">dá para montar ${da}</b>` : ''}</small>
+            </div>
             <div class="mm-acoes">${kit
                 ? `<button class="btn-ic verde" title="Montar kit" onclick="abrirMontarKit(${p.id})">${window.ic('camadas')}</button>${at > 0 ? `<button class="btn-ic" title="Desmontar kit (peças voltam soltas)" onclick="desmontarKit(${p.id})">${window.ic('desfazer')}</button>` : ''}`
                 : `<button class="btn-ic verde" title="Registrar produção" onclick="abrirProducao(${p.id})">${window.ic('mais')}</button>`}
-                <button class="btn-ic" title="Editar nome, categoria e preços" onclick="abrirEdicaoProduto(${p.id})">${window.ic('etiqueta')}</button><button class="btn-ic" title="Ajustar quantidade do Ateliê" onclick="abrirAjusteAtelie(${p.id})">${window.ic('lapis')}</button><button class="btn-ic" title="Histórico" onclick="abrirMovimentos({produto_id:${p.id}})">${window.ic('relogio')}</button></div></div>`;
+                <button class="btn-ic" title="Editar nome, categoria e preços" onclick="abrirEdicaoProduto(${p.id})">${window.ic('etiqueta')}</button><button class="btn-ic" title="Corrigir a quantidade do Ateliê" onclick="abrirAjusteAtelie(${p.id})">${window.ic('lapis')}</button><button class="btn-ic" title="Histórico deste produto" onclick="abrirMovimentos({produto_id:${p.id}})">${window.ic('historico')}</button></div></div>`;
+    }).join('');
+};
+window.renderizarEstoquePorVendedor = function(t, cat) {
+    const P = window.painelEstoque, E = window.EST, produto = id => P.produtos.find(x => x.id === id);
+    const bate = e => { const p = produto(e.produto_id); return p && e.qtd > 0 && window.categoriaBate(p, cat) && window.produtoBate(p, t); };
+    const pend = vid => (P.pendentes.find(x => x.vendedor_id === vid) || { total: 0 }).total;
+    const grupos = [{ id: 0, nome: 'Ateliê' }, ...P.vendedores].filter(v => E.onde === '' || (E.onde === 'v' ? v.id > 0 : String(v.id) === E.onde))
+        .map(v => ({ v, itens: P.estoque.filter(e => e.vendedor_id === v.id && bate(e)).sort((a, b) => b.qtd - a.qtd) }))
+        .filter(g => g.itens.length || (g.v.id > 0 && pend(g.v.id) > 0 && !t && !cat));
+    window.$('estoque-info-lista').innerText = `${grupos.filter(g => g.v.id > 0).length} vendedor(es) com peças`;
+    if (!grupos.length) { window.$('lista-estoque').innerHTML = `<div class="vazio-box">${window.ic('usuarios')}<b>Nenhuma peça nesse filtro</b><span>Envie peças em <b>Enviar peças</b>.</span></div>`; return; }
+    window.$('lista-estoque').innerHTML = grupos.map(({ v, itens }) => {
+        const pecas = itens.reduce((s, e) => s + e.qtd, 0), valor = itens.reduce((s, e) => s + e.qtd * (v.id ? window.repasseParaVendedor(v.id, produto(e.produto_id)) : 0), 0);
+        return `<div class="estv ${v.id ? '' : 'atelie'}">
+            <div class="estv-cab" ${v.id ? `onclick="abrirVendedor(${v.id}, 'pecas')" role="button" tabindex="0"` : ''}>
+                <span class="avatar-v ${v.id ? '' : 'casa'}">${v.id ? window.esc(inicialMM(v.nome)) : window.ic('arquivo')}</span>
+                <div><b>${window.esc(v.nome)}</b><small>${pecas} peça${pecas === 1 ? '' : 's'}${v.id ? ` · ${window.fmt(valor)} em repasse${pend(v.id) > 0 ? ` · <span class="txt-laranja">falta acertar ${window.fmt(pend(v.id))}</span>` : ''}` : ''}</small></div>
+                ${v.id ? `<span class="estv-abrir">Controle${window.ic('seta-dir')}</span>` : ''}
+            </div>
+            ${itens.map(e => { const p = produto(e.produto_id); return `<div class="estv-item"><img src="${window.esc(window.fotoNaLista(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy"><span>${window.esc(p.nome)}</span><b>${e.qtd}</b></div>`; }).join('') || '<p class="estv-vazio">Nenhuma peça agora.</p>'}
+        </div>`;
     }).join('');
 };
 
@@ -361,83 +406,185 @@ window.renderizarVendedores = function() {
     const pend = vid => P.pendentes.find(x => x.vendedor_id === vid) || { total: 0, n: 0 };
     const pecasDe = vid => P.estoque.filter(e => e.vendedor_id === vid).reduce((s, e) => s + e.qtd, 0);
     const valorDe = vid => P.estoque.filter(e => e.vendedor_id === vid).reduce((s, e) => { const p = P.produtos.find(x => x.id === e.produto_id); return s + (p ? e.qtd * window.repasseParaVendedor(vid, p) : 0); }, 0);
-    const ativos = P.vendedores.filter(v => v.ativo);
-    window.$('vendedores-resumo').innerHTML = `<div class="mm-resumo">
-        <div class="mm-kpi"><h3>🤝 Vendedores ativos</h3><span>${ativos.length}</span></div>
-        <div class="mm-kpi"><h3>⏳ A receber</h3><span class="v-laranja">${window.fmt(P.pendentes.reduce((s, x) => s + x.total, 0))}</span></div></div>`;
-    window.$('lista-vendedores').innerHTML = P.vendedores.length ? P.vendedores.map(v => {
+    const ativos = P.vendedores.filter(v => v.ativo), totalPend = P.pendentes.reduce((s, x) => s + x.total, 0);
+    const naRua = P.vendedores.reduce((s, v) => s + pecasDe(v.id), 0), valorRua = P.vendedores.reduce((s, v) => s + valorDe(v.id), 0);
+    window.$('vendedores-resumo').innerHTML = `<div class="resumo-faixa">
+        <div class="rf"><small>Vendedores ativos</small><b>${ativos.length}</b><i>${P.vendedores.length - ativos.length ? `${P.vendedores.length - ativos.length} desativado(s)` : 'na equipe'}</i></div>
+        <div class="rf roxo"><small>Peças com eles</small><b>${naRua}</b><i>${window.fmt(valorRua)} em repasse</i></div>
+        <div class="rf laranja"><small>Falta acertar</small><b>${window.fmt(totalPend)}</b><i>${P.pendentes.reduce((s, x) => s + x.n, 0)} venda(s)</i></div></div>`;
+    const t = window.$('vd-busca') ? window.$('vd-busca').value : '';
+    const lista = P.vendedores.filter(v => window.buscaBate(t, v.nome, v.telefone))
+        .sort((a, b) => (b.ativo - a.ativo) || (pend(b.id).total - pend(a.id).total) || a.nome.localeCompare(b.nome, 'pt-BR'));
+    window.$('lista-vendedores').innerHTML = lista.length ? lista.map(v => {
         const pd = pend(v.id), pc = pecasDe(v.id);
-        return `<div class="mm-card" style="${v.ativo ? '' : 'opacity:0.6;'}"><div class="mm-info"><h4>👤 ${window.esc(v.nome)} ${v.ativo ? '' : '<span class="tag-inativo">Desativado</span>'}</h4>
-            <div class="mm-chips"><span class="mm-chip azul">📦 ${pc} peça(s) · ${window.fmt(valorDe(v.id))}</span>
-            <span class="mm-chip ${pd.total > 0 ? 'amarelo' : 'verde'}">💰 ${pd.total > 0 ? `deve ${window.fmt(pd.total)} (${pd.n} baixa${pd.n > 1 ? 's' : ''})` : 'em dia'}</span>
-            ${pd.mais_antiga ? `<span class="mm-chip">⏳ desde ${window.fmtDataHora(pd.mais_antiga).slice(0, 8)}</span>` : ''}</div>
-            ${v.telefone ? `<span class="mm-sub">📱 ${window.esc(v.telefone)}</span>` : ''}</div>
-            <div class="mm-acoes"><button class="btn-novera btn-n-editar" style="width:auto;padding:0 12px;font-weight:800;font-size:0.8rem;" onclick="window.abrirVendedor(${v.id})">📋 Abrir</button>
-            <button class="btn-novera" title="Ver o sistema como ele(a) vê" onclick="window.verComoVendedor(${v.id})">👀</button>
-            ${v.ativo ? `<button class="btn-novera" title="Enviar mala" onclick="window.abrirMala(${v.id})">🧳</button>` : ''}
-            ${v.telefone ? `<a class="btn-novera" style="text-decoration:none;" title="WhatsApp" href="${window.linkZap(v.telefone, `Olá, ${v.nome}!`)}" target="_blank">💬</a>` : ''}</div></div>`;
-    }).join('') : '<p class="mm-vazio">Nenhum vendedor ainda. Cadastre no botão acima ☝️</p>';
+        return `<div class="vend-card ${v.ativo ? '' : 'inativo'}" onclick="abrirVendedor(${v.id})" role="button" tabindex="0">
+            <div class="vc-topo"><span class="avatar-v">${window.esc(inicialMM(v.nome))}</span>
+                <div class="vc-nome"><b>${window.esc(v.nome)}</b><small>${v.telefone ? window.esc(v.telefone) : 'sem WhatsApp'}${v.criado_em ? ` · desde ${window.fmtDataHora(v.criado_em).slice(0, 8)}` : ''}</small></div>
+                ${!v.ativo ? '<span class="pilula canc">Desativado</span>' : pd.total > 0 ? '<span class="pilula pend">Deve acerto</span>' : '<span class="pilula pago">Em dia</span>'}</div>
+            <div class="vc-nums">
+                <div><small>Com ${window.esc(v.nome)}</small><b>${pc} peça${pc === 1 ? '' : 's'}</b><i>${window.fmt(valorDe(v.id))} em repasse</i></div>
+                <div class="${pd.total > 0 ? 'laranja' : 'verde'}"><small>Falta acertar</small><b>${window.fmt(pd.total)}</b><i>${pd.total > 0 ? `${pd.n} venda${pd.n > 1 ? 's' : ''} · desde ${window.fmtDataHora(pd.mais_antiga).slice(0, 8)}` : 'nada pendente'}</i></div>
+            </div>
+            <div class="vc-acoes" onclick="event.stopPropagation()">
+                ${v.ativo ? `<button class="btn-limpar" onclick="abrirMala(${v.id})">${window.ic('mala')}Enviar peças</button>` : ''}
+                ${v.telefone ? `<a class="btn-limpar zap" href="${window.linkZap(v.telefone, `Olá, ${v.nome}!`)}" target="_blank" rel="noopener">${window.ic('zap')}WhatsApp</a>` : ''}
+                <button class="btn-limpar azul" onclick="abrirVendedor(${v.id})">${window.ic('recibo')}Controle${window.ic('seta-dir')}</button>
+            </div></div>`;
+    }).join('') : `<div class="vazio-box">${window.ic('usuarios')}<b>${P.vendedores.length ? 'Ninguém com esse nome' : 'Nenhum vendedor ainda'}</b><span>${P.vendedores.length ? '' : 'Toque em <b>Novo vendedor</b> para cadastrar.'}</span></div>`;
     window.renderizarEncomendasAdmin();
 };
-
+window.novoVendedor = function() {
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic('usuarios')} Novo vendedor</h3>
+        <p class="texto-ajuda" style="margin-top:0;">A pessoa entra no sistema com este usuário e senha e vê só as peças dela e o acerto.</p>
+        <div class="input-group"><label for="nv-usuario">Nome de usuário (login)</label><input type="text" id="nv-usuario" placeholder="Ex: Kamila" autocomplete="off"></div>
+        <div class="row"><div class="col"><div class="input-group"><label for="nv-senha">Senha inicial</label><input type="text" id="nv-senha" placeholder="Mínimo 4 caracteres" autocomplete="off"></div></div>
+            <div class="col"><div class="input-group"><label for="nv-telefone">WhatsApp</label><input type="tel" id="nv-telefone" placeholder="11999998888"></div></div></div>
+        <button class="btn-magic btn-global" onclick="salvarNovoVendedor()">${window.ic('check')} Cadastrar vendedor</button>`);
+    setTimeout(() => window.$('nv-usuario') && window.$('nv-usuario').focus(), 80);
+};
 window.salvarNovoVendedor = async function() {
     const usuario = window.$('nv-usuario').value.trim(), senha = window.$('nv-senha').value, telefone = window.$('nv-telefone').value.trim();
     try {
         await window.apiAcao("salvar_vendedor", { usuario, senha, telefone });
-        window.$('nv-usuario').value = ''; window.$('nv-senha').value = ''; window.$('nv-telefone').value = '';
         const txt = `Olá, *${usuario}*! Bem-vindo(a) à equipe *Mini Mundo 3D* 🌍🖨️\n\nSeu acesso ao sistema:\n🔗 ${window.linkSistema()}\n👤 Usuário: ${usuario}\n🔑 Senha: ${senha}\n\nLá você vê as peças que estão com você, dá baixa quando vender e acompanha seu acerto. Troque a senha no primeiro acesso!`;
-        window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">🤝</span><h3 class="modal-title-alert">Vendedor cadastrado!</h3>
+        window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">${window.ICONES.ok}</span><h3 class="modal-title-alert">Vendedor cadastrado!</h3>
             <p class="modal-text-alert"><b>${window.esc(usuario)}</b> já pode entrar no sistema.</p>
-            <a class="btn-magic btn-global" style="text-decoration:none;" href="${window.linkZap(telefone, txt)}" target="_blank">📲 Enviar acesso pelo WhatsApp</a>
+            <a class="btn-magic btn-zap" href="${window.linkZap(telefone, txt)}" target="_blank" rel="noopener">${window.ic('zap')} Enviar o acesso pelo WhatsApp</a>
             <button class="btn-modal-cancel" style="width:100%;margin-top:10px;" onclick="window.fecharModalMM()">Fechar</button></div>`);
         window.carregarPainelEstoque();
     } catch (e) { window.mostrarAlerta("Atenção", e.message, "warning"); }
 };
 
-// Ficha completa de um vendedor: o que ele deve, o que está com ele, acertos e dados
-window.abrirVendedor = async function(vid) {
-    window.abrirModalMM('<p class="mm-vazio">⏳ Carregando vendedor...</p>');
-    try { window.vendAberto = await window.apiAcao("meu_painel", { vendedor_id: vid }); window.renderizarFichaVendedor(); }
-    catch (e) { window.preencherModalMM(`<p class="mm-vazio">❌ ${window.esc(e.message)}</p>`); }
+// 📋 CONTROLE DO VENDEDOR: tela própria (o voltar do celular volta para a lista).
+// Vendas item a item com o que falta acertar, peças com ele(a), resumo por produto, acertos e dados.
+window.CV = { aba: 'vendas', filtro: null };
+window.abrirVendedor = async function(vid, aba) {
+    if (window.telaAtualMM() !== 'vendedores') window.switchTab('vendedores');
+    if (window.$('modal-mm').style.display === 'flex') window.fecharModalMM();
+    const box = window.$('vd-controle'), mesmo = window.vendAberto && window.vendAberto.vendedor.id === vid;
+    if (!mesmo) { window.CV = { aba: aba || 'vendas', filtro: null }; box.innerHTML = '<div class="carregando-box"><span class="girando"></span>Abrindo o controle…</div>'; window.ultimoAcerto = window.ultimoAcerto && window.ultimoAcerto.vid === vid ? window.ultimoAcerto : null; }
+    else if (aba) window.CV.aba = aba;
+    window.$('vd-lista-box').hidden = true; box.hidden = false;
+    if (!window.NAV.sub) window.navSubTela(window.fecharControleVendedor);
+    if (!mesmo) window.scrollTo(0, 0);
+    try {
+        const r = await window.apiAcao('controle_vendedor', { vendedor_id: vid });
+        window.vendAberto = Object.assign(r, { pendente_total: r.resumo.a_acertar });
+        if (window.CV.filtro === null) window.CV.filtro = r.resumo.baixas_pendentes ? 'pendente' : 'todas';
+        window.renderizarFichaVendedor();
+    } catch (e) { box.innerHTML = `<button class="btn-limpar" onclick="fecharControleVendedor()">${window.ic('voltar')} Vendedores</button><div class="vazio-box">${window.ic('alerta')}<b>Não consegui abrir</b><span>${window.esc(e.message)}</span></div>`; }
 };
+window.fecharControleVendedor = function() {
+    window.$('vd-controle').hidden = true; window.$('vd-lista-box').hidden = false;
+    window.vendAberto = null; window.ultimoAcerto = null; window.navSaiuSubTela();
+};
+window.aoSairDaTela = window.aoSairDaTela || {};
+window.aoSairDaTela.vendedores = () => { if (window.$('vd-controle') && !window.$('vd-controle').hidden) window.fecharControleVendedor(); };
+window.cvAba = function(aba, filtro) { window.CV.aba = aba; if (filtro) window.CV.filtro = filtro; window.renderizarCorpoVendedor(); };
 window.renderizarFichaVendedor = function() {
-    const d = window.vendAberto, v = d.vendedor, info = window.painelEstoque.vendedores.find(x => x.id === v.id) || { ativo: true };
-    const pend = d.baixas.filter(b => b.status === 'Pendente'), pagas = d.baixas.filter(b => b.status === 'Pago').slice(0, 15);
-    const banner = window.ultimoAcerto && window.ultimoAcerto.vid === v.id ? `<div class="mm-alerta ok">✅ Acerto de ${window.fmt(window.ultimoAcerto.total)} registrado. <a href="${window.linkZap(v.telefone, `Olá, *${v.nome}*! Recebi ${window.fmt(window.ultimoAcerto.total)} referente às suas vendas. Obrigado! 🙏 — Mini Mundo 3D`)}" target="_blank">📲 Mandar recibo</a></div>` : '';
-    window.preencherModalMM(`
-        <h3 class="modal-title">👤 ${window.esc(v.nome)}</h3>${banner}
-        <button class="btn-ver-como" onclick="window.verComoVendedor(${v.id})"><span>👀</span><span><b>Ver o sistema como ${window.esc(v.nome)} vê</b><small>Abre o painel dele(a): peças, acerto e pedidos</small></span></button>
-        <div class="mm-secao">💰 A receber — ${window.fmt(d.pendente_total)}</div>
-        ${pend.length ? pend.map(b => `<label class="mm-linha"><input type="checkbox" class="chk-baixa" value="${b.id}" data-valor="${b.repasse_total}" checked onchange="window.somarSelecaoAcerto()">
-            <span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} <b style="color:#b45309;">${window.fmt(b.repasse_total)}</b><span class="mm-sub">${window.fmtDataHora(b.data_hora)}${b.origem === 'CONFERENCIA' ? ' · 📋 diferença da conferência' : b.origem === 'ADMIN' ? ' · lançada por você' : ''}</span></span>
-            <button class="btn-novera btn-n-apagar" title="Cancelar baixa (volta a peça pro estoque dele)" onclick="event.preventDefault(); window.cancelarBaixa(${b.id}, true)">✖</button></label>`).join('') + `
-            <div class="mm-total" id="acerto-selecao">Selecionado: ${window.fmt(d.pendente_total)}</div>
-            <div class="row"><div class="col"><div class="input-group"><label>Forma</label><select id="acerto-forma"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Outro</option></select></div></div><div class="col"><div class="input-group"><label>Obs.</label><input type="text" id="acerto-obs"></div></div></div>
-            <button class="btn-magic btn-global" style="margin-top:0;" id="btn-acerto" onclick="window.receberSelecionadas(${v.id})">✅ Recebi o valor selecionado</button>
-            <a class="btn-limpar" style="display:block;text-align:center;margin-top:8px;padding:10px;text-decoration:none;" target="_blank" href="${window.textoCobrancaVendedor(d)}">📲 Mandar extrato / cobrar no WhatsApp</a>`
-        : '<p class="mm-vazio">Nada pendente. ✅</p>'}
-
-        <div class="mm-secao">📦 Peças com ${window.esc(v.nome)}</div>
-        ${d.estoque.length ? d.estoque.map(e => `<div class="mm-linha"><span class="mm-nome">${e.qtd}x ${window.esc(e.nome)}<span class="mm-sub">🤝 ${window.fmt(e.repasse)}/un${e.especial ? ' (especial)' : ''}</span></span>
-            <button class="btn-novera btn-n-baixa" title="Registrar venda por ele(a)" onclick="window.baixaPeloAdmin(${v.id}, ${e.produto_id}, ${e.qtd})">✅</button>
-            <button class="btn-novera" title="Recolher peças (voltam pro Ateliê)" onclick="window.recolherPecas(${v.id}, ${e.produto_id}, ${e.qtd})">↩️</button>
-            <button class="btn-novera" title="Repasse especial pra esse vendedor" onclick="window.definirRepasseEspecial(${v.id}, ${e.produto_id})">💲</button></div>`).join('') : '<p class="mm-vazio">Nenhuma peça com ele(a).</p>'}
-        <div class="row" style="margin-top:8px;"><div class="col"><button class="btn-limpar" style="width:100%;padding:10px;" onclick="window.abrirConferencia(${v.id})">📋 Conferir estoque</button></div>
-            <div class="col"><button class="btn-limpar" style="width:100%;padding:10px;" onclick="window.abrirMala(${v.id})">🧳 Enviar mais</button></div></div>
-        <button class="btn-limpar" style="width:100%;padding:10px;margin-top:8px;" onclick="window.abrirMovimentos({local:${v.id}})">📜 Movimentações dele(a)</button>
-
-        <div class="mm-secao">🧾 Acertos</div>
-        ${d.acertos.length ? d.acertos.map(a => `<div class="mm-linha"><span class="mm-nome">${window.fmt(a.valor)} · ${window.esc(a.forma || '—')}<span class="mm-sub">${window.fmtDataHora(a.data_hora)} · ${a.qtd_baixas} baixa(s)${a.obs ? ' · ' + window.esc(a.obs) : ''}</span></span>
-            <button class="btn-novera btn-n-apagar" title="Desfazer acerto (as baixas voltam a pendentes)" onclick="window.desfazerAcerto(${v.id}, ${a.id})">↩️</button></div>`).join('') : '<p class="mm-vazio">Nenhum acerto ainda.</p>'}
-        ${pagas.length ? `<details style="margin-top:6px;"><summary style="cursor:pointer;font-size:0.8rem;font-weight:800;color:var(--text-muted);">Últimas baixas pagas</summary>${pagas.map(b => `<div class="mm-linha"><span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} · ${window.fmt(b.repasse_total)}<span class="mm-sub">vendido ${window.fmtDataHora(b.data_hora)} · pago ${window.fmtDataHora(b.data_pgto)}</span></span></div>`).join('')}</details>` : ''}
-
-        <div class="mm-secao">⚙️ Dados e acesso</div>
-        <div class="row"><div class="col"><div class="input-group"><label>Usuário</label><input type="text" id="fv-usuario" value="${window.esc(v.nome)}"></div></div><div class="col"><div class="input-group"><label>WhatsApp</label><input type="text" id="fv-telefone" value="${window.esc(v.telefone)}"></div></div></div>
-        <div class="input-group"><label>Situação</label><select id="fv-ativo"><option value="true" ${info.ativo ? 'selected' : ''}>🟢 Ativo</option><option value="false" ${info.ativo ? '' : 'selected'}>🔴 Desativado (não consegue mais entrar)</option></select></div>
-        <div class="row"><div class="col"><button class="btn-magic btn-global" style="margin-top:0;padding:10px;" onclick="window.salvarDadosVendedor(${v.id})">💾 Salvar</button></div><div class="col"><button class="btn-limpar" style="width:100%;padding:12px;" onclick="window.resetarSenhaVendedor(${v.id})">🔑 Nova senha</button></div></div>
-        ${v.codigo_vitrine ? `<button class="btn-limpar" style="width:100%;padding:10px;margin-top:8px;" onclick="window.copiarTexto('${window.linkVitrine(v.codigo_vitrine)}', 'Link da vitrine copiado!')">🔗 Copiar link da vitrine dele(a)</button>` : ''}`);
+    const d = window.vendAberto, v = d.vendedor, r = d.resumo, nome = window.esc(v.nome);
+    const banner = window.ultimoAcerto && window.ultimoAcerto.vid === v.id ? `<div class="mm-alerta ok">${window.ic('check')}<span>Acerto de <b>${window.fmt(window.ultimoAcerto.total)}</b> registrado. <a href="${window.linkZap(v.telefone, `Olá, *${v.nome}*! Recebi ${window.fmt(window.ultimoAcerto.total)} referente às suas vendas. Obrigado! 🙏 — Mini Mundo 3D`)}" target="_blank" rel="noopener">Mandar recibo no WhatsApp</a></span></div>` : '';
+    window.$('vd-controle').innerHTML = `
+        <div class="cv-barra">
+            <button class="btn-limpar" onclick="fecharControleVendedor()">${window.ic('voltar')} Vendedores</button>
+            <div class="cv-barra-acoes">
+                ${v.telefone ? `<a class="btn-ic zap" title="WhatsApp" aria-label="WhatsApp de ${nome}" href="${window.linkZap(v.telefone, `Olá, ${v.nome}!`)}" target="_blank" rel="noopener">${window.ic('zap')}</a>` : ''}
+                <button class="btn-ic" title="Ver o sistema como ${nome} vê" aria-label="Ver como ${nome}" onclick="verComoVendedor(${v.id})">${window.ic('olho')}</button>
+                ${v.ativo ? `<button class="btn-limpar" onclick="abrirMala(${v.id})">${window.ic('mala')}Enviar peças</button>` : ''}
+            </div>
+        </div>
+        <div class="cv-perfil"><span class="avatar-v grande">${window.esc(inicialMM(v.nome))}</span>
+            <div><h2>${nome}</h2><small>${v.telefone ? window.esc(v.telefone) : 'sem WhatsApp'}${v.criado_em ? ` · na equipe desde ${window.fmtDataHora(v.criado_em).slice(0, 8)}` : ''}${v.ultimo_acesso ? ` · último acesso ${window.fmtDataHora(v.ultimo_acesso)}` : ''}</small></div>
+            ${v.ativo ? '' : '<span class="pilula canc">Desativado</span>'}</div>
+        ${banner}
+        <div class="cv-nums">
+            <div><small>Recebeu</small><b>${r.recebeu}</b><i>peças enviadas</i></div>
+            <div><small>Vendeu</small><b>${r.vendeu}</b><i>${window.fmt(r.vendido_valor)} em repasse</i></div>
+            <div><small>Devolveu</small><b>${r.devolveu}</b><i>${r.perdeu ? `+ ${r.perdeu} perdida(s)` : 'recolhidas'}</i></div>
+            <div class="roxo"><small>Está com ${nome}</small><b>${r.com_ele}</b><i>${window.fmt(r.valor_com_ele)} se vender tudo</i></div>
+        </div>
+        <div class="cv-acerto ${r.a_acertar > 0 ? 'deve' : 'ok'}">
+            <div><small>Falta acertar</small><b>${window.fmt(r.a_acertar)}</b><i>${r.a_acertar > 0 ? `${r.baixas_pendentes} venda${r.baixas_pendentes > 1 ? 's' : ''}${r.mais_antiga ? ` · a mais antiga em ${window.fmtDataHora(r.mais_antiga).slice(0, 8)}` : ''} · ` : ''}já acertou ${window.fmt(r.acertado)}</i></div>
+            ${r.a_acertar > 0 ? `<button class="btn-magic btn-global" onclick="cvAba('vendas', 'pendente'); document.getElementById('cv-receber').scrollIntoView({ behavior: 'smooth', block: 'center' })">${window.ic('dinheiro')} Receber</button>` : `<span class="pilula pago">${window.ic('check')}Tudo acertado</span>`}
+        </div>
+        <div class="sub-abas cv-abas" id="cv-abas"></div>
+        <div id="cv-corpo"></div>`;
+    window.renderizarCorpoVendedor();
 };
-window.somarSelecaoAcerto = function() { const t = [...document.querySelectorAll('.chk-baixa:checked')].reduce((s, c) => s + (parseFloat(c.dataset.valor) || 0), 0); window.$('acerto-selecao').innerText = `Selecionado: ${window.fmt(t)}`; };
+window.renderizarCorpoVendedor = function() {
+    const d = window.vendAberto; if (!d) return;
+    const v = d.vendedor, C = window.CV, nome = window.esc(v.nome), vid = v.id;
+    const pend = d.baixas.filter(b => b.status === 'Pendente'), pagas = d.baixas.filter(b => b.status === 'Pago');
+    const abas = [['vendas', 'recibo', 'Vendas', d.baixas.length], ['pecas', 'pacote', `Com ${nome}`, d.estoque.reduce((s, e) => s + e.qtd, 0)], ['produtos', 'barras', 'Por produto', 0], ['acertos', 'dinheiro', 'Acertos', d.acertos.length], ['dados', 'ajustes', 'Dados', 0]];
+    window.$('cv-abas').innerHTML = abas.map(([k, i, r, n]) => `<button class="${C.aba === k ? 'active' : ''}" onclick="cvAba('${k}')">${window.ic(i)}${r}${n ? `<em class="badge-num">${n}</em>` : ''}</button>`).join('');
+    const foto = f => `<img src="${window.esc(f || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">`;
+    let h = '';
+    if (C.aba === 'vendas') {
+        const lista = C.filtro === 'pendente' ? pend : C.filtro === 'pago' ? pagas : d.baixas;
+        h = `<div class="chips-rolagem cv-filtros">${[['pendente', 'Falta acertar', pend.length, 'pend'], ['pago', 'Acertadas', pagas.length, 'pago'], ['todas', 'Todas', d.baixas.length, '']]
+            .map(([k, r, n, c]) => `<button class="chip-op ${c} ${C.filtro === k ? 'active' : ''}" onclick="cvAba('vendas', '${k}')">${r} <em>${n || ''}</em></button>`).join('')}</div>
+            <p class="texto-ajuda cv-dica">Cada linha é uma venda que ${nome} fez (baixa). ${C.filtro === 'pendente' && pend.length ? 'Marque as que você recebeu e toque em <b>Recebi o valor selecionado</b>.' : ''}</p>
+            ${C.filtro === 'pendente' && pend.length > 1 ? `<label class="cv-marcar"><input type="checkbox" checked onchange="document.querySelectorAll('.chk-baixa').forEach(c => { c.checked = this.checked; }); somarSelecaoAcerto()"> Marcar todas</label>` : ''}
+            <div class="cv-lista">${lista.map(b => {
+                const p = b.status === 'Pendente';
+                const chk = p && C.filtro === 'pendente', tag = chk ? 'label' : 'div';
+                return `<${tag} class="cvb ${p ? 'pend' : 'pago'}">
+                    ${chk ? `<input type="checkbox" class="chk-baixa" value="${b.id}" data-valor="${b.repasse_total}" checked onchange="somarSelecaoAcerto()">` : ''}
+                    ${foto(b.foto)}
+                    <span class="cvb-info"><b>${b.qtd}x ${window.esc(b.produto_nome)}</b>
+                        <small>vendeu em ${window.fmtDataHora(b.data_hora).slice(0, 8)}${b.origem === 'CONFERENCIA' ? ' · achado na conferência' : b.origem === 'ADMIN' ? ` · lançada por ${window.esc(b.criado_por || 'você')}` : ''} · ${window.fmt(b.repasse_unit)}/un</small>
+                        ${p ? '<span class="pilula pend">Falta acertar</span>' : `<span class="pilula pago">${window.ic('check')}Acertado em ${window.fmtDataHora(b.acerto_data || b.data_pgto).slice(0, 8)}${b.acerto_forma ? ` · ${window.esc(b.acerto_forma)}` : ''}</span>`}</span>
+                    <b class="cvb-v">${window.fmt(b.repasse_total)}</b>
+                    ${p ? `<button class="btn-ic perigo" title="Desfazer esta venda (a peça volta para ${nome})" aria-label="Desfazer venda" onclick="event.preventDefault(); cancelarBaixa(${b.id}, true)">${window.ic('desfazer')}</button>` : ''}
+                </${tag}>`; }).join('') || `<div class="vazio-box pequeno">${window.ic('recibo')}<b>${C.filtro === 'pendente' ? 'Nada para acertar' : 'Nenhuma venda aqui'}</b><span>${C.filtro === 'pendente' ? `${nome} está em dia.` : `Quando ${nome} vender, a venda aparece aqui.`}</span></div>`}</div>
+            ${C.filtro === 'pendente' && pend.length ? `<div class="cv-receber" id="cv-receber">
+                <div class="mm-total" id="acerto-selecao">Selecionado: ${window.fmt(d.pendente_total)}</div>
+                <div class="row"><div class="col"><div class="input-group"><label for="acerto-forma">Como pagou?</label><select id="acerto-forma"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Outro</option></select></div></div>
+                    <div class="col"><div class="input-group"><label for="acerto-obs">Observação</label><input type="text" id="acerto-obs" placeholder="Opcional"></div></div></div>
+                <button class="btn-magic btn-global" id="btn-acerto" onclick="receberSelecionadas(${vid})">${window.ic('check')} Recebi o valor selecionado</button>
+                <a class="btn-magic btn-zap" target="_blank" rel="noopener" href="${window.textoCobrancaVendedor(d)}">${window.ic('zap')} Mandar extrato / cobrar no WhatsApp</a>
+            </div>` : ''}`;
+    } else if (C.aba === 'pecas') {
+        h = `<div class="cv-lista">${d.estoque.map(e => `<div class="cvp-linha">${foto(e.foto)}
+                <span class="cvb-info"><b>${window.esc(e.nome)}</b><small>${e.qtd} peça${e.qtd > 1 ? 's' : ''} · repasse ${window.fmt(e.repasse)}/un${e.especial ? ' (especial)' : ''}</small></span>
+                <div class="cvp-bts">
+                    <button class="btn-limpar verde" onclick="baixaPeloAdmin(${vid}, ${e.produto_id}, ${e.qtd})">${window.ic('check')}Vendeu</button>
+                    <button class="btn-limpar" onclick="recolherPecas(${vid}, ${e.produto_id}, ${e.qtd})">${window.ic('devolver')}Recolher</button>
+                    <button class="btn-ic" title="Repasse especial para ${nome}" aria-label="Repasse especial" onclick="definirRepasseEspecial(${vid}, ${e.produto_id})">${window.ic('etiqueta')}</button>
+                </div></div>`).join('') || `<div class="vazio-box pequeno">${window.ic('pacote')}<b>Nenhuma peça com ${nome}</b><span>Toque em <b>Enviar peças</b> para mandar.</span></div>`}</div>
+            <div class="cv-bts-rodape">
+                ${d.estoque.length ? `<button class="btn-limpar" onclick="abrirConferencia(${vid})">${window.ic('check')}Conferir (contar as peças)</button>` : ''}
+                ${v.ativo ? `<button class="btn-limpar" onclick="abrirMala(${vid})">${window.ic('mala')}Enviar mais peças</button>` : ''}
+                <button class="btn-limpar" onclick="abrirMovimentos({local:${vid}})">${window.ic('historico')}Entradas e saídas</button>
+            </div>`;
+    } else if (C.aba === 'produtos') {
+        h = `<p class="texto-ajuda cv-dica">Tudo o que passou pela mão de ${nome}, produto por produto.</p>
+            <div class="cv-lista">${d.produtos.map(p => `<div class="cvp">${foto(p.foto)}
+                <div class="cvp-info"><b>${window.esc(p.nome)}</b>
+                    <div class="cvp-nums"><span>Recebeu <b>${p.recebeu}</b></span><span>Vendeu <b>${p.vendeu}</b></span><span>Devolveu <b>${p.devolveu}</b></span>${p.perdeu ? `<span>Perdeu <b>${p.perdeu}</b></span>` : ''}<span class="roxo">Com ${nome} <b>${p.com_ele}</b></span></div>
+                    ${p.vendeu ? `<small>${p.acertado > 0 ? `acertado ${window.fmt(p.acertado)}` : ''}${p.acertado > 0 && p.a_acertar > 0 ? ' · ' : ''}${p.a_acertar > 0 ? `<b class="txt-laranja">falta ${window.fmt(p.a_acertar)}</b>` : ''}</small>` : ''}
+                </div></div>`).join('') || `<div class="vazio-box pequeno">${window.ic('barras')}<b>Nada ainda</b><span>Quando você enviar peças, o resumo aparece aqui.</span></div>`}</div>`;
+    } else if (C.aba === 'acertos') {
+        h = `<div class="cv-lista">${d.acertos.map(a => `<div class="cvp-linha">
+                <span class="avatar-v verde">${window.ic('dinheiro')}</span>
+                <span class="cvb-info"><b>${window.fmt(a.valor)} · ${window.esc(a.forma || 'sem forma')}</b><small>${window.fmtDataHora(a.data_hora)} · ${a.qtd_baixas} venda(s)${a.usuario ? ` · recebido por ${window.esc(a.usuario)}` : ''}${a.obs ? ` · ${window.esc(a.obs)}` : ''}</small></span>
+                <button class="btn-ic perigo" title="Desfazer este acerto (as vendas voltam a 'falta acertar')" aria-label="Desfazer acerto" onclick="desfazerAcerto(${vid}, ${a.id})">${window.ic('desfazer')}</button>
+            </div>`).join('') || `<div class="vazio-box pequeno">${window.ic('dinheiro')}<b>Nenhum acerto ainda</b><span>Quando ${nome} te pagar, registre na aba <b>Vendas</b>.</span></div>`}</div>`;
+    } else {
+        const info = (window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === vid)) || v;
+        h = `<div class="card cv-dados">
+            <div class="row"><div class="col"><div class="input-group"><label for="fv-usuario">Usuário (login)</label><input type="text" id="fv-usuario" value="${nome}"></div></div><div class="col"><div class="input-group"><label for="fv-telefone">WhatsApp</label><input type="tel" id="fv-telefone" value="${window.esc(v.telefone)}"></div></div></div>
+            <div class="input-group"><label for="fv-ativo">Situação</label><select id="fv-ativo"><option value="true" ${info.ativo ? 'selected' : ''}>Ativo</option><option value="false" ${info.ativo ? '' : 'selected'}>Desativado (não consegue mais entrar)</option></select></div>
+            <button class="btn-magic btn-global" onclick="salvarDadosVendedor(${vid})">${window.ic('check')} Salvar</button>
+            <div class="cv-bts-rodape">
+                <button class="btn-limpar" onclick="resetarSenhaVendedor(${vid})">${window.ic('chave')}Nova senha</button>
+                ${v.codigo_vitrine ? `<button class="btn-limpar" onclick="copiarTexto('${window.linkVitrine(v.codigo_vitrine)}', 'Link da vitrine copiado!')">${window.ic('link')}Copiar link da vitrine</button>` : ''}
+                <button class="btn-limpar" onclick="verComoVendedor(${vid})">${window.ic('olho')}Ver como ${nome} vê</button>
+            </div></div>`;
+    }
+    window.$('cv-corpo').innerHTML = h;
+};
+window.somarSelecaoAcerto = function() { const t = [...document.querySelectorAll('.chk-baixa:checked')].reduce((s, c) => s + (parseFloat(c.dataset.valor) || 0), 0); if (window.$('acerto-selecao')) window.$('acerto-selecao').innerText = `Selecionado: ${window.fmt(t)}`; };
 window.textoCobrancaVendedor = function(d) {
     const pend = d.baixas.filter(b => b.status === 'Pendente');
     const linhas = pend.map(b => `• ${window.fmtDataHora(b.data_hora).slice(0, 8)} — ${b.qtd}x ${b.produto_nome}: ${window.fmt(b.repasse_total)}`).join('\n');
@@ -445,9 +592,9 @@ window.textoCobrancaVendedor = function(d) {
 };
 window.receberSelecionadas = async function(vid) {
     const ids = [...document.querySelectorAll('.chk-baixa:checked')].map(c => parseInt(c.value));
-    if (!ids.length) return window.mostrarAlerta("Atenção", "Marque as baixas que você recebeu.", "warning");
+    if (!ids.length) return window.mostrarAlerta("Atenção", "Marque as vendas que você recebeu.", "warning");
     const total = [...document.querySelectorAll('.chk-baixa:checked')].reduce((s, c) => s + (parseFloat(c.dataset.valor) || 0), 0);
-    if (!await window.confirmarMM({ icone: '💰', titulo: 'Confirmar recebimento?', html: `Você recebeu <b>${window.fmt(total)}</b> de <b>${window.esc(window.vendAberto.vendedor.nome)}</b> (${ids.length} baixa${ids.length > 1 ? 's' : ''}) via <b>${window.esc(window.$('acerto-forma').value)}</b>?`, ok: '✅ Sim, recebi' })) return;
+    if (!await window.confirmarMM({ icone: '💰', titulo: 'Confirmar recebimento?', html: `Você recebeu <b>${window.fmt(total)}</b> de <b>${window.esc(window.vendAberto.vendedor.nome)}</b> (${ids.length} venda${ids.length > 1 ? "s" : ""}) via <b>${window.esc(window.$('acerto-forma').value)}</b>?`, ok: '✅ Sim, recebi' })) return;
     const b = window.$('btn-acerto'); b.disabled = true;
     try {
         const r = await window.apiAcao("acertar_baixas", { vendedor_id: vid, ids, forma: window.$('acerto-forma').value, obs: window.$('acerto-obs').value });
@@ -583,7 +730,8 @@ window.iniciarAppVendedor = function() {
     window.$('login-screen').style.display = "none"; window.$('app-core').style.display = "block";
     window.$('subtitulo-app').innerText = "Painel do Vendedor";
     window.mostrarUsuarioNoMenu("Vendedor(a)");
-    window.switchTab('v_estoque', '📦 Meu Estoque');
+    window.navComecar(); window.switchTab('v_estoque', '📦 Meu Estoque', true);
+    if (window.boasVindasMM) window.boasVindasMM();
 };
 
 // 👀 VER COMO O VENDEDOR: o Admin abre as mesmas telas que o vendedor vê, com os dados dele
@@ -599,13 +747,13 @@ window.verComoVendedor = function(vid) {
     window.$('subtitulo-app').innerText = `Visão de ${v.nome}`;
     window.switchTab('v_estoque', '📦 Meu Estoque');
 };
-window.sairVisaoVendedor = function() {
+window.sairVisaoVendedor = function(semHistorico) {
     const vid = window.vendedorVisto && window.vendedorVisto.id;
     window.vendedorVisto = null; window.painelVendedor = null;
     document.body.classList.remove('modo-vendedor', 'vendo-como');
     document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = true; });
     window.$('subtitulo-app').innerText = "Central & ERP";
-    window.switchTab('vendedores', '🤝 Vendedores');
+    window.switchTab('vendedores', '🤝 Vendedores', semHistorico === true);
     if (vid) window.abrirVendedor(vid);
 };
 
@@ -618,15 +766,15 @@ window.carregarPainelVendedor = async function() {
 window.renderizarVendedorEstoque = function() {
     const d = window.painelVendedor; if (!d) return;
     const pecas = d.estoque.reduce((s, e) => s + e.qtd, 0), valor = d.estoque.reduce((s, e) => s + e.qtd * e.repasse, 0);
-    window.$('v-resumo').innerHTML = `<div class="mm-resumo">
-        <div class="mm-kpi"><h3>📦 Peças com você</h3><span>${pecas}</span></div>
-        <div class="mm-kpi" style="cursor:pointer;" onclick="window.switchTab('v_acerto','💸 Meu Acerto')"><h3>💰 Você me deve</h3><span class="v-laranja">${window.fmt(d.pendente_total)}</span></div></div>
-        <p style="font-size:0.8rem;color:var(--text-muted);font-weight:600;text-align:center;margin:-5px 0 15px;">Vendeu? Toque em <b>✅ Vendi</b> na peça. Repasse total se vender tudo: <b>${window.fmt(valor)}</b></p>`;
+    window.$('v-resumo').innerHTML = `<div class="resumo-faixa dois">
+        <div class="rf roxo"><small>Peças com você</small><b>${pecas}</b><i>${window.fmt(valor)} de repasse se vender tudo</i></div>
+        <button type="button" class="rf laranja" onclick="window.switchTab('v_acerto')"><small>Você me deve</small><b>${window.fmt(d.pendente_total)}</b><i>toque para ver o acerto</i></button></div>
+        <p class="texto-ajuda v-dica">Vendeu? Toque em <b>Vendi</b> na peça e diga quantas.</p>`;
     const t = window.$('v-busca-estoque').value || '';
     const lista = d.estoque.filter(e => window.buscaBate(t, e.nome));
     window.$('v-lista-estoque').innerHTML = d.estoque.length ? lista.map(e => `<div class="mm-card">${window.fotoVendedor(e)}
-        <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">📦 Com você: ${e.qtd}</span><span class="mm-chip amarelo">🤝 Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">💡 Sugerido ${window.fmt(e.preco_sugerido)}</span></div></div>
-        <div class="mm-acoes"><button class="btn-vendi" onclick="window.abrirBaixa(${e.produto_id})">✅ Vendi</button></div></div>`).join('')
+        <div class="mm-info"><h4>${window.esc(e.nome)}</h4><div class="mm-chips"><span class="mm-chip azul">Com você: ${e.qtd}</span><span class="mm-chip amarelo">Repasse ${window.fmt(e.repasse)}</span><span class="mm-chip verde">Sugerido ${window.fmt(e.preco_sugerido)}</span></div></div>
+        <div class="mm-acoes"><button class="btn-vendi" onclick="window.abrirBaixa(${e.produto_id})">${window.ic('check')} Vendi</button></div></div>`).join('')
         : '<p class="mm-vazio">Você ainda não tem peças. Quando a Mini Mundo te enviar uma mala, elas aparecem aqui. 🧳</p>';
     window.$('v-vitrine').innerHTML = d.vendedor.codigo_vitrine && d.estoque.length ? `<div class="filtros-box" style="margin-top:20px;text-align:center;">
         <div class="filtros-title" style="justify-content:center;">🛍️ Sua vitrine online</div>
@@ -677,10 +825,10 @@ window.renderizarVendedorAcerto = function() {
             <span class="kpi-valor" style="color:${d.pendente_total > 0 ? '#fbbf24' : '#6ee7b7'};">${window.fmt(d.pendente_total)}</span>
             <span class="kpi-sub">${d.pendente_qtd} venda(s) aguardando acerto</span></div></div>
         ${d.pendente_total > 0 && d.telefone_admin ? `<a class="btn-magic btn-global" style="margin:0 0 16px;" target="_blank" href="${window.linkZap(d.telefone_admin, msgPago)}">📲 Avisar que paguei (WhatsApp)</a>` : ''}
-        <div class="section-title">⏳ Aguardando acerto</div>
+        <div class="secao-tit">${window.ic('relogio')}Aguardando acerto</div>
         ${pend.length ? pend.map(b => `<div class="mm-linha"><span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} · <b style="color:#b45309;">${window.fmt(b.repasse_total)}</b><span class="mm-sub">${window.fmtDataHora(b.data_hora)}${b.origem === 'CONFERENCIA' ? ' · 📋 diferença encontrada na conferência' : ''}</span></span>
             ${podeCancelar(b) ? `<button class="btn-novera btn-n-apagar" title="Errei, cancelar" onclick="window.cancelarBaixa(${b.id}, false)">✖</button>` : ''}</div>`).join('') : '<p class="mm-vazio">Tudo em dia! ✅</p>'}
-        <div class="section-title">🧾 Acertos feitos</div>
+        <div class="secao-tit">${window.ic('check')}Acertos feitos</div>
         ${d.acertos.length ? d.acertos.map(a => `<div class="mm-linha"><span class="mm-nome">${window.fmt(a.valor)} · ${window.esc(a.forma || '')}<span class="mm-sub">${window.fmtDataHora(a.data_hora)} · ${a.qtd_baixas} venda(s)</span></span></div>`).join('') : '<p class="mm-vazio">Nenhum acerto ainda.</p>'}
         ${pagas.length ? `<details style="margin-top:10px;"><summary style="cursor:pointer;font-size:0.8rem;font-weight:800;color:var(--text-muted);">Últimas vendas já acertadas</summary>${pagas.map(b => `<div class="mm-linha"><span class="mm-nome">${b.qtd}x ${window.esc(b.produto_nome)} · ${window.fmt(b.repasse_total)}<span class="mm-sub">${window.fmtDataHora(b.data_hora)}</span></span></div>`).join('')}</details>` : ''}`;
 };

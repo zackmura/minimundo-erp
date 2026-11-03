@@ -20,7 +20,8 @@ window.carregarDashboardERP = async function() {
     $('dash-carregando').hidden = false;
     try {
         const [v, d, b, p] = await Promise.all(['listar_vendas', 'listar_despesas', 'listar_baixas', 'painel_estoque'].map(a => window.apiAcao(a)));
-        Object.assign(DASH, { vendas: v.vendas, despesas: d.despesas, baixas: b.baixas, painel: p });
+        // Venda cancelada não entra em nenhuma conta do painel
+        Object.assign(DASH, { vendas: v.vendas.filter(x => x.status !== 'Cancelado'), despesas: d.despesas, baixas: b.baixas, painel: p });
         window.arrayVendas = v.vendas; window.painelEstoque = p; window.configMM = p.config;
         window.renderizarDashboard();
     } catch (e) { $('dash-conteudo').innerHTML = `<div class="vazio-box">${window.ic('alerta')}<b>Não consegui carregar o painel</b><span>${esc(e.message)}</span></div>`; }
@@ -145,7 +146,7 @@ window.renderizarDashboard = function() {
     const atrasados = [...pedidosPend.values()].filter(iso => diasDesde(iso) > 7).length;
     const encPend = (Pn.encomendas || []).filter(e => ['Pendente', 'Produzindo'].includes(e.status)).length;
     const atencao = [];
-    if (pedidosPend.size) atencao.push(['relogio', `${pedidosPend.size} venda(s) a receber · ${window.fmt(pendLoja)}`, atrasados ? `${atrasados} há mais de 7 dias` : 'todas recentes', "switchTab('vendas'); abaVendas('historico'); periodoHV('areceber')", atrasados ? 'ruim' : '']);
+    if (pedidosPend.size) atencao.push(['relogio', `${pedidosPend.size} venda(s) a receber · ${window.fmt(pendLoja)}`, atrasados ? `${atrasados} há mais de 7 dias` : 'todas recentes', "switchTab('vendas'); abaVendas('historico'); situacaoHV('pendente')", atrasados ? 'ruim' : '']);
     Pn.pendentes.filter(p => p.total > 0).sort((a, b) => b.total - a.total).forEach(p => atencao.push(['usuarios', `${esc(vendNome(p.vendedor_id))} te deve ${window.fmt(p.total)}`, `${p.n} venda(s) sem acerto${p.mais_antiga ? ` · desde ${window.fmtDataHora(p.mais_antiga).slice(0, 8)}` : ''}`, `switchTab('vendedores'); abrirVendedor(${p.vendedor_id})`, diasDesde(String(p.mais_antiga || '').slice(0, 10)) > 30 ? 'ruim' : '']));
     if (encPend) atencao.push(['presente', `${encPend} encomenda(s) de vendedores`, 'pendentes ou em produção', "switchTab('vendedores')", '']);
     if (baixos.length) atencao.push(['alerta', `${baixos.length} produto(s) acabando no Ateliê`, baixos.slice(0, 3).map(p => esc(p.nome)).join(', ') + (baixos.length > 3 ? '…' : ''), "switchTab('estoque')", '']);
