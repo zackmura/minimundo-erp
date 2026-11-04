@@ -1960,3 +1960,81 @@ label.cvb { cursor:pointer; }
 .med-kit .btn-limpar { flex-shrink:0; }
 .med-kit-txt { margin:8px 0 0 !important; font-size:.76rem; }
 .med-kit-txt a { color:#5b4bc4; font-weight:800; cursor:pointer; text-decoration:underline; }
+
+/* ==========================================
+   v7.4 · SITE DO VENDEDOR (Meu site)
+   ========================================== */
+.ms-abas { margin:14px 0 12px; overflow-x:auto; scrollbar-width:none; }
+.ms-abas::-webkit-scrollbar { display:none; }
+.ms-abas button { white-space:nowrap; flex:1 0 auto; justify-content:center; padding:11px 10px; font-size:.86rem; }
+.ms-dica { margin:0 0 12px; }
+.ms-tit { margin:18px 0 8px; font-size:.82rem; font-weight:800; color:#44403c; text-transform:uppercase; letter-spacing:.04em; }
+.ms-tit small { text-transform:none; letter-spacing:0; font-weight:600; color:var(--text-muted); }
+/* Criar o site */
+.ms-criar { text-align:center; }
+.ms-criar-ic { display:inline-flex; width:56px; height:56px; border-radius:18px; align-items:center; justify-content:center; background:var(--primary-soft); color:var(--primary); margin-bottom:8px; }
+.ms-criar-ic svg.ic { width:28px; height:28px; }
+.ms-criar h3 { margin:0 0 12px; font-size:1.15rem; }
+.ms-criar .input-group, .ms-criar .texto-ajuda { text-align:left; }
+.ms-lista-ok { list-style:none; margin:0 0 16px; padding:0; display:grid; gap:8px; text-align:left; }
+.ms-lista-ok li { display:flex; gap:8px; align-items:flex-start; font-size:.88rem; color:#44403c; line-height:1.4; }
+.ms-lista-ok svg.ic { color:var(--verde); flex-shrink:0; margin-top:2px; }
+/* Meus preços */
+.ms-precos { display:grid; grid-template-columns:minmax(0, 1fr); gap:8px; margin-top:10px; }
+.ms-preco { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; }
+.ms-preco img { width:44px; height:44px; border-radius:10px; object-fit:cover; flex-shrink:0; background:#f5f5f4; }
+.ms-preco-info { flex:1; min-width:0; }
+.ms-preco-info b { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:.88rem; line-height:1.3; }
+.ms-preco-info small { display:block; font-size:.72rem; color:var(--text-muted); }
+.ms-ganho { color:var(--verde) !important; font-weight:700; }
+.ms-ganho.neg { color:var(--vermelho) !important; }
+.ms-preco-in { width:116px !important; flex-shrink:0; padding:10px 10px !important; text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+/* A barra de salvar só aparece quando algum preço mudou, e fica presa embaixo da tela */
+.ms-salvar:not(.on) { display:none; }
+.ms-salvar { position:sticky; bottom:calc(76px + env(safe-area-inset-bottom)); z-index:5; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding:10px 12px; border-radius:16px; background:#fff; border:1px solid var(--border-color); box-shadow:0 10px 30px -12px rgba(0,0,0,.25); }
+.ms-salvar span { font-size:.82rem; font-weight:700; color:var(--text-muted); }
+.ms-salvar.on { border-color:var(--verde-borda); }
+.ms-salvar.on span { color:var(--verde); }
+.ms-salvar .btn-magic { width:auto; padding:10px 16px; margin:0; }
+@media (min-width:769px) { .ms-salvar { bottom:16px; } }
+/* Divulgar */
+.ms-links { display:grid; gap:10px; }
+.ms-link { display:grid; grid-template-columns:52px 1fr; gap:6px 12px; align-items:center; background:#fff; border:1px solid var(--border-color); border-radius:16px; padding:12px; }
+.ms-link > img, .ms-link-ic { width:52px; height:52px; border-radius:12px; object-fit:cover; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; }
+.ms-link-info { min-width:0; }
+.ms-link-info b { display:block; font-size:.92rem; }
+.ms-link-info small { display:block; font-size:.74rem; color:var(--text-muted); }
+.ms-link-info code { display:block; margin-top:3px; font-size:.72rem; color:#5b4bc4; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ms-link-bts { grid-column:1 / -1; display:flex; gap:6px; flex-wrap:wrap; }
+.ms-link-bts > * { flex:1; min-width:0; }
+.ms-dados { margin-top:16px; }
+/* Pedidos do site */
+.ms-ped { background:#fff; border:1px solid var(--border-color); border-radius:16px; padding:12px 14px; margin-bottom:10px; }
+.ms-ped.fim { opacity:.8; }
+.ms-ped-topo { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.ms-ped-topo b { font-size:.92rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ms-ped-sub { display:block; margin-top:2px; font-size:.74rem; color:var(--text-muted); }
+.ms-ped-itens { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
+.ms-ped-itens li { display:flex; align-items:center; gap:9px; font-size:.84rem; }
+.ms-ped-itens img { width:32px; height:32px; border-radius:8px; object-fit:cover; flex-shrink:0; background:#f5f5f4; }
+.ms-ped-itens span { flex:1; min-width:0; }
+.ms-ped-itens em { font-style:normal; font-weight:700; color:#44403c; white-space:nowrap; }
+.ms-ped-obs { display:flex; gap:6px; align-items:flex-start; margin:8px 0 0; font-size:.78rem; color:#57534e; }
+.ms-ped-obs svg.ic { width:14px; height:14px; flex-shrink:0; margin-top:2px; color:var(--text-muted); }
+.ms-ped-total { display:flex; justify-content:space-between; align-items:baseline; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border-color); font-size:.82rem; color:var(--text-muted); }
+.ms-ped-total b { font-size:1.05rem; color:var(--text-main); }
+.ms-ped-baixa { display:flex; gap:6px; align-items:center; margin:8px 0 0; font-size:.76rem; font-weight:700; color:var(--verde); }
+.ms-ped-baixa svg.ic { width:14px; height:14px; }
+.ms-ped-bts { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.ms-ped-bts .btn-limpar { flex:1 1 auto; }
+/* Situação do site no controle do vendedor (Admin) */
+.ms-sit { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; background:#fff; border:1px solid var(--border-color); }
+.ms-sit > svg.ic { width:22px; height:22px; flex-shrink:0; color:var(--text-muted); }
+.ms-sit div { flex:1; min-width:0; }
+.ms-sit b { display:block; font-size:.92rem; }
+.ms-sit small { display:block; font-size:.76rem; color:var(--text-muted); overflow-wrap:anywhere; }
+.ms-sit.ok { border-color:var(--verde-borda); background:var(--verde-soft); } .ms-sit.ok > svg.ic { color:var(--verde); }
+.ms-sit.pausa { border-color:#fed7aa; background:#fff7ed; } .ms-sit.pausa > svg.ic { color:#c2410c; }
+.bottom-nav-btn .aviso-num { position:absolute; top:2px; right:calc(50% - 22px); margin:0; min-width:17px; height:17px; font-size:.62rem; padding:0 4px; }
+@media (max-width:380px) { .ms-preco-in { width:104px !important; padding:10px 8px !important; } .ms-preco { gap:8px; padding:10px; } .ms-preco img { width:36px; height:36px; } }
+@media (max-width:360px) { .ms-abas button { padding:11px 6px; gap:5px; } .ms-abas button svg.ic { display:none; } }

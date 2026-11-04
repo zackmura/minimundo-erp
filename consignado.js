@@ -515,7 +515,7 @@ window.renderizarCorpoVendedor = function() {
     const d = window.vendAberto; if (!d) return;
     const v = d.vendedor, C = window.CV, nome = window.esc(v.nome), vid = v.id;
     const pend = d.baixas.filter(b => b.status === 'Pendente'), pagas = d.baixas.filter(b => b.status === 'Pago');
-    const abas = [['vendas', 'recibo', 'Vendas', d.baixas.length], ['pecas', 'pacote', `Com ${nome}`, d.estoque.reduce((s, e) => s + e.qtd, 0)], ['produtos', 'barras', 'Por produto', 0], ['acertos', 'dinheiro', 'Acertos', d.acertos.length], ['dados', 'ajustes', 'Dados', 0]];
+    const abas = [['vendas', 'recibo', 'Vendas', d.baixas.length], ['pecas', 'pacote', `Com ${nome}`, d.estoque.reduce((s, e) => s + e.qtd, 0)], ['produtos', 'barras', 'Por produto', 0], ['acertos', 'dinheiro', 'Acertos', d.acertos.length], ['site', 'sacola', 'Site', d.site ? d.site.novos : 0], ['dados', 'ajustes', 'Dados', 0]];
     window.$('cv-abas').innerHTML = abas.map(([k, i, r, n]) => `<button class="${C.aba === k ? 'active' : ''}" onclick="cvAba('${k}')">${window.ic(i)}${r}${n ? `<em class="badge-num">${n}</em>` : ''}</button>`).join('');
     const foto = f => `<img src="${window.esc(f || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">`;
     let h = '';
@@ -570,6 +570,8 @@ window.renderizarCorpoVendedor = function() {
                 <span class="cvb-info"><b>${window.fmt(a.valor)} · ${window.esc(a.forma || 'sem forma')}</b><small>${window.fmtDataHora(a.data_hora)} · ${a.qtd_baixas} venda(s)${a.usuario ? ` · recebido por ${window.esc(a.usuario)}` : ''}${a.obs ? ` · ${window.esc(a.obs)}` : ''}</small></span>
                 <button class="btn-ic perigo" title="Desfazer este acerto (as vendas voltam a 'falta acertar')" aria-label="Desfazer acerto" onclick="desfazerAcerto(${vid}, ${a.id})">${window.ic('desfazer')}</button>
             </div>`).join('') || `<div class="vazio-box pequeno">${window.ic('dinheiro')}<b>Nenhum acerto ainda</b><span>Quando ${nome} te pagar, registre na aba <b>Vendas</b>.</span></div>`}</div>`;
+    } else if (C.aba === 'site') {
+        h = window.htmlSiteNoControle ? window.htmlSiteNoControle(d) : '';
     } else {
         const info = (window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === vid)) || v;
         h = `<div class="card cv-dados">
@@ -739,7 +741,8 @@ window.vendedorVisto = null;
 window.verComoVendedor = function(vid) {
     const v = window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === vid); if (!v) return;
     window.vendedorVisto = { id: v.id, nome: v.nome }; window.painelVendedor = null;
-    ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas'].forEach(id => { window.$(id).innerHTML = ''; });
+    ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas', 'v-site'].forEach(id => { window.$(id).innerHTML = ''; });
+    if (window.MS) Object.assign(window.MS, { aba: null, dados: null, busca: '', mudou: {} });
     window.fecharModalMM();
     document.body.classList.add('modo-vendedor', 'vendo-como');
     document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = false; });
@@ -750,6 +753,7 @@ window.verComoVendedor = function(vid) {
 window.sairVisaoVendedor = function(semHistorico) {
     const vid = window.vendedorVisto && window.vendedorVisto.id;
     window.vendedorVisto = null; window.painelVendedor = null;
+    if (window.MS) Object.assign(window.MS, { aba: null, dados: null, busca: '', mudou: {} });
     document.body.classList.remove('modo-vendedor', 'vendo-como');
     document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = true; });
     window.$('subtitulo-app').innerText = "Central & ERP";
@@ -759,7 +763,7 @@ window.sairVisaoVendedor = function(semHistorico) {
 
 window.carregarPainelVendedor = async function() {
     if (window.$('loading-v')) window.$('loading-v').style.display = 'block';
-    try { window.painelVendedor = await window.apiAcao("meu_painel"); window.renderizarVendedorEstoque(); window.renderizarVendedorAcerto(); window.renderizarVendedorEncomendas(); }
+    try { window.painelVendedor = await window.apiAcao("meu_painel"); window.renderizarVendedorEstoque(); window.renderizarVendedorAcerto(); window.renderizarVendedorEncomendas(); if (window.avisoSiteVendedor) window.avisoSiteVendedor(); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
     finally { if (window.$('loading-v')) window.$('loading-v').style.display = 'none'; }
 };

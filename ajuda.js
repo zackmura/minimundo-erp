@@ -77,6 +77,13 @@ const GUIAS = [
         { alvo: '.acoes-sec button:nth-child(2)', titulo: 'Montar kit', texto: 'Escolha o kit e quantos montar. As peças saem do Ateliê e o kit pronto entra. Para criar um kit novo, use Precificar → Kit.', antes: () => window.switchTab('estoque') }
     ] },
     // ---------- Vendedores ----------
+    { id: 'sitevendedor', grupo: 'Vendedores', icone: 'sacola', titulo: 'Site do vendedor (com o preço dele)', desc: 'As suas páginas no link do vendedor, com o preço que ele escolher.', passos: [
+        'O vendedor cria o site em "Meu site", no painel dele. Você também pode criar por ele: Vendedores → abra o vendedor → aba Site → Criar o site.',
+        'Ele só muda os preços. Fotos, textos e tema são os das suas páginas, e o preço nunca fica abaixo do repasse.',
+        'Os pedidos do site dele chegam para ele, não na sua tela Pedidos. Você acompanha tudo na aba Site do controle dele.',
+        'Quando ele entrega e dá baixa nas peças, o repasse aparece em Vendas (falta acertar), como qualquer venda dele.',
+        'Para tirar o site do ar, use "Pausar" na aba Site. O link dele passa a mostrar a sua página normal.'
+    ] },
     { id: 'vendedor', grupo: 'Vendedores', icone: 'usuarios', titulo: 'Cadastrar um vendedor', desc: 'Criar o acesso e mandar pelo WhatsApp.', tour: [
         { alvo: '#vd-lista-box .pl-topo .btn-magic', titulo: 'Novo vendedor', texto: 'Toque aqui, coloque o nome de usuário, uma senha e o WhatsApp. Depois o sistema monta a mensagem com o acesso.', antes: () => window.switchTab('vendedores') }
     ] },
@@ -124,6 +131,12 @@ const GUIAS_VENDEDOR = [
     ] },
     { id: 'v-vendi', grupo: 'No dia a dia', icone: 'check', titulo: 'Registrar uma venda', desc: 'Dar baixa na peça vendida.', passos: ['Em Meu estoque, ache a peça (pode buscar pelo nome).', 'Toque em "Vendi", escolha quantas e confirme.', 'Errou? Em Meu acerto dá para cancelar em até 48 horas.'] },
     { id: 'v-acerto', grupo: 'No dia a dia', icone: 'dinheiro', titulo: 'Pagar o acerto', desc: 'Repassar o valor das vendas.', passos: ['Em Meu acerto você vê o total e cada venda.', 'Faça o pagamento e toque em "Avisar que paguei" para mandar a lista no WhatsApp.', 'Quando a Mini Mundo confirmar, as vendas passam para "Acertos feitos".'] },
+    { id: 'v-site', grupo: 'Meu site', icone: 'sacola', titulo: 'Criar o seu site e colocar os seus preços', desc: 'As páginas da Mini Mundo com o seu preço e o seu WhatsApp.', tour: [
+        { alvo: ['#nav-v_site', '#btn-v_site'], titulo: 'Meu site', texto: 'Aqui você cria o seu site. São as mesmas páginas da Mini Mundo, mas com o seu preço e o seu WhatsApp.', antes: () => window.switchTab('v_site') },
+        { alvo: ['#btn-ms-criar', '.ms-abas'], titulo: 'Criar ou ajustar', texto: 'Na primeira vez, confira o seu WhatsApp e toque em "Criar meu site". Depois, use as abas Pedidos, Meus preços e Divulgar.' },
+        { alvo: ['.ms-precos', '#v-site'], titulo: 'Seus preços', texto: 'Em "Meus preços", coloque o preço de cada produto e toque em Salvar. Campo vazio = vale o sugerido. O preço não pode ser menor que o repasse.', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('precos'); } },
+        { alvo: ['.ms-links', '#v-site'], titulo: 'Divulgar', texto: 'Em "Divulgar" estão os seus links: copie ou mande direto pelo WhatsApp. Os pedidos chegam em "Pedidos". Entregou? Toque em "Dar baixa nas peças".', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('divulgar'); } }
+    ] },
     { id: 'v-vitrine', grupo: 'No dia a dia', icone: 'link', titulo: 'Mandar sua vitrine para clientes', desc: 'Link com as peças que estão com você.', passos: ['Em Meu estoque, no fim da página, toque em "Copiar link" da sua vitrine.', 'Mande para os clientes: eles veem as fotos e falam com você no WhatsApp.'] }
 ];
 const guias = () => vendedor() ? GUIAS_VENDEDOR : GUIAS;
@@ -299,6 +312,13 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v7.4', data: '04/11/2026', titulo: 'Site de cada vendedor', itens: [
+        'Cada vendedor(a) pode ter o próprio site: as mesmas páginas de venda da Mini Mundo, com fotos, textos e tema iguais, num link só dele(a).',
+        'O vendedor(a) só muda o preço de cada produto. O preço nunca pode ser menor que o repasse. Sem mexer, vale o preço sugerido.',
+        'No site do vendedor(a), o cliente fala com o WhatsApp dele(a) e o pedido chega para ele(a), em "Meu site". Esses pedidos não aparecem na sua tela Pedidos.',
+        'Quando entrega, o vendedor(a) toca em "Dar baixa nas peças": elas saem da mala dele(a) e o repasse entra no acerto com você.',
+        'No controle de cada vendedor, a aba nova "Site" mostra o link, os preços dele(a) e os pedidos. Você pode pausar o site quando quiser.'
+    ] },
     { v: 'v7.3', data: '03/11/2026', titulo: 'Tamanho dos kits', itens: [
         'Kit sem tamanho próprio, mas com as peças medidas: a foto do kit ganha o selo "Tamanho das peças". Ao tocar, o cliente vê uma régua de cada peça.',
         'Na lista "Vem no kit" da página de venda, tocar no tamanho de uma peça abre a régua só dela.',

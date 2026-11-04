@@ -54,6 +54,9 @@
         .hero-escuro .prazo { background:rgba(255,255,255,.1); color:var(--hero-tinta); box-shadow:0 0 0 1px rgba(255,255,255,.22); }
         .hero-escuro .prazo b { color:var(--hero-ouro); }
         .hero-bt { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:22px; }
+        .atende { flex-basis:100%; margin:0 0 4px; font-size:.88rem; color:var(--suave); }
+        .atende b { color:var(--tinta); }
+        .hero-escuro .atende { color:var(--hero-suave); } .hero-escuro .atende b { color:var(--hero-tinta); }
         .pilula { display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; font-weight:600; font-size:.88rem; padding:12px 20px; border-radius:999px; border:1px solid var(--botao); background:var(--botao); color:var(--botaoTxt); cursor:pointer; transition:transform .15s, opacity .15s; }
         .pilula:hover { transform:translateY(-1px); opacity:.92; }
         .pilula.clara { background:transparent; color:var(--tinta); border-color:var(--ouro2); }
@@ -453,6 +456,7 @@
     // Página de venda para clientes: minimundo.vivainteligente.net/loja?p=natal (uma página por tema).
     // Sem "p" mostra as coleções no ar; com "pedido" mostra o andamento de um pedido.
     // O pedido é feito aqui mesmo e chega no painel (tela Pedidos). Custo e estoque nunca chegam aqui.
+    // Com &v=apelido é o site de um vendedor: as mesmas páginas, com o preço e o WhatsApp dele(a); o pedido vai para ele(a).
     // Para testar: localStorage.setItem('mm_api_url', 'http://localhost:8100/mmapi/api')
     const API = localStorage.getItem('mm_api_url') || 'https://bdfernando.alwaysdata.net/mmapi/api';
     const $ = id => document.getElementById(id);
@@ -462,11 +466,17 @@
     const instaLink = s => { s = String(s || '').trim(); if (!s) return ''; return /^https?:\/\//i.test(s) ? s : `https://instagram.com/${s.replace(/^@/, '').replace(/^instagram\.com\//i, '')}`; };
     // Endereço curto da página (minimundo.vivainteligente.net/loja), mesmo se abriu como loja.html
     const BASE = location.origin + location.pathname.replace(/\.html$/, '');
-    const linkPagina = (slug, item) => `${BASE}?p=${encodeURIComponent(slug)}${item ? '&i=' + item : ''}`;
+    const linkPagina = (slug, item) => `${BASE}?p=${encodeURIComponent(slug)}${VEND ? '&v=' + VEND : ''}${item ? '&i=' + item : ''}`;
     const linkPedido = codigo => `${BASE}?pedido=${encodeURIComponent(codigo)}`;
     const PARAMS = new URLSearchParams(location.search);
     // Aceita loja?p=natal e também loja?natal
-    let SLUG = (PARAMS.get('p') || (!PARAMS.get('pedido') && [...PARAMS.keys()].find(k => !['i', 'pedido', 'de', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign'].includes(k) && !PARAMS.get(k))) || '').toLowerCase();
+    let SLUG = (PARAMS.get('p') || (!PARAMS.get('pedido') && [...PARAMS.keys()].find(k => !['i', 'v', 'pedido', 'de', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign'].includes(k) && !PARAMS.get(k))) || '').toLowerCase();
+    let VEND = (PARAMS.get('v') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24);
+    // Site do vendedor desligado (ou apelido errado): o servidor manda a página normal e o &v= sai do endereço
+    function conferirVendedor(loja) {
+        if (!VEND || (loja && loja.vendedor)) return;
+        VEND = ''; if (SLUG) history.replaceState(null, '', linkPagina(SLUG, PARAMS.get('i')));
+    }
     const CODIGO = (PARAMS.get('pedido') || '').toUpperCase();
     // De onde veio o link (?de=instagram…; sem ele, o navegador de dentro do Instagram/Facebook se apresenta). Conta na visita e no pedido.
     const DE = (() => {
@@ -488,7 +498,7 @@
     let DADOS = null, ITENS = [], FILTRO = 'tudo', SACOLA = [], TEMA = 'padrao', ETAPA = 'sacola', CHECKOUT = { entrega: 'retirar', pagamento: 'Pix' };
     const guardar = (k, v) => { try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) { /* aba anônima */ } };
     const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v === null ? padrao : JSON.parse(v); } catch (e) { return padrao; } };
-    const chaveSacola = () => 'mm_sacola_' + SLUG;
+    const chaveSacola = () => 'mm_sacola_' + SLUG + (VEND ? '.' + VEND : '');
     function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2400); }
     const post = async corpo => { const r = await (await fetch(API, { method: 'POST', body: JSON.stringify(corpo) })).json(); if (!r.sucesso) { const e = new Error(r.erro || 'erro'); e.negocio = true; throw e; } return r; };
 
@@ -511,8 +521,10 @@
         document.title = `${pagina.titulo || t.titulo} | Mini Mundo`;
     }
     function montarContato() {
-        const L = (DADOS && DADOS.loja) || {}, z = zap(L.whatsapp, 'Olá! Vim pela página da Mini Mundo.'), ig = instaLink(L.instagram), meus = ler('mm_pedidos', []);
-        $('hero-bt').innerHTML = (z ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} Fale com a gente</a>` : '') + (ig ? `<a class="pilula clara" href="${esc(ig)}" target="_blank" rel="noopener">${IC.insta} Instagram</a>` : '');
+        const L = (DADOS && DADOS.loja) || {}, ig = instaLink(L.instagram), meus = ler('mm_pedidos', []);
+        const z = zap(L.whatsapp, L.vendedor ? `Olá, ${L.vendedor}! Vim pela sua página da Mini Mundo.` : 'Olá! Vim pela página da Mini Mundo.');
+        $('hero-bt').innerHTML = (L.vendedor ? `<p class="atende">Atendimento por <b>${esc(L.vendedor)}</b> · revenda Mini Mundo</p>` : '')
+            + (z ? `<a class="pilula" href="${esc(z)}" target="_blank" rel="noopener">${IC.zap} ${L.vendedor ? `Fale com ${esc(L.vendedor)}` : 'Fale com a gente'}</a>` : '') + (ig ? `<a class="pilula clara" href="${esc(ig)}" target="_blank" rel="noopener">${IC.insta} Instagram</a>` : '');
         $('rodape-links').innerHTML = (z ? `<a href="${esc(z)}" target="_blank" rel="noopener">WhatsApp</a>` : '') + (ig ? `<a href="${esc(ig)}" target="_blank" rel="noopener">Instagram</a>` : '')
             + (SLUG && DADOS && DADOS.pagina ? `<a onclick="compartilharPagina()">Compartilhar</a>` : '') + (meus.length ? `<a onclick="meusPedidos()">Meus pedidos (${meus.length})</a>` : '');
         if (z) { $('zap-flutuante').href = z; $('zap-flutuante').innerHTML = IC.zap; $('zap-flutuante').hidden = !!SACOLA.length; }
@@ -529,8 +541,9 @@
     async function carregar() {
         try {
             if (CODIGO) return mostrarPedido(await post({ acao: 'acompanhar_pedido', c: CODIGO }));
-            if (!SLUG) return mostrarColecoes(await post({ acao: 'paginas_publicas' }));
-            DADOS = await post({ acao: 'pagina_publica', p: SLUG });
+            if (!SLUG) return mostrarColecoes(await post({ acao: 'paginas_publicas', v: VEND }));
+            DADOS = await post({ acao: 'pagina_publica', p: SLUG, v: VEND });
+            conferirVendedor(DADOS.loja);
             // Link antigo da página: mostra o endereço de hoje
             if (DADOS.pagina && DADOS.pagina.slug && DADOS.pagina.slug !== SLUG) {
                 const antiga = ler('mm_sacola_' + SLUG, null); SLUG = DADOS.pagina.slug;
@@ -545,7 +558,8 @@
             SACOLA = ler(chaveSacola(), []).filter(s => s && s.qtd > 0 && ITENS.some(i => i.id === s.id));
             montarContato(); montarFiltros(); renderizar(); atualizarBarra(); mostrarOutras(DADOS.outras, 'Veja também');
             marcarDoLink();
-            if (!sessionStorage.getItem('mm_visita_' + SLUG)) { sessionStorage.setItem('mm_visita_' + SLUG, '1'); post({ acao: 'registrar_pagina', p: SLUG, de: DE }).catch(() => {}); }
+            const visita = 'mm_visita_' + SLUG + (VEND ? '.' + VEND : '');
+            if (!sessionStorage.getItem(visita)) { sessionStorage.setItem(visita, '1'); post({ acao: 'registrar_pagina', p: SLUG, de: DE, v: VEND }).catch(() => {}); }
         } catch (e) {
             montarTopo({ titulo: CODIGO ? 'Pedido não encontrado' : 'Mini Mundo' }, 'padrao');
             $('conteudo').innerHTML = `<div class="aviso"><h2>${e.negocio ? esc(e.message) : 'Não conseguimos abrir a página agora'}</h2><p>${e.negocio ? 'Se precisar, fale com a gente pelo WhatsApp.' : 'Verifique a internet e tente de novo em instantes.'}</p><button class="pilula" onclick="location.reload()">Tentar de novo</button></div>`;
@@ -559,7 +573,7 @@
         mostrarOutras(DADOS.outras, 'Coleções no ar');
     }
     function mostrarColecoes(r) {
-        DADOS = r;
+        DADOS = r; conferirVendedor(r.loja);
         if (r.paginas.length === 1) return location.replace(linkPagina(r.paginas[0].slug));
         montarTopo({ titulo: 'Coleções Mini Mundo', texto: 'Escolha uma coleção para ver os kits e as peças, montar sua sacola e fazer seu pedido.' }, 'padrao');
         montarContato();
@@ -759,7 +773,7 @@
         guardar('mm_cliente', { nome, telefone: tel, endereco, entrega: CHECKOUT.entrega, pagamento: CHECKOUT.pagamento });
         const b = $('s-enviar'), txt = b.innerHTML; b.disabled = true; b.textContent = 'Enviando seu pedido…';
         try {
-            const r = await post({ acao: 'fazer_pedido', p: SLUG, de: DE, site: $('s-site').value, itens: SACOLA.map(s => ({ id: s.id, qtd: s.qtd })),
+            const r = await post({ acao: 'fazer_pedido', p: SLUG, v: VEND, de: DE, site: $('s-site').value, itens: SACOLA.map(s => ({ id: s.id, qtd: s.qtd })),
                 cliente: { nome, telefone: tel, entrega: CHECKOUT.entrega, endereco, pagamento: CHECKOUT.pagamento, obs } });
             const resumo = SACOLA.map(s => { const it = ITENS.find(i => i.id === s.id); return it ? `${s.qtd}× ${it.nome}` : ''; }).filter(Boolean);
             const meus = ler('mm_pedidos', []); meus.unshift({ codigo: r.codigo, numero: r.numero, pagina: DADOS.pagina.titulo, data: new Date().toISOString().slice(0, 10) }); guardar('mm_pedidos', meus.slice(0, 20));
@@ -772,7 +786,7 @@
         const L = DADOS.loja || {}, link = linkPedido(r.codigo);
         const z = zap(L.whatsapp, `Olá! Acabei de fazer o pedido *#${r.numero}* pela página *${DADOS.pagina.titulo}*.\n${resumo.join('\n')}\nTotal: ${real(r.total)}${r.sem_preco ? ' + itens a combinar' : ''}\n\nAcompanhar: ${link}`);
         gaveta(`<div class="s-ok"><div class="s-selo">✓</div><h2>Pedido #${r.numero} recebido!</h2>
-            <p>Obrigado, ${esc(nome.split(' ')[0])}! A gente vai confirmar tudo com você pelo WhatsApp.</p>
+            <p>Obrigado, ${esc(nome.split(' ')[0])}! ${L.vendedor ? esc(L.vendedor) : 'A gente'} vai confirmar tudo com você pelo WhatsApp.</p>
             <p><b>Total: ${real(r.total)}</b>${r.sem_preco ? ' + itens a combinar' : ''}</p>
             <a class="pilula" href="${esc(link)}">Acompanhar meu pedido</a>
             ${PUSH_OK && r.push ? `<button class="pilula clara" type="button" onclick="ativarAvisos('${esc(r.codigo)}', '${esc(r.push)}', this)">🔔 Me avise quando o pedido mudar</button>` : ''}
@@ -811,6 +825,7 @@
     let PEDIDO = null, PUSH = '', VISTO = '', ULTIMA_OLHADA = 0;
     function mostrarPedido(r) {
         DADOS = { loja: r.loja }; PUSH = r.push || ''; PEDIDO = r.pedido; VISTO = marcaPedido(PEDIDO);
+        VEND = (r.loja && r.loja.apelido) || ''; // pedido do site de um vendedor: "Ver a coleção" volta para o site dele(a)
         const p = PEDIDO, tema = p.pagina ? p.pagina.tema : 'padrao';
         if (p.pagina && p.pagina.slug) SLUG = p.pagina.slug;
         montarTopo({ titulo: `Pedido #${p.numero}`, texto: `Olá, ${p.cliente || 'tudo bem'}! Aqui você acompanha o seu pedido, passo a passo.` }, tema);
