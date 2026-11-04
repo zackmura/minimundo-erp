@@ -532,7 +532,7 @@ window.renderizarCorpoVendedor = function() {
                     ${chk ? `<input type="checkbox" class="chk-baixa" value="${b.id}" data-valor="${b.repasse_total}" checked onchange="somarSelecaoAcerto()">` : ''}
                     ${foto(b.foto)}
                     <span class="cvb-info"><b>${b.qtd}x ${window.esc(b.produto_nome)}</b>
-                        <small>vendeu em ${window.fmtDataHora(b.data_hora).slice(0, 8)}${b.origem === 'CONFERENCIA' ? ' · achado na conferência' : b.origem === 'ADMIN' ? ` · lançada por ${window.esc(b.criado_por || 'você')}` : ''} · ${window.fmt(b.repasse_unit)}/un</small>
+                        <small>vendeu em ${window.fmtDataHora(b.data_hora).slice(0, 8)}${b.cliente ? ` para ${window.esc(b.cliente)}` : ''}${b.origem === 'CONFERENCIA' ? ' · achado na conferência' : b.origem === 'ADMIN' ? ` · lançada por ${window.esc(b.criado_por || 'você')}` : ''} · ${window.fmt(b.repasse_unit)}/un</small>
                         ${p ? '<span class="pilula pend">Falta acertar</span>' : `<span class="pilula pago">${window.ic('check')}Acertado em ${window.fmtDataHora(b.acerto_data || b.data_pgto).slice(0, 8)}${b.acerto_forma ? ` · ${window.esc(b.acerto_forma)}` : ''}</span>`}</span>
                     <b class="cvb-v">${window.fmt(b.repasse_total)}</b>
                     ${p ? `<button class="btn-ic perigo" title="Desfazer esta venda (a peça volta para ${nome})" aria-label="Desfazer venda" onclick="event.preventDefault(); cancelarBaixa(${b.id}, true)">${window.ic('desfazer')}</button>` : ''}
@@ -732,7 +732,7 @@ window.iniciarAppVendedor = function() {
     window.$('login-screen').style.display = "none"; window.$('app-core').style.display = "block";
     window.$('subtitulo-app').innerText = "Painel do Vendedor";
     window.mostrarUsuarioNoMenu("Vendedor(a)");
-    window.navComecar(); window.switchTab('v_estoque', '📦 Meu Estoque', true);
+    window.navComecar(); window.switchTab('v_estoque', 'Vender', true);
     if (window.boasVindasMM) window.boasVindasMM();
 };
 
@@ -741,7 +741,8 @@ window.vendedorVisto = null;
 window.verComoVendedor = function(vid) {
     const v = window.painelEstoque && window.painelEstoque.vendedores.find(x => x.id === vid); if (!v) return;
     window.vendedorVisto = { id: v.id, nome: v.nome }; window.painelVendedor = null;
-    ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas', 'v-site'].forEach(id => { window.$(id).innerHTML = ''; });
+    ['v-resumo', 'v-lista-estoque', 'v-vitrine', 'v-acerto', 'v-lista-encomendas', 'v-site', 'v-vendas', 'vd-cats'].forEach(id => { window.$(id).innerHTML = ''; });
+    if (window.$('vd-barra')) window.$('vd-barra').hidden = true;
     if (window.MS) Object.assign(window.MS, { aba: null, dados: null, busca: '', mudou: {} });
     window.fecharModalMM();
     document.body.classList.add('modo-vendedor', 'vendo-como');
@@ -753,6 +754,7 @@ window.verComoVendedor = function(vid) {
 window.sairVisaoVendedor = function(semHistorico) {
     const vid = window.vendedorVisto && window.vendedorVisto.id;
     window.vendedorVisto = null; window.painelVendedor = null;
+    if (window.$('vd-barra')) window.$('vd-barra').hidden = true;
     if (window.MS) Object.assign(window.MS, { aba: null, dados: null, busca: '', mudou: {} });
     document.body.classList.remove('modo-vendedor', 'vendo-como');
     document.querySelectorAll('.faixa-ver-como, .btn-voltar').forEach(el => { el.hidden = true; });

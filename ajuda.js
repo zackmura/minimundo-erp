@@ -90,6 +90,13 @@ const GUIAS = [
     { id: 'mala', grupo: 'Vendedores', icone: 'mala', titulo: 'Enviar peças para o vendedor', desc: 'Consignado: as peças passam do Ateliê para ele(a).', tour: [
         { alvo: ['.vc-acoes .btn-limpar', '#vd-lista-box .pl-topo'], titulo: 'Enviar peças', texto: 'No cartão do vendedor, toque em Enviar peças. Marque as quantidades de cada produto e confirme. Dá para mandar a lista no WhatsApp.', antes: () => window.switchTab('vendedores') }
     ] },
+    { id: 'vendasvend', grupo: 'Vendedores', icone: 'carrinho', titulo: 'Como o vendedor lança as vendas', desc: 'Carrinho com fotos, cliente e "vai pagar depois".', passos: [
+        'No celular do vendedor, a tela "Vender" mostra as peças da mala dele(a) com foto grande. Ele(a) toca em "Adicionar" nas peças que o cliente levou.',
+        'Em "Fechar a venda" dá para mudar a quantidade e o preço de cada peça, tirar uma peça, pôr o nome e o WhatsApp do cliente e dizer se ele já pagou.',
+        'Ao lançar, as peças saem da mala e o repasse de cada uma entra no acerto com você, como antes.',
+        'Em "Minhas vendas" ele(a) acompanha quem falta pagar, cobra no WhatsApp e marca "Recebi". Você vê tudo em Vendedores → abrir o vendedor → Vendas, com o nome do cliente.',
+        'Para ver exatamente o que ele(a) vê, use "Ver como o vendedor".'
+    ] },
     { id: 'acerto', grupo: 'Vendedores', icone: 'dinheiro', titulo: 'Ver as vendas do vendedor e receber o acerto', desc: 'Controle item a item do que falta acertar.', tour: [
         { alvo: ['.vend-card', '#lista-vendedores'], titulo: 'Abrir o controle', texto: 'Toque no vendedor. Abre o controle completo dele(a).', antes: () => window.switchTab('vendedores') },
         { alvo: '.cv-nums', titulo: 'Resumo', texto: 'Quanto recebeu, vendeu, devolveu e quantas peças estão com ele(a) agora.', antes: async () => { const v = (window.painelEstoque && window.painelEstoque.vendedores || [])[0]; if (v) { await window.abrirVendedor(v.id, 'vendas'); } } },
@@ -98,6 +105,13 @@ const GUIAS = [
         { alvo: ['#cv-receber', '#cv-corpo'], titulo: 'Receber', texto: 'Em Vendas → Falta acertar, marque o que recebeu, escolha como pagou e toque em "Recebi o valor selecionado".' }
     ] },
     // ---------- Divulgar ----------
+    { id: 'musica', grupo: 'Divulgar', icone: 'play', titulo: 'Música no site', desc: 'Bate o sino, Noite Feliz ou sem música.', passos: [
+        'Em Páginas, toque em Editar na página e abra a aba Aparência.',
+        'Em "Música no site", escolha a música. "Automática" toca "Bate o sino" nas páginas com o tema Natal.',
+        'Toque em "Ouvir" para escutar antes. Depois toque em "Salvar aparência".',
+        'No site, a música começa baixinha depois que o cliente toca na página (os celulares não deixam tocar sozinha). Quem não quiser desliga no botão de música do topo.',
+        'Vale também no site dos vendedores, porque as páginas são as mesmas.'
+    ] },
     { id: 'pagina', grupo: 'Divulgar', icone: 'megafone', titulo: 'Criar uma página de venda', desc: 'Uma loja para cada data, com pedido pelo site.', tour: [
         { alvo: '.pg-topo-bt .btn-magic', titulo: 'Nova página', texto: 'Escolha o tema (Natal, Dia das Mães…) e o título. Depois adicione os produtos.', antes: () => window.switchTab('paginas') },
         { alvo: ['.pg-card .pg-botoes .btn-magic', '#pg-lista'], titulo: 'Divulgar', texto: 'Cria os posts prontos (story, feed, carrossel, enquete e vídeo) com a legenda e o link.' },
@@ -123,21 +137,22 @@ const GUIAS = [
     ] }
 ];
 const GUIAS_VENDEDOR = [
-    { id: 'v-tour', grupo: 'Comece aqui', icone: 'play', titulo: 'Tour rápido do seu painel', desc: 'Onde ver suas peças, registrar venda e o acerto.', tour: [
-        { alvo: '#v-lista-estoque', titulo: 'Suas peças', texto: 'Estas são as peças que estão com você agora.', antes: () => window.switchTab('v_estoque') },
-        { alvo: ['.btn-vendi', '#v-lista-estoque'], titulo: 'Vendi', texto: 'Vendeu? Toque em "Vendi" na peça e diga quantas. O valor do repasse entra no seu acerto.' },
-        { alvo: '#v-acerto', titulo: 'Meu acerto', texto: 'Aqui está quanto você deve repassar e o que já foi pago.', antes: () => window.switchTab('v_acerto') },
+    { id: 'v-tour', grupo: 'Comece aqui', icone: 'play', titulo: 'Tour rápido do seu painel', desc: 'Onde vender, acompanhar as vendas e o acerto.', tour: [
+        { alvo: '#v-lista-estoque', titulo: 'Vender', texto: 'Estas são as peças que estão com você. Toque na foto para ver maior.', antes: () => window.switchTab('v_estoque') },
+        { alvo: ['.vd-add', '.vd-passo', '#v-lista-estoque'], titulo: 'Pôr no carrinho', texto: 'Toque em "Adicionar" nas peças que o cliente levou. Depois toque em "Fechar a venda", embaixo: lá você muda o preço, tira peças, coloca o cliente e diz se ele já pagou.' },
+        { alvo: ['#v-vendas', '#tab-v_vendas'], titulo: 'Minhas vendas', texto: 'Aqui você vê quem comprou, quem ainda falta pagar (com botão de cobrar no WhatsApp), o seu lucro e quanto deve à Mini Mundo.', antes: () => window.switchTab('v_vendas') },
         { alvo: '#tab-v_encomendas .card', titulo: 'Encomendas', texto: 'Cliente quer uma peça que você não tem? Peça aqui para a fábrica.', antes: () => window.switchTab('v_encomendas') }
     ] },
-    { id: 'v-vendi', grupo: 'No dia a dia', icone: 'check', titulo: 'Registrar uma venda', desc: 'Dar baixa na peça vendida.', passos: ['Em Meu estoque, ache a peça (pode buscar pelo nome).', 'Toque em "Vendi", escolha quantas e confirme.', 'Errou? Em Meu acerto dá para cancelar em até 48 horas.'] },
-    { id: 'v-acerto', grupo: 'No dia a dia', icone: 'dinheiro', titulo: 'Pagar o acerto', desc: 'Repassar o valor das vendas.', passos: ['Em Meu acerto você vê o total e cada venda.', 'Faça o pagamento e toque em "Avisar que paguei" para mandar a lista no WhatsApp.', 'Quando a Mini Mundo confirmar, as vendas passam para "Acertos feitos".'] },
+    { id: 'v-vendi', grupo: 'No dia a dia', icone: 'carrinho', titulo: 'Lançar uma venda', desc: 'Uma ou várias peças, com o cliente e o preço.', passos: ['Em Vender, toque em "Adicionar" nas peças que o cliente levou (pode buscar pelo nome). Toque na foto para ver maior.', 'Toque em "Fechar a venda". Lá dá para mudar a quantidade e o preço, ou tirar uma peça na lixeira.', 'Coloque o nome e o WhatsApp do cliente (opcional) e escolha "Vai pagar depois" ou "Já pagou".', 'Toque em "Lançar venda". As peças saem da sua mala e o repasse entra no seu acerto.', 'Errou? Em Minhas vendas, toque em desfazer (até 48 horas).'] },
+    { id: 'v-receber', grupo: 'No dia a dia', icone: 'recibo', titulo: 'Acompanhar quem falta pagar', desc: 'Vendas a receber, cobrar e marcar como recebido.', passos: ['Em Minhas vendas, o filtro "A receber" mostra quem ainda não pagou.', 'Toque em "Cobrar" para mandar a lembrança no WhatsApp do cliente.', 'Quando ele pagar, toque em "Recebi" e escolha como pagou.', 'Em cima você vê o total a receber, quanto deve à Mini Mundo e o seu lucro no mês.'] },
+    { id: 'v-acerto', grupo: 'No dia a dia', icone: 'dinheiro', titulo: 'Pagar o acerto', desc: 'Repassar o valor das vendas.', passos: ['Em Minhas vendas, toque em "Acerto com a Mini Mundo": lá está o total e cada peça vendida.', 'Faça o pagamento e toque em "Avisar que paguei" para mandar a lista no WhatsApp.', 'Quando a Mini Mundo confirmar, as vendas passam para "Acertos feitos".'] },
     { id: 'v-site', grupo: 'Meu site', icone: 'sacola', titulo: 'Criar o seu site e colocar os seus preços', desc: 'As páginas da Mini Mundo com o seu preço e o seu WhatsApp.', tour: [
         { alvo: ['#nav-v_site', '#btn-v_site'], titulo: 'Meu site', texto: 'Aqui você cria o seu site. São as mesmas páginas da Mini Mundo, mas com o seu preço e o seu WhatsApp.', antes: () => window.switchTab('v_site') },
         { alvo: ['#btn-ms-criar', '.ms-abas'], titulo: 'Criar ou ajustar', texto: 'Na primeira vez, confira o seu WhatsApp e toque em "Criar meu site". Depois, use as abas Pedidos, Meus preços e Divulgar.' },
         { alvo: ['.ms-precos', '#v-site'], titulo: 'Seus preços', texto: 'Em "Meus preços", coloque o preço de cada produto e toque em Salvar. Campo vazio = vale o sugerido. O preço não pode ser menor que o repasse.', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('precos'); } },
         { alvo: ['.ms-links', '#v-site'], titulo: 'Divulgar', texto: 'Em "Divulgar" estão os seus links: copie ou mande direto pelo WhatsApp. Os pedidos chegam em "Pedidos". Entregou? Toque em "Dar baixa nas peças".', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('divulgar'); } }
     ] },
-    { id: 'v-vitrine', grupo: 'No dia a dia', icone: 'link', titulo: 'Mandar sua vitrine para clientes', desc: 'Link com as peças que estão com você.', passos: ['Em Meu estoque, no fim da página, toque em "Copiar link" da sua vitrine.', 'Mande para os clientes: eles veem as fotos e falam com você no WhatsApp.'] }
+    { id: 'v-vitrine', grupo: 'No dia a dia', icone: 'link', titulo: 'Mandar sua vitrine para clientes', desc: 'Link com as peças que estão com você.', passos: ['Em Vender, no fim da página, toque em "Copiar link" da sua vitrine.', 'Mande para os clientes: eles veem as fotos e falam com você no WhatsApp.'] }
 ];
 const guias = () => vendedor() ? GUIAS_VENDEDOR : GUIAS;
 
@@ -312,6 +327,13 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v7.5', data: '04/11/2026', titulo: 'Vender mais fácil, vendas dos vendedores, site novo e música', itens: [
+        'Vendedores: a tela "Vender" tem fotos grandes (toque na foto para ver em tela cheia) e carrinho. Dá para pôr várias peças, mudar a quantidade e o preço, tirar o que não vai e lançar tudo de uma vez.',
+        'Na venda, o vendedor(a) coloca o cliente e diz se ele já pagou ou vai pagar depois. Em "Minhas vendas" aparecem quem falta pagar (com botão para cobrar no WhatsApp), o lucro do mês e quanto ele(a) deve para você.',
+        'Os pedidos do site do vendedor(a) também viram vendas com o nome do cliente quando ele(a) dá baixa. No controle do vendedor, cada venda mostra para quem foi.',
+        'Site com cara de loja: barra no topo com a sacola e a busca, fotos dos produtos ao lado do título, contagem regressiva, produtos em grade (2 por linha no celular) e cada produto abre numa janela com as fotos, o tamanho e o que vem no kit.',
+        'Música no site: nas páginas de Natal toca "Bate o sino" depois que o cliente toca na página, com botão para desligar. Em Páginas → Editar → Aparência dá para escolher Noite Feliz, We Wish You a Merry Christmas ou sem música.'
+    ] },
     { v: 'v7.4', data: '04/11/2026', titulo: 'Site de cada vendedor', itens: [
         'Cada vendedor(a) pode ter o próprio site: as mesmas páginas de venda da Mini Mundo, com fotos, textos e tema iguais, num link só dele(a).',
         'O vendedor(a) só muda o preço de cada produto. O preço nunca pode ser menor que o repasse. Sem mexer, vale o preço sugerido.',

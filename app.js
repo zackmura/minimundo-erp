@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v7.4.0";
+const VERSAO_APP = "v7.5.0";
 window.VERSAO_APP_MM = VERSAO_APP;
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
@@ -163,7 +163,8 @@ window.TELAS = {
     novidades: ['presente', 'Novidades', 'O que mudou em cada versão'],
     ajuda: ['ajuda', 'Ajuda e tutoriais', 'Passo a passo de cada tarefa'],
     menu_mobile: ['grade', 'Menu', 'Todas as telas do sistema'],
-    v_estoque: ['arquivo', 'Meu estoque', 'Peças que estão com você'],
+    v_estoque: ['carrinho', 'Vender', 'Escolha as peças que o cliente levou e lance a venda'],
+    v_vendas: ['recibo', 'Minhas vendas', 'Quem comprou, quem falta pagar e o seu acerto'],
     v_acerto: ['dinheiro', 'Meu acerto', 'O que você deve e o que já pagou'],
     v_encomendas: ['presente', 'Encomendas', 'Peça algo para a fábrica'],
     v_site: ['sacola', 'Meu site', 'Suas páginas de venda, com o seu preço']
@@ -235,6 +236,7 @@ window.switchTab = function(tabName, tituloAba = null, semHistorico = false) {
     window.$('terminal').style.display = abasComConsole.includes(tabName) ? 'block' : 'none';
     window.scrollTo(0, 0);
     if(tabName==='estoque' || tabName==='vendedores') window.carregarPainelEstoque();
+    if(tabName==='v_vendas' && window.renderizarMinhasVendas) window.renderizarMinhasVendas();
     if(tabName.startsWith('v_')) window.carregarPainelVendedor();
     if(tabName==='v_site' && window.carregarMeuSite) window.carregarMeuSite();
 

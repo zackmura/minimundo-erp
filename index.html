@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=7.4.0">
+    <link rel="stylesheet" href="style.css?v=7.5.0">
 </head>
 <body>
 
@@ -139,7 +139,8 @@
 
         <nav class="sb-nav" id="menu-abas-vendedor">
             <div class="sb-grupo">Meu painel</div>
-            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Meu estoque</span></button>
+            <button id="btn-v_estoque" class="tab-btn" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vender</span></button>
+            <button id="btn-v_vendas" class="tab-btn" onclick="switchTab('v_vendas')"><svg class="ic"><use href="#i-recibo"/></svg><span>Minhas vendas</span></button>
             <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg><span>Meu acerto</span></button>
             <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg><span>Encomendas</span></button>
             <button id="btn-v_site" class="tab-btn" onclick="switchTab('v_site')"><svg class="ic"><use href="#i-sacola"/></svg><span>Meu site</span><b class="aviso-num" data-aviso-site hidden></b></button>
@@ -781,10 +782,15 @@
         <div id="tab-v_estoque" class="tab-content">
             <div id="v-resumo"></div>
             <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="v-busca-estoque" placeholder="Buscar peça…" autocomplete="off" enterkeyhint="search" oninput="renderizarVendedorEstoque()"></div>
+            <div class="chips-rolagem" id="vd-cats"></div>
             <div id="loading-v" class="loading-mm">⏳ Carregando suas peças...</div>
-            <div id="v-lista-estoque"></div>
+            <div id="v-lista-estoque" class="vd-grade"></div>
+            <button type="button" class="vd-barra" id="vd-barra" hidden onclick="abrirCarrinhoVendedor()"></button>
             <div id="v-vitrine"></div>
             <button class="btn-magic btn-secundario esconde-vendo-como" style="margin-top:20px;" onclick="abrirTrocarSenha()">🔑 Trocar minha senha</button>
+        </div>
+        <div id="tab-v_vendas" class="tab-content">
+            <div id="v-vendas"></div>
         </div>
         <div id="tab-v_site" class="tab-content">
             <div id="v-site"></div>
@@ -1033,30 +1039,32 @@
 </nav>
 
 <nav class="bottom-nav" id="bottom-nav-vendedor">
-    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
-    <button id="nav-v_acerto" class="bottom-nav-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg>Acerto</button>
+    <button id="nav-v_estoque" class="bottom-nav-btn active" onclick="switchTab('v_estoque')"><svg class="ic"><use href="#i-carrinho"/></svg>Vender</button>
+    <button id="nav-v_vendas" class="bottom-nav-btn" onclick="switchTab('v_vendas')"><svg class="ic"><use href="#i-recibo"/></svg>Vendas</button>
     <button id="nav-v_encomendas" class="bottom-nav-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg>Encomendas</button>
     <button id="nav-v_site" class="bottom-nav-btn" onclick="switchTab('v_site')"><svg class="ic"><use href="#i-sacola"/></svg>Meu site<b class="aviso-num" data-aviso-site hidden></b></button>
     <button id="nav-v-ajuda" class="bottom-nav-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg>Ajuda</button>
 </nav>
 
-<script src="galeria.js?v=7.4.0"></script>
-<script src="app.js?v=7.4.0"></script>
-<script src="regua.js?v=7.4.0"></script>
-<script src="lista-fotos.js?v=7.4.0"></script>
-<script src="consignado.js?v=7.4.0"></script>
-<script src="site-vendedor.js?v=7.4.0"></script>
-<script src="vendas.js?v=7.4.0"></script>
-<script src="produtos.js?v=7.4.0"></script>
-<script src="dashboard.js?v=7.4.0"></script>
-<script src="ajustes.js?v=7.4.0"></script>
-<script src="rascunho.js?v=7.4.0"></script>
-<script src="usuarios.js?v=7.4.0"></script>
-<script src="temas.js?v=7.4.0"></script>
-<script src="kits.js?v=7.4.0"></script>
-<script src="paginas.js?v=7.4.0"></script>
-<script src="pedidos.js?v=7.4.0"></script>
-<script src="ajuda.js?v=7.4.0"></script>
+<script src="galeria.js?v=7.5.0"></script>
+<script src="app.js?v=7.5.0"></script>
+<script src="regua.js?v=7.5.0"></script>
+<script src="lista-fotos.js?v=7.5.0"></script>
+<script src="consignado.js?v=7.5.0"></script>
+<script src="site-vendedor.js?v=7.5.0"></script>
+<script src="vender.js?v=7.5.0"></script>
+<script src="vendas.js?v=7.5.0"></script>
+<script src="produtos.js?v=7.5.0"></script>
+<script src="dashboard.js?v=7.5.0"></script>
+<script src="ajustes.js?v=7.5.0"></script>
+<script src="rascunho.js?v=7.5.0"></script>
+<script src="usuarios.js?v=7.5.0"></script>
+<script src="temas.js?v=7.5.0"></script>
+<script src="kits.js?v=7.5.0"></script>
+<script src="musica.js?v=7.5.0"></script>
+<script src="paginas.js?v=7.5.0"></script>
+<script src="pedidos.js?v=7.5.0"></script>
+<script src="ajuda.js?v=7.5.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>

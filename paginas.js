@@ -167,7 +167,14 @@ window.abrirEditorPagina = function(id) {
                 <div class="col"><div class="input-group"><label for="pe-ate">Encomendas até</label><input type="date" id="pe-ate" value="${esc(p.pedidos_ate)}"><small class="texto-ajuda">Aparece com contagem regressiva. Pode deixar vazio.</small></div></div>
                 <div class="col"><div class="input-group"><label for="pe-slug">Link da página</label><div class="pe-slug"><span>…/loja?p=</span><input type="text" id="pe-slug" value="${esc(p.slug)}" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false"></div></div></div>
             </div>
-            <div class="input-group"><label>Foto de capa <small class="rot-dica">opcional, larga, aparece embaixo do título</small></label><div class="pe-capa" id="pe-capa"></div></div>
+            <div class="input-group"><label for="pe-musica">Música no site</label>
+                <div class="pe-musica"><select id="pe-musica">
+                    <option value="" ${!p.musica ? 'selected' : ''}>Automática pelo tema</option>
+                    ${Object.entries(window.MusicaMM ? window.MusicaMM.nomes : {}).map(([k, n]) => `<option value="${k}" ${p.musica === k ? 'selected' : ''}>🎵 ${esc(n)}</option>`).join('')}
+                    <option value="nenhuma" ${p.musica === 'nenhuma' ? 'selected' : ''}>🔇 Sem música</option>
+                </select><button type="button" class="btn-limpar" id="pe-ouvir" onclick="ouvirMusicaPg()">▶ Ouvir</button></div>
+                <small class="texto-ajuda">Automática: nas páginas de Natal toca "Bate o sino". Toca baixinho depois que o cliente toca na página (os celulares não deixam tocar sozinha). O cliente pode desligar no botão do topo.</small></div>
+            <div class="input-group"><label>Foto de capa <small class="rot-dica">opcional; aparece ao lado do título, no lugar das fotos dos produtos</small></label><div class="pe-capa" id="pe-capa"></div></div>
             <label class="chave" style="margin:4px 0 16px;"><input type="checkbox" id="pe-ativa" ${p.ativa ? 'checked' : ''}> Página no ar (clientes conseguem abrir)</label>
             <button class="btn-magic btn-global" id="btn-pe" onclick="salvarPaginaPg()">${window.ic('check')} Salvar aparência</button>
             <button class="btn-limpar perigo ep-link" style="margin-top:18px;" onclick="excluirPaginaPg(${p.id})">${window.ic('lixo')} Excluir esta página</button>
@@ -220,10 +227,22 @@ window.trocarCapaPg = function() {
     };
     inp.click();
 };
+// Ouvir a música escolhida antes de salvar (Automática = a do tema)
+window.ouvirMusicaPg = function() {
+    const M = window.MusicaMM, b = $('pe-ouvir'); if (!M || !b) return;
+    if (M.tocando()) { M.parar(); b.textContent = '▶ Ouvir'; return; }
+    const v = $('pe-musica').value, id = v === 'nenhuma' ? '' : v || (PG.temaEditor === 'natal' ? 'sino' : '');
+    if (!id) return window.toastMM(v === 'nenhuma' ? 'Sem música nesta página' : 'Neste tema, o automático é sem música');
+    M.tocar(id, 0.35); b.textContent = '⏸ Parar';
+};
+window.aoSairDaTela = window.aoSairDaTela || {};
+const sairPaginasAntes = window.aoSairDaTela.paginas;
+window.aoSairDaTela.paginas = function() { if (window.MusicaMM) window.MusicaMM.parar(); if (sairPaginasAntes) sairPaginasAntes(); };
 window.salvarPaginaPg = async function() {
     const p = paginaPorId(PG.editando); if (!p) return;
     const slug = slugDe($('pe-slug').value) || p.slug; $('pe-slug').value = slug;
-    const dados = { id: p.id, titulo: $('pe-titulo').value.trim(), texto: $('pe-texto').value.trim(), tema: PG.temaEditor, slug, pedidos_ate: $('pe-ate').value, capa: PG.capaEditor || '', ativa: $('pe-ativa').checked };
+    const dados = { id: p.id, titulo: $('pe-titulo').value.trim(), texto: $('pe-texto').value.trim(), tema: PG.temaEditor, slug, pedidos_ate: $('pe-ate').value, capa: PG.capaEditor || '', ativa: $('pe-ativa').checked, musica: $('pe-musica') ? $('pe-musica').value : (p.musica || '') };
+    if (window.MusicaMM) window.MusicaMM.parar();
     if (!dados.titulo) { $('pe-titulo').focus(); return window.mostrarAlerta('Falta o título', 'Dê um título para a página.', 'warning'); }
     if (slug !== p.slug && !await window.confirmarMM({ icone: '🔗', titulo: 'Mudar o link?', texto: `O link vai ficar …/p/${slug}.\nQuem tiver o link antigo (…/p/${p.slug}) não vai mais encontrar a página.`, ok: 'Mudar o link' })) return;
     const b = $('btn-pe'), txt = b.innerHTML; b.disabled = true; b.innerText = 'Salvando…';
