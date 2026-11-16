@@ -19,11 +19,13 @@ window.DASH = { periodo: 'mes', vendas: [], despesas: [], baixas: [], painel: nu
 window.carregarDashboardERP = async function() {
     $('dash-carregando').hidden = false;
     try {
-        const [v, d, b, p] = await Promise.all(['listar_vendas', 'listar_despesas', 'listar_baixas', 'painel_estoque'].map(a => window.apiAcao(a)));
+        // A fila vem junto, mas se o servidor ainda for o antigo o resto do painel abre normal
+        const [v, d, b, p, f] = await Promise.all([...['listar_vendas', 'listar_despesas', 'listar_baixas', 'painel_estoque'].map(a => window.apiAcao(a)), window.apiAcao('listar_fila').catch(() => null)]);
         // Venda cancelada não entra em nenhuma conta do painel
-        Object.assign(DASH, { vendas: v.vendas.filter(x => x.status !== 'Cancelado'), despesas: d.despesas, baixas: b.baixas, painel: p });
+        Object.assign(DASH, { vendas: v.vendas.filter(x => x.status !== 'Cancelado'), despesas: d.despesas, baixas: b.baixas, painel: p, fila: f });
         window.arrayVendas = v.vendas; window.painelEstoque = p; window.configMM = p.config;
         window.renderizarDashboard();
+        if (window.renderizarAtalhos) window.renderizarAtalhos(f);
     } catch (e) { $('dash-conteudo').innerHTML = `<div class="vazio-box">${window.ic('alerta')}<b>Não consegui carregar o painel</b><span>${esc(e.message)}</span></div>`; }
     finally { $('dash-carregando').hidden = true; }
 };
@@ -151,6 +153,16 @@ window.renderizarDashboard = function() {
     if (encPend) atencao.push(['presente', `${encPend} encomenda(s) de vendedores`, 'pendentes ou em produção', "switchTab('vendedores')", '']);
     if (baixos.length) atencao.push(['alerta', `${baixos.length} produto(s) acabando no Ateliê`, baixos.slice(0, 3).map(p => esc(p.nome)).join(', ') + (baixos.length > 3 ? '…' : ''), "switchTab('estoque')", '']);
     if (semRepasse) atencao.push(['etiqueta', `${semRepasse} produto(s) sem preço de repasse`, 'não podem ir na mala dos vendedores', "switchTab('modelos'); filtroProdutos('semrepasse')", '']);
+    // Fila de impressão e filamento acabando
+    const F = DASH.fila;
+    if (F) {
+        const abertos = F.itens.filter(i => i.status !== 'pronto'), pecas = abertos.reduce((s, i) => s + i.qtd, 0);
+        const horasFila = abertos.reduce((s, i) => s + (i.tempo || 0) * i.qtd, 0) / (F.impressoras || 1);
+        const atrasadas = abertos.filter(i => i.prazo && i.prazo < hojeIso).length;
+        if (pecas) atencao.unshift(['impressora', `${pecas} peça(s) para imprimir`, `${horasFila <= 0 ? 'toque para ver a ordem' : '~' + (horasFila >= 1 ? Math.round(horasFila) + ' h' : Math.max(1, Math.round(horasFila * 60)) + ' min') + ' de impressora'}${atrasadas ? ` · ${atrasadas} atrasada(s)` : ''}`, "switchTab('fila')", atrasadas ? 'ruim' : '']);
+        const acabando = (F.filamentos || []).filter(x => x.restante < 150);
+        if (acabando.length) atencao.push(['alerta', `Filamento acabando: ${acabando.slice(0, 3).map(x => esc(x.material + ' ' + x.cor)).join(', ')}`, 'compre antes que a impressora pare', "switchTab('fila'); abaFila('filamento')", '']);
+    }
 
     h += `<div class="dash-grade">
         <div class="card"><div class="card-titulo">Precisa de atenção</div><p class="card-desc">Toque para resolver.</p>
@@ -163,6 +175,13 @@ window.renderizarDashboard = function() {
             </div>
             <button class="btn-limpar" style="width:100%;margin-top:12px;" onclick="switchTab('estoque')">Abrir o estoque</button></div>
     </div>`;
+    const rendem = (window.arrayBancoCustos || []).filter(p => p.ativo !== false && window.lucroPorHora && window.lucroPorHora(p) !== null).map(p => ({ nome: p.modelo, v: window.lucroPorHora(p), sub: `venda ${window.fmt(p.preco_venda)}` })).sort((a, b) => b.v - a.v);
+    if (rendem.length >= 2) {
+        const top = rendem.slice(0, 5), piores = rendem.length > 6 ? rendem.slice(-3).reverse().map(x => ({ ...x, medalha: false })) : [];
+        h += `<div class="card"><div class="card-titulo">Lucro por hora de impressora</div><p class="card-desc">Quanto sobra (venda − custo) para cada hora que a impressora trabalha. Quando a fila aperta, imprima primeiro os de cima.</p>
+            ${barrasHtml(top, i => window.fmt(i.v) + '/h', '#059669')}
+            ${piores.length ? `<p class="card-desc" style="margin:14px 0 6px;">Rendem menos por hora (vale subir o preço?)</p>${barrasHtml(piores, i => window.fmt(i.v) + '/h', '#d97706')}` : ''}</div>`;
+    }
     $('dash-conteudo').innerHTML = h;
     desenharGrafico(P.atual[1].startsWith('9999') ? hojeIso : (P.atual[1] > hojeIso ? hojeIso : P.atual[1]));
 };

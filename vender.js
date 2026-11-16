@@ -147,6 +147,7 @@ function desenharCarrinho() {
         <div class="vd-secao">O cliente já pagou?</div>
         <div class="seg-mini largo vd-pago" id="vd-pago"><button type="button" class="${D.pago ? '' : 'active'}" onclick="vdPago(false)">${ic('relogio')} Vai pagar depois</button><button type="button" class="${D.pago ? 'active' : ''}" onclick="vdPago(true)">${ic('check')} Já pagou</button></div>
         <div class="vd-formas" id="vd-formas" ${D.pago ? '' : 'hidden'}>${FORMAS.map(f => `<button type="button" class="chip-op ${D.forma === f ? 'active' : ''}" onclick="vdForma('${f}')">${f}</button>`).join('')}</div>
+        <button type="button" class="btn-limpar vd-pix" id="vd-pix" onclick="pixCarrinho()">💠 Cobrar com QR do Pix · ${fmt(k.total)}</button>
         <div class="input-group" style="margin-top:12px;"><label for="vd-obs">Observação <small style="font-weight:600;color:var(--text-muted);">(opcional)</small></label><input id="vd-obs" type="text" maxlength="255" autocomplete="off" value="${esc(D.obs)}" placeholder="Ex.: entregar no sábado" oninput="VD.dados.obs = this.value; vdGuardar()"></div>
         <div class="vd-contas" id="vd-contas">${htmlContas(k)}</div>
         <button class="btn-magic btn-global" id="btn-vd-lancar" onclick="lancarVendaVendedor()">${ic('check')} Lançar venda · ${fmt(k.total)}</button>
@@ -155,6 +156,7 @@ function desenharCarrinho() {
 function atualizarContas() {
     const k = contas(); if ($('vd-contas')) $('vd-contas').innerHTML = htmlContas(k);
     const b = $('btn-vd-lancar'); if (b && !b.disabled) b.innerHTML = `${ic('check')} Lançar venda · ${fmt(k.total)}`;
+    if ($('vd-pix')) $('vd-pix').textContent = `💠 Cobrar com QR do Pix · ${fmt(k.total)}`;
     barraCarrinho();
 }
 window.vdPreco = function(pid, v) {
@@ -169,6 +171,11 @@ window.vdPago = function(p) {
     VD.dados.pago = p; guardar();
     document.querySelectorAll('#vd-pago button').forEach((b, i) => b.classList.toggle('active', (i === 1) === p));
     $('vd-formas').hidden = !p;
+};
+// QR do Pix com o valor do carrinho; "Voltar para a venda" abre o carrinho de novo (nada se perde)
+window.pixCarrinho = function() {
+    const k = contas(); if (!(k.total > 0)) return window.mostrarAlerta('Sem valor', 'Ponha as peças e os preços primeiro.', 'warning');
+    window.abrirPixQR(k.total, 'Mini Mundo', { voltar: 'abrirCarrinhoVendedor()', rotuloVoltar: 'Voltar para a venda', telefone: VD.dados.telefone });
 };
 window.vdForma = function(f) { VD.dados.forma = f; guardar(); document.querySelectorAll('#vd-formas button').forEach(b => b.classList.toggle('active', b.textContent === f)); };
 window.esvaziarCarrinho = async function() {
@@ -189,6 +196,7 @@ window.lancarVendaVendedor = async function() {
             <div class="vd-contas">${htmlContas(r)}</div>
             <p class="modal-text-alert">${cli.pago ? `Recebido${cli.forma ? ` no ${esc(cli.forma)}` : ''}. ✅` : `Ficou <b>a receber</b>${cli.cliente ? ` de ${esc(cli.cliente)}` : ''}. Quando pagar, toque em <b>Recebi</b> em Minhas vendas.`}<br>Agora você me deve <b>${fmt(r.pendente_total)}</b> no total.</p>
             ${z ? `<a class="btn-magic btn-zap" target="_blank" rel="noopener" href="${esc(z)}">${ic('zap')} Mandar o resumo para ${esc(primeiroNome(cli.cliente) || 'o cliente')}</a>` : ''}
+            ${cli.pago ? '' : `<button class="btn-magic btn-azul" onclick="abrirPixQR(${r.total}, 'Venda ${r.venda_id}', { telefone: '${esc(tel)}' })">💠 Mostrar o QR do Pix</button>`}
             <button class="btn-modal-ok ok" onclick="fecharModalMM()">Nova venda</button>
             <button class="btn-limpar" style="width:100%;margin-top:8px;padding:11px;" onclick="fecharModalMM(); abrirMinhasVendas('todas')">${ic('recibo')} Ver minhas vendas</button></div>`);
         window.carregarPainelVendedor();
@@ -201,7 +209,8 @@ window.abrirMinhasVendas = function(o) {
     if (document.querySelector('#tab-v_vendas.active')) window.renderizarMinhasVendas(); else window.switchTab('v_vendas');
 };
 const vendaDe = id => ((window.painelVendedor || {}).vendas || []).find(v => v.id === id);
-const cobranca = v => `Olá${v.cliente ? `, ${primeiroNome(v.cliente)}` : ''}! Tudo bem? Aqui é ${window.painelVendedor.vendedor.nome}, da Mini Mundo 😊\n\nPassando para lembrar do pagamento da sua compra de ${window.fmtDataHora(v.data_hora).slice(0, 8)}:\n${v.itens.map(i => `• ${i.qtd}x ${i.nome}`).join('\n')}\n\n*Total: ${fmt(v.total)}*\n\nAgradeço a preferência!`;
+const pixDaVenda = v => { try { return window.pixPayload ? window.pixPayload({ ...window.dadosPix(), valor: v.total, mensagem: `Venda ${v.id}` }) : ''; } catch (e) { return ''; } };
+const cobranca = v => { const pix = pixDaVenda(v); return `Olá${v.cliente ? `, ${primeiroNome(v.cliente)}` : ''}! Tudo bem? Aqui é ${window.painelVendedor.vendedor.nome}, da Mini Mundo 😊\n\nPassando para lembrar do pagamento da sua compra de ${window.fmtDataHora(v.data_hora).slice(0, 8)}:\n${v.itens.map(i => `• ${i.qtd}x ${i.nome}`).join('\n')}\n\n*Total: ${fmt(v.total)}*${pix ? `\n\nPix copia e cola (o valor já vem preenchido):\n${pix}` : ''}\n\nAgradeço a preferência!`; };
 function cartaoVendaFeita(v) {
     const podeCancelar = !v.parte_acertada && (!!window.vendedorVisto || (Date.now() - dataMs(v.data_hora)) < 48 * 3600 * 1000);
     const z = v.telefone ? window.linkZap(v.telefone, v.pago ? `Olá${v.cliente ? `, ${primeiroNome(v.cliente)}` : ''}! Aqui é ${window.painelVendedor.vendedor.nome}, da Mini Mundo 😊` : cobranca(v)) : '';
@@ -212,7 +221,7 @@ function cartaoVendaFeita(v) {
         ${v.obs ? `<p class="vv-obs">💬 ${esc(v.obs)}</p>` : ''}
         <div class="vv-contas"><span>Cliente paga<b>${fmt(v.total)}</b></span><span>Repasse<b>${fmt(v.repasse)}</b></span><span>Seu lucro<b class="${v.lucro < 0 ? 'neg' : 'pos'}">${fmt(v.lucro)}</b></span></div>
         <div class="vv-acoes">
-            ${v.pago ? '' : `<button type="button" class="btn-vendi" onclick="receberVenda(${v.id}, true)">${ic('check')} Recebi</button>`}
+            ${v.pago ? '' : `<button type="button" class="btn-vendi" onclick="receberVenda(${v.id}, true)">${ic('check')} Recebi</button><button type="button" class="btn-ic" title="Cobrar com QR do Pix" aria-label="QR do Pix da venda #${v.id}" onclick="abrirPixQR(${v.total}, 'Venda ${v.id}', { telefone: '${esc(v.telefone || '')}' })">💠</button>`}
             ${z ? `<a class="vv-zap ${v.pago ? 'claro' : ''}" target="_blank" rel="noopener" href="${esc(z)}">${ic('zap')} ${v.pago ? 'WhatsApp' : 'Cobrar'}</a>` : ''}
             <span class="vv-espaco"></span>
             ${v.pago ? `<button type="button" class="btn-ic" onclick="receberVenda(${v.id}, false)" title="Marquei por engano: voltar para a receber" aria-label="Voltar a venda #${v.id} para a receber">${ic('relogio')}</button>` : ''}
@@ -240,6 +249,7 @@ window.renderizarMinhasVendas = function() {
         <button type="button" class="rf laranja" onclick="abrirMinhasVendas('receber')"><small>A receber</small><b>${fmt(rec.total)}</b><i>${rec.n ? `de ${rec.n} venda(s)` : 'ninguém devendo'}</i></button>
         <button type="button" class="rf ${d.pendente_total > 0 ? 'roxo' : ''}" onclick="abrirMinhasVendas('acerto')"><small>Você me deve</small><b>${fmt(d.pendente_total)}</b><i>ver o acerto</i></button>
         <div class="rf verde"><small>Lucro no mês</small><b>${fmt(lucroMes)}</b><i>de ${fmt(vendidoMes)}</i></div></div>
+        ${barraMeta(d.meta)}
         <div class="seg-mini largo vv-seg"><button type="button" class="${VD.aba === 'vendas' ? 'active' : ''}" onclick="VD.aba = 'vendas'; renderizarMinhasVendas()">${ic('recibo')} Vendas <em>${vendas.length || ''}</em></button><button type="button" class="${VD.aba === 'acerto' ? 'active' : ''}" onclick="VD.aba = 'acerto'; renderizarMinhasVendas()">${ic('dinheiro')} Acerto <em>${d.pendente_total > 0 ? fmt(d.pendente_total) : ''}</em></button></div>`;
     if (VD.aba === 'acerto') { box.innerHTML = topo + `<div id="vv-acerto">${htmlAcerto(d)}</div>`; return; }
     const busca = ($('vv-busca') || {}).value || '';
@@ -250,6 +260,16 @@ window.renderizarMinhasVendas = function() {
     listaVendas();
 };
 window.vvBuscar = () => listaVendas();
+// Meta do mês (a Mini Mundo define): barra de progresso com o quanto falta
+function barraMeta(m) {
+    if (!m || !(m.valor > 0)) return '';
+    const pct = Math.min(100, Math.round(m.feito / m.valor * 100)), falta = Math.max(0, m.valor - m.feito);
+    const hoje = new Date(), fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate(), dias = fim - hoje.getDate() + 1;
+    return `<div class="meta-v ${pct >= 100 ? 'ok' : ''}"><div class="meta-topo"><b>🎯 Meta do mês</b><span>${fmt(m.feito)} de ${fmt(m.valor)}</span></div>
+        <div class="meta-trilho"><i style="width:${pct}%"></i></div>
+        <small>${pct >= 100 ? 'Meta batida! Parabéns! 🎉' : `Faltam ${fmt(falta)} · ${dias} dia${dias === 1 ? '' : 's'} para acabar o mês (~${fmt(falta / dias)} por dia)`}</small></div>`;
+}
+window.barraMetaVendedor = barraMeta;
 window.receberVenda = async function(id, pago) {
     const v = vendaDe(id); if (!v) return;
     if (!pago) {

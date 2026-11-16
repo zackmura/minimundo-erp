@@ -8,7 +8,8 @@ const $ = window.$;
 const esc = s => window.esc(s);
 const CAMPOS = {
     'cfg-markup-repasse': 'markup_repasse', 'cfg-margem-vendedor': 'margem_vendedor', 'cfg-estoque-minimo': 'estoque_minimo', 'cfg-telefone-admin': 'telefone_admin',
-    'cfg-multiplicador': 'multiplicador_venda', 'cfg-filamento': 'filamento_kg', 'cfg-watts': 'imp_watts', 'cfg-kwh': 'imp_kwh', 'cfg-maq': 'imp_maq_hora', 'cfg-hora': 'imp_hora', 'cfg-falha': 'taxa_falha'
+    'cfg-multiplicador': 'multiplicador_venda', 'cfg-filamento': 'filamento_kg', 'cfg-watts': 'imp_watts', 'cfg-kwh': 'imp_kwh', 'cfg-maq': 'imp_maq_hora', 'cfg-hora': 'imp_hora', 'cfg-falha': 'taxa_falha',
+    'cfg-pix-chave': 'pagina_pix', 'cfg-pix-tipo': 'pix_tipo', 'cfg-pix-nome': 'pix_nome', 'cfg-pix-cidade': 'pix_cidade', 'cfg-impressoras': 'impressoras'
 };
 const DESCRICAO = {
     gemini: 'Escreve as descrições do Catálogo e gera o Quiz. Crie grátis em aistudio.google.com → "Get API key".',
@@ -28,6 +29,7 @@ window.carregarConfigMM = async function() {
 window.salvarConfigMM = async function(btn) {
     const valores = {};
     Object.entries(CAMPOS).forEach(([id, k]) => { if ($(id)) valores[k] = $(id).value.trim(); });
+    if (valores.impressoras !== undefined) valores.impressoras = String(Math.min(50, Math.max(1, parseInt(valores.impressoras) || 1)));
     if (btn) btn.disabled = true;
     try {
         window.configMM = (await window.apiAcao('salvar_config', { valores })).config;
@@ -36,6 +38,13 @@ window.salvarConfigMM = async function(btn) {
         window.toastMM('Parâmetros salvos');
     } catch (e) { window.mostrarAlerta('Erro', e.message, 'error'); }
     finally { if (btn) btn.disabled = false; }
+};
+
+// Salva o Pix e mostra um QR de R$ 1,00 para conferir no app do banco
+window.testarPixAjustes = async function(btn) {
+    if (!$('cfg-pix-chave').value.trim()) return window.mostrarAlerta('Falta a chave', 'Coloque a sua chave Pix primeiro.', 'warning');
+    await window.salvarConfigMM(btn);
+    window.abrirPixQR(1, 'Teste do Pix');
 };
 
 // ---------- CHAVES ----------

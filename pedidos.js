@@ -11,17 +11,20 @@ const $ = window.$;
 const esc = s => window.esc(s);
 const val = v => window.limparValorPlanilha(v);
 window.PC = { lista: [], filtro: 'abertos', novos: 0, form: null, avisar: null };
-const ETAPAS = { novo: ['Novo', 'laranja', '🛎️'], confirmado: ['Confirmado', 'azul', '✅'], producao: ['Em produção', 'roxo', '🖨️'], pronto: ['Pronto', 'verde', '🎁'], entregue: ['Entregue', 'cinza', '💛'], cancelado: ['Cancelado', 'vermelho', '🚫'] };
+const ETAPAS = { orcamento: ['Orçamento', 'amarelo', '📝'], novo: ['Novo', 'laranja', '🛎️'], confirmado: ['Confirmado', 'azul', '✅'], producao: ['Em produção', 'roxo', '🖨️'], pronto: ['Pronto', 'verde', '🎁'], entregue: ['Entregue', 'cinza', '💛'], cancelado: ['Cancelado', 'vermelho', '🚫'] };
 const PASSOS = ['novo', 'confirmado', 'producao', 'pronto', 'entregue'];
-const PROXIMA = { novo: ['confirmado', 'Confirmar'], confirmado: ['producao', 'Começar produção'], producao: ['pronto', 'Marcar pronto'], pronto: ['entregue', 'Marcar entregue'] };
+const PROXIMA = { orcamento: ['confirmado', 'Cliente aprovou'], novo: ['confirmado', 'Confirmar'], confirmado: ['producao', 'Começar produção'], producao: ['pronto', 'Marcar pronto'], pronto: ['entregue', 'Marcar entregue'] };
 const ABERTOS = ['novo', 'confirmado', 'producao', 'pronto'];
-const ROT_HIST = { novo: 'Pedido recebido', confirmado: 'Confirmado', producao: 'Em produção', pronto: 'Pronto', entregue: 'Entregue', cancelado: 'Cancelado', pago: 'Pagamento confirmado', recado: 'Recado para o cliente' };
+const ROT_HIST = { orcamento: 'Orçamento enviado', novo: 'Pedido recebido', confirmado: 'Confirmado', producao: 'Em produção', pronto: 'Pronto', entregue: 'Entregue', cancelado: 'Cancelado', pago: 'Pagamento confirmado', recado: 'Recado para o cliente' };
 const ORIGENS = ['WhatsApp', 'Instagram', 'Feira', 'Indicação', 'Loja física'];
 const PAGAMENTOS = ['Pix', 'Cartão', 'Dinheiro', 'A combinar'];
 const FORMAS_VENDA = ['Pix', 'Dinheiro', 'Cartão de crédito', 'Cartão de débito', 'Outro'];
 const REDES = { whatsapp: 'WhatsApp', instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', qrcode: 'QR code', outro: 'outro link' };
 // Entregou (ou vai entregar) e o cliente ainda não pagou
-const aReceber = p => !p.pago && p.status !== 'cancelado' && p.total > 0;
+const aReceber = p => !p.pago && !['cancelado', 'orcamento'].includes(p.status) && p.total > 0;
+// Orçamento: até quando vale (vazio = sem prazo)
+const validadeTxt = p => { if (!p.validade) return 'sem prazo'; const d = diasAte(p.validade); return d < 0 ? `venceu em ${dataHora(p.validade)}` : d === 0 ? 'vale até hoje' : `vale até ${dataHora(p.validade)}`; };
+const isoMais = dias => { const d = new Date(); d.setDate(d.getDate() + dias); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const viaRede = p => p.veio_de ? ` · via ${REDES[p.veio_de] || esc(p.veio_de)}` : '';
 const produtoPorId = id => (window.arrayBancoCustos || []).find(p => p.linha === id);
 const pedidoPorId = id => PC.lista.find(p => p.id === id);
@@ -96,7 +99,7 @@ window.renderizarPedidos = function() {
     // Quadros das etapas em aberto (tocar filtra; tocar de novo volta para todos em aberto)
     $('pc-painel').innerHTML = ABERTOS.map(s => `<button type="button" class="pc-tile ${ETAPAS[s][1]} ${PC.filtro === s ? 'on' : ''}" onclick="filtroPedidos('${PC.filtro === s ? 'abertos' : s}')">
         <span class="pc-tile-ic">${ETAPAS[s][2]}</span><b>${conta[s]}</b><small>${ETAPAS[s][0]}</small><em>${conta[s] ? window.fmt(valor[s]) : '—'}</em></button>`).join('');
-    $('pc-filtros').innerHTML = [['abertos', 'Em aberto'], ['receber', '💸 A receber'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']]
+    $('pc-filtros').innerHTML = [['abertos', 'Em aberto'], ['orcamento', '📝 Orçamentos'], ['receber', '💸 A receber'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']]
         .map(([f, r]) => `<button class="chip-op ${PC.filtro === f ? 'active' : ''}" onclick="filtroPedidos('${f}')">${r} <em>${conta[f] || ''}</em></button>`).join('');
     const abertos = todos.filter(p => ABERTOS.includes(p.status)), receber = todos.filter(aReceber).reduce((s, p) => s + p.total, 0);
     const semana = abertos.filter(p => { const d = diasAte(p.data_entrega); return d !== null && d <= 7; }).length, atrasados = abertos.filter(p => (diasAte(p.data_entrega) ?? 0) < 0).length;
@@ -104,7 +107,7 @@ window.renderizarPedidos = function() {
     const lista = todos.filter(p => (PC.filtro === 'todos' || (PC.filtro === 'abertos' ? ABERTOS.includes(p.status) : PC.filtro === 'receber' ? aReceber(p) : p.status === PC.filtro))
         && window.buscaBate(t, '#' + p.id, p.cliente, p.telefone, p.origem, p.pagina_titulo, p.itens.map(i => i.nome).join(' ')));
     if (!lista.length) {
-        box.innerHTML = `<div class="vazio-box">${window.ic('recibo')}<b>${!todos.length ? 'Nenhum pedido ainda' : t.trim() ? `Nada encontrado para "${esc(t)}"` : PC.filtro === 'receber' ? 'Ninguém está devendo 🎉' : 'Nenhum pedido nessa etapa'}</b>
+        box.innerHTML = `<div class="vazio-box">${window.ic('recibo')}<b>${!todos.length ? 'Nenhum pedido ainda' : t.trim() ? `Nada encontrado para "${esc(t)}"` : PC.filtro === 'receber' ? 'Ninguém está devendo 🎉' : PC.filtro === 'orcamento' ? 'Nenhum orçamento esperando resposta' : 'Nenhum pedido nessa etapa'}</b>
             <span>${!todos.length ? 'Os pedidos feitos nas páginas de venda aparecem aqui. Você também pode anotar pedidos do WhatsApp ou do Instagram.' : ''}</span></div>`;
         return;
     }
@@ -119,7 +122,7 @@ window.renderizarPedidos = function() {
                     <div class="pc-origem">${p.origem === 'Site' ? `${window.ic('sacola')} ${esc(p.pagina_titulo || 'Site')}${viaRede(p)}` : `${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`}</div>
                 </div></div>
             ${barra(p.status)}
-            <div class="pc-rodape"><b>${window.fmt(p.total)}${semPreco ? ' +' : ''}</b>${p.pago ? '<span class="mm-chip verde">pago</span>' : aReceber(p) && !ABERTOS.includes(p.status) ? '<span class="mm-chip amarelo">falta receber</span>' : ''}${prazo(p)}${p.avisos ? '<span class="pc-sino" title="O cliente recebe aviso no celular">🔔</span>' : ''}${p.venda_pedido_id ? `<span class="mm-chip">venda #${p.venda_pedido_id}</span>` : ''}</div>
+            <div class="pc-rodape"><b>${window.fmt(p.total)}${semPreco ? ' +' : ''}</b>${p.status === 'orcamento' ? `<span class="mm-chip ${p.validade && diasAte(p.validade) < 0 ? 'vermelho' : 'amarelo'}">${validadeTxt(p)}</span>` : ''}${p.pago ? '<span class="mm-chip verde">pago</span>' : aReceber(p) && !ABERTOS.includes(p.status) ? '<span class="mm-chip amarelo">falta receber</span>' : ''}${prazo(p)}${p.avisos ? '<span class="pc-sino" title="O cliente recebe aviso no celular">🔔</span>' : ''}${p.venda_pedido_id ? `<span class="mm-chip">venda #${p.venda_pedido_id}</span>` : ''}</div>
             ${prox ? `<div class="pc-botoes" onclick="event.stopPropagation()"><button class="btn-magic btn-pequeno" onclick="mudarEtapa(${p.id}, '${prox[0]}')">${window.ic('check')} ${prox[1]}</button>${p.telefone ? `<a class="btn-limpar" href="${esc(window.linkZap(p.telefone, mensagemEtapa(p, p.status)))}" target="_blank" rel="noopener">${window.ic('zap')} WhatsApp</a>` : ''}</div>` : ''}
         </div>`;
     }).join('');
@@ -129,6 +132,7 @@ window.renderizarPedidos = function() {
 function mensagemEtapa(p, st, recado) {
     const nome = (p.cliente || '').split(' ')[0], link = linkAcompanhar(p.codigo), itens = p.itens.map(i => `• ${i.qtd}× ${i.nome}`).join('\n');
     const m = {
+        orcamento: `Olá, ${nome}! Segue o seu orçamento *#${p.id}* da Mini Mundo:\n${p.itens.map(i => `• ${i.qtd}× ${i.nome}${i.personalizacao ? ` (${i.personalizacao})` : ''}${i.preco > 0 ? ` — ${window.fmt(i.preco * i.qtd)}` : ''}`).join('\n')}\nTotal: *${window.fmt(p.total)}*${p.validade ? `\nVale até ${dataHora(p.validade)}.` : ''}\n\nPara aprovar é só tocar em *Aprovar orçamento* no link abaixo. 😊`,
         novo: `Olá, ${nome}! Recebemos o seu pedido *#${p.id}*:\n${itens}\nTotal: ${window.fmt(p.total)}\n\nPodemos confirmar?`,
         confirmado: `Olá, ${nome}! Seu pedido *#${p.id}* está confirmado. 🎉${p.data_entrega ? `\nPrevisão: ${dataHora(p.data_entrega)}.` : ''}\nTotal: ${window.fmt(p.total)}${p.pagamento && p.pagamento !== 'A combinar' && !p.pago ? ` (${p.pagamento})` : ''}`,
         producao: `Olá, ${nome}! Seu pedido *#${p.id}* já está em produção. 🖨️`,
@@ -137,7 +141,7 @@ function mensagemEtapa(p, st, recado) {
         cancelado: `Olá, ${nome}! Seu pedido *#${p.id}* foi cancelado. Qualquer dúvida, é só falar.`,
         recado: `Olá, ${nome}! Sobre o seu pedido *#${p.id}*:`
     }[st] || '';
-    return `${m}${recado ? `\n\n${recado}` : ''}\n\nAcompanhe aqui: ${link}`;
+    return `${m}${recado ? `\n\n${recado}` : ''}\n\n${st === 'orcamento' ? 'Ver e aprovar' : 'Acompanhe aqui'}: ${link}`;
 }
 
 // Lembrete de pagamento (com a chave Pix dos Ajustes das páginas, se tiver)
@@ -155,7 +159,9 @@ window.abrirPedido = function(id) {
     const zapLink = (st, recado) => p.telefone ? window.linkZap(p.telefone, mensagemEtapa(p, st, recado)) : '';
     window.abrirModalMM(`<div class="pd-cab"><div><h3 class="modal-title">Pedido #${p.id} ${chip(p.status)}</h3>
             <p>${p.origem === 'Site' ? `Feito no site · ${esc(p.pagina_titulo)}${viaRede(p)}` : `Anotado por ${esc(p.criado_por || '—')} · ${esc(p.origem)}${p.pagina_titulo ? ` · ${esc(p.pagina_titulo)}` : ''}`} · ${dataHora(p.criado_em)}</p></div></div>
-        <div class="pd-passos">${PASSOS.map((s, i) => `<button type="button" class="${p.status === 'cancelado' ? '' : i < atual || p.status === 'entregue' ? 'feito' : i === atual ? 'agora' : ''}" onclick="mudarEtapa(${p.id}, '${s}', true)">
+        ${p.status === 'orcamento' ? `<div class="pd-orc"><span>📝</span><div><b>Orçamento esperando o cliente</b><small>${validadeTxt(p)} · o cliente aprova pelo link e o pedido vira "Confirmado" sozinho (as peças entram na fila de impressão)</small>
+            <div class="pd-orc-bts">${p.telefone ? `<a class="btn-magic btn-pequeno btn-zap" href="${esc(zapLink('orcamento'))}" target="_blank" rel="noopener">${window.ic('zap')} Mandar no WhatsApp</a>` : ''}<button class="btn-limpar" onclick="copiarTexto('${esc(linkAcompanhar(p.codigo))}', 'Link do orçamento copiado!')">${window.ic('copiar')} Copiar link</button><button class="btn-limpar" onclick="validadeOrcamento(${p.id})">${window.ic('relogio')} Mudar validade</button></div></div></div>` : ''}
+        <div class="pd-passos" ${p.status === 'orcamento' ? 'hidden' : ''}>${PASSOS.map((s, i) => `<button type="button" class="${p.status === 'cancelado' ? '' : i < atual || p.status === 'entregue' ? 'feito' : i === atual ? 'agora' : ''}" onclick="mudarEtapa(${p.id}, '${s}', true)">
             <i>${i < atual || p.status === 'entregue' ? '✓' : ETAPAS[s][2]}</i><b>${ETAPAS[s][0]}</b><small>${quando[s] ? dataHora(quando[s]) : ''}</small></button>`).join('')}</div>
         ${avisar ? `<div class="pd-avisar">${window.ic('check')}<div><b>${avisar.recado ? 'Recado enviado.' : `Agora está "${ETAPAS[avisar.status] ? ETAPAS[avisar.status][0] : ''}".`}</b>
             <span>O cliente já vê no link de acompanhar${p.avisos ? ' e recebe um aviso no celular 🔔' : ''}.${p.telefone ? ' Se quiser, mande também no WhatsApp:' : ''}</span>
@@ -166,7 +172,7 @@ window.abrirPedido = function(id) {
         <h4 class="pd-tit">Produtos <small>como o cliente viu no site</small></h4>
         <div class="pc-bloco pd-itens">${p.itens.map((i, n) => { const f = fotosItem(i), cad = cadastro(i);
             return `<div class="pd-item"><button type="button" class="pd-foto" ${f.length ? `onclick="fotosDoItem(${p.id}, ${n})"` : 'disabled'}><img src="${esc(f[0] || 'logo.png')}" alt="" loading="lazy" onerror="this.src='logo.png'">${f.length > 1 ? `<span>${f.length}</span>` : ''}</button>
-                <div class="pd-info"><b>${i.qtd}× ${esc(i.nome)}</b>${cad ? `<small class="pd-cad">No cadastro: ${esc(cad)}</small>` : ''}
+                <div class="pd-info"><b>${i.qtd}× ${esc(i.nome)}</b>${i.personalizacao ? `<span class="fl-pers">✏️ ${esc(i.personalizacao)}</span>` : ''}${cad ? `<small class="pd-cad">No cadastro: ${esc(cad)}</small>` : ''}
                     ${i.descricao ? `<p class="pd-desc" onclick="this.classList.toggle('aberta')">${esc(i.descricao)}</p>` : ''}
                     ${(i.pecas || []).length ? `<div class="pd-pecas">${i.pecas.map(x => `<span>${x.foto ? `<img src="${esc(x.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${x.qtd}× ${esc(x.nome)}</span>`).join('')}</div>` : ''}</div>
                 <div class="pd-preco"><b>${i.preco > 0 ? window.fmt(i.preco * i.qtd) : '<i>a combinar</i>'}</b>${i.preco > 0 && i.qtd > 1 ? `<small>${i.qtd} × ${window.fmt(i.preco)}</small>` : ''}</div></div>`; }).join('')}
@@ -174,7 +180,7 @@ window.abrirPedido = function(id) {
             ${p.desconto ? `<div class="pc-linha"><span>Desconto</span><b>− ${window.fmt(p.desconto)}</b></div>` : ''}${p.taxa_entrega ? `<div class="pc-linha"><span>Entrega</span><b>${window.fmt(p.taxa_entrega)}</b></div>` : ''}
             <div class="pc-total"><span>Total${semPreco ? ' <small>(+ itens a combinar)</small>' : ''}</span><b>${window.fmt(p.total)}</b></div>
             ${p.pago ? `<div class="pd-pgto ok"><span>✅ <b>Pago</b>${p.pagamento && p.pagamento !== 'A combinar' ? ` · ${esc(p.pagamento)}` : ''}</span><a onclick="marcarPago(${p.id}, false)">desfazer</a></div>`
-                : p.status === 'cancelado' ? '' : `<div class="pd-pgto"><span>⏳ <b>Falta receber ${window.fmt(p.total)}</b>${p.pagamento ? ` · ${esc(p.pagamento)}` : ''}</span>
+                : ['cancelado', 'orcamento'].includes(p.status) ? '' : `<div class="pd-pgto"><span>⏳ <b>Falta receber ${window.fmt(p.total)}</b>${p.pagamento ? ` · ${esc(p.pagamento)}` : ''}</span>
                 <div><button class="btn-magic btn-pequeno" onclick="marcarPago(${p.id}, true)">${window.ic('check')} Recebi o pagamento</button>${p.telefone ? `<a class="btn-limpar" href="${esc(window.linkZap(p.telefone, mensagemCobranca(p)))}" target="_blank" rel="noopener">${window.ic('zap')} Cobrar no WhatsApp</a>` : ''}</div></div>`}
         </div>
         <h4 class="pd-tit">Cliente</h4>
@@ -190,11 +196,11 @@ window.abrirPedido = function(id) {
         <h4 class="pd-tit">Histórico <small>o cliente vê as etapas e os recados</small></h4>
         <ol class="pd-hist">${p.historico.slice().reverse().map(h => `<li class="${h.status === 'pago' ? 'verde' : ETAPAS[h.status] ? ETAPAS[h.status][1] : ''}"><span><b>${ROT_HIST[h.status] || esc(h.status)}</b><small>${dataHora(h.quando)}${h.por ? ` · ${h.por === 'site' ? 'pelo site' : esc(h.por)}` : ''}</small>
             ${h.recado ? `<em>💬 ${esc(h.recado)} <a onclick="apagarRecado(${h.id}, ${p.id})">apagar</a></em>` : ''}</span></li>`).join('') || '<li><span><small>Sem histórico.</small></span></li>'}</ol>
-        ${p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas: <a onclick="fecharModalMM(); verVenda(${p.venda_pedido_id})">venda #${p.venda_pedido_id}</a>${p.pago ? '' : ' (a receber)'}</p>`
+        ${p.status === 'orcamento' ? '' : p.venda_pedido_id ? `<p class="pc-venda ok">${window.ic('check')} Lançado nas Vendas: <a onclick="fecharModalMM(); verVenda(${p.venda_pedido_id})">venda #${p.venda_pedido_id}</a>${p.pago ? '' : ' (a receber)'}</p>`
             : `<button class="btn-magic btn-global" onclick="lancarVenda(${p.id})">${window.ic('carrinho')} Lançar como venda</button><p class="texto-ajuda" style="margin:-4px 0 12px;">Aparece em Vendas e no financeiro. Pode lançar ao entregar, mesmo que o cliente vá pagar depois.</p>`}
         <div class="pc-acoes">
             ${p.telefone ? `<a class="btn-limpar" href="${esc(zapLink(p.status))}" target="_blank" rel="noopener">${window.ic('zap')} Mensagem: ${ETAPAS[p.status][0].toLowerCase()}</a>` : ''}
-            <button class="btn-limpar" onclick="copiarTexto('${esc(linkAcompanhar(p.codigo))}', 'Link para o cliente acompanhar copiado!')">${window.ic('copiar')} Copiar link de acompanhar</button>
+            ${p.status === 'orcamento' ? '' : `<button class="btn-limpar" onclick="copiarTexto('${esc(linkAcompanhar(p.codigo))}', 'Link para o cliente acompanhar copiado!')">${window.ic('copiar')} Copiar link de acompanhar</button>`}
             <a class="btn-limpar" href="${esc(linkAcompanhar(p.codigo))}" target="_blank" rel="noopener">${window.ic('olho')} Ver como o cliente vê</a>
             <button class="btn-limpar" onclick="editarPedido(${p.id})">${window.ic('lapis')} Editar</button>
             ${p.status !== 'cancelado' ? `<button class="btn-limpar perigo" onclick="mudarEtapa(${p.id}, 'cancelado', true)">${window.ic('x')} Cancelar pedido</button>` : ''}
@@ -275,18 +281,33 @@ window.confirmarLancarVenda = async function(id) {
 // ---------- Anotar ou editar pedido ----------
 // Escolhendo uma página, os produtos entram com o nome, o preço e as fotos de lá (igual ao que o cliente vê no site)
 window.novoPedido = () => abrirFormPedido(null);
+window.novoOrcamento = () => abrirFormPedido(null, true);
+window.validadeOrcamento = async function(id) {
+    const p = pedidoPorId(id); if (!p) return;
+    const v = await window.pedirValorMM({ icone: '📝', titulo: 'Até quando vale o orçamento?', texto: 'Depois dessa data o cliente não consegue mais aprovar pelo link.', campo: 'date', valor: p.validade || isoMais(7), ok: 'Salvar' });
+    if (v === null || v === undefined) return;
+    try {
+        await window.apiAcao('salvar_pedido_cliente', { ...dadosDoPedido(p), validade: v });
+        await atualizarEAbrir(id); window.toastMM('Validade salva');
+    } catch (e) { window.mostrarAlerta('Não deu', servidorAntigo(e), 'error'); }
+};
+// O pedido inteiro como o formulário manda (para mudar só um detalhe sem perder nada)
+const dadosDoPedido = p => ({ id: p.id, cliente: p.cliente, telefone: p.telefone, origem: p.origem, entrega: p.entrega, endereco: p.endereco || '', data_entrega: p.data_entrega || '',
+    pagamento: p.pagamento, pago: !!p.pago, status: p.status, obs: p.obs || '', obs_interna: p.obs_interna || '', desconto: window.fmtPlanilha(p.desconto || 0), taxa_entrega: window.fmtPlanilha(p.taxa_entrega || 0),
+    itens: p.itens.map(i => ({ produto_id: i.produto_id, nome: i.nome, qtd: i.qtd, preco: i.preco > 0 ? window.fmtPlanilha(i.preco) : '', personalizacao: i.personalizacao || '' })) });
 window.editarPedido = id => abrirFormPedido(pedidoPorId(id));
 const itemDaPagina = (pg, pid) => pg && (pg.itens || []).find(i => i.produto_id === pid);
 const nomeNaPagina = (it, x) => (it && it.nome) || (x ? x.modelo : 'Produto');
 const precoNaPagina = (it, x) => it && it.preco > 0 ? it.preco : (x && x.preco_venda) || null;
-function abrirFormPedido(p) {
+function abrirFormPedido(p, orcamento) {
     const doSite = !!(p && p.origem === 'Site');
+    const stIni = p ? p.status : orcamento ? 'orcamento' : 'confirmado';
     PC.form = { id: p ? p.id : 0, travado: !!(p && p.venda_pedido_id), doSite, entrega: p ? p.entrega : 'retirar', origem: p ? p.origem : 'WhatsApp',
         pagina: p ? p.pagina_id || 0 : (paginas().find(g => g.ativa && (g.itens || []).length) || {}).id || 0, itens: p ? p.itens.map(i => ({ ...i })) : [] };
     const f = PC.form, origens = f.origem && !ORIGENS.includes(f.origem) ? [f.origem, ...ORIGENS] : ORIGENS;
     const pgs = paginas().filter(g => g.ativa || g.id === f.pagina);
-    window.abrirModalMM(`<h3 class="modal-title">${window.ic(p ? 'lapis' : 'mais')} ${p ? `Editar o pedido #${p.id}` : 'Anotar pedido'}</h3>
-        ${p ? '' : '<p class="texto-ajuda" style="margin-top:0;">Para pedidos que chegaram pelo WhatsApp, Instagram, feira… e ficarem junto com os do site.</p>'}
+    window.abrirModalMM(`<h3 class="modal-title">${window.ic(p ? 'lapis' : 'mais')} ${p ? `Editar ${p.status === 'orcamento' ? 'o orçamento' : 'o pedido'} #${p.id}` : orcamento ? 'Novo orçamento' : 'Anotar pedido'}</h3>
+        ${p ? '' : orcamento ? '<p class="texto-ajuda" style="margin-top:0;">Monte os produtos e os preços. Depois mande o link: o cliente vê as fotos e aprova com um toque.</p>' : '<p class="texto-ajuda" style="margin-top:0;">Para pedidos que chegaram pelo WhatsApp, Instagram, feira… e ficarem junto com os do site.</p>'}
         <div class="row"><div class="col"><div class="input-group"><label for="fp-cliente">Cliente *</label><input type="text" id="fp-cliente" value="${esc(p ? p.cliente : '')}" maxlength="120" autocomplete="off"></div></div>
             <div class="col"><div class="input-group"><label for="fp-tel">WhatsApp</label><input type="tel" id="fp-tel" value="${esc(p ? fone(p.telefone) : '')}" maxlength="20" placeholder="(11) 98888-7777"></div></div></div>
         ${doSite ? '' : `<div class="input-group"><label>Veio por</label><div class="chips-op" id="fp-origem">${origens.map(o => `<button type="button" class="chip-op ${o === f.origem ? 'active' : ''}" data-o="${esc(o)}" onclick="fpOrigem(this, this.dataset.o)">${esc(o)}</button>`).join('')}</div></div>`}
@@ -303,11 +324,12 @@ function abrirFormPedido(p) {
         <div class="input-group" id="fp-end-box" ${f.entrega === 'entrega' ? '' : 'hidden'}><label for="fp-end">Endereço</label><textarea id="fp-end" rows="2" maxlength="500">${esc(p ? p.endereco : '')}</textarea></div>
         <div class="row"><div class="col"><div class="input-group"><label for="fp-data">Data de entrega <small class="rot-dica">o cliente vê como previsão</small></label><input type="date" id="fp-data" value="${esc(p ? p.data_entrega : '')}"></div></div>
             <div class="col"><div class="input-group"><label for="fp-pgto">Pagamento</label><select id="fp-pgto">${[...new Set([...(p && p.pagamento ? [p.pagamento] : []), ...PAGAMENTOS])].map(x => `<option ${p && p.pagamento === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div></div></div>
-        <div class="row"><div class="col"><div class="input-group"><label for="fp-status">Etapa</label><select id="fp-status">${Object.entries(ETAPAS).map(([k, v]) => `<option value="${k}" ${(p ? p.status : 'confirmado') === k ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div></div>
+        <div class="row"><div class="col"><div class="input-group"><label for="fp-status">Etapa</label><select id="fp-status" onchange="$('fp-val-box').hidden = this.value !== 'orcamento'">${Object.entries(ETAPAS).map(([k, v]) => `<option value="${k}" ${stIni === k ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div></div>
             <div class="col" style="display:flex;align-items:center;"><label class="chave" style="margin:10px 0 0;"><input type="checkbox" id="fp-pago" ${p && p.pago ? 'checked' : ''}> Já foi pago</label></div></div>
+        <div class="input-group" id="fp-val-box" ${stIni === 'orcamento' ? '' : 'hidden'}><label for="fp-validade">Orçamento vale até <small class="rot-dica">depois disso o link não aprova mais</small></label><input type="date" id="fp-validade" value="${esc(p && p.validade ? p.validade : isoMais(7))}"></div>
         <div class="input-group"><label for="fp-obs">Recado do cliente</label><textarea id="fp-obs" rows="2" maxlength="1000" placeholder="Nome para personalizar, cores…">${esc(p ? p.obs : '')}</textarea></div>
         <div class="input-group"><label for="fp-interna">Anotação interna <small class="rot-dica">o cliente não vê</small></label><textarea id="fp-interna" rows="2" maxlength="1000">${esc(p ? p.obs_interna : '')}</textarea></div>
-        <button class="btn-magic btn-global" id="btn-fp" onclick="salvarPedidoForm()">${window.ic('check')} ${p ? 'Salvar' : 'Anotar pedido'}</button>`);
+        <button class="btn-magic btn-global" id="btn-fp" onclick="salvarPedidoForm()">${window.ic('check')} ${p ? 'Salvar' : orcamento ? 'Criar orçamento' : 'Anotar pedido'}</button>`);
     fpItens(); fpBuscar();
 }
 window.fpOrigem = function(b, o) { PC.form.origem = o; document.querySelectorAll('#fp-origem button').forEach(x => x.classList.toggle('active', x === b)); };
@@ -328,7 +350,7 @@ window.fpBuscar = function() {
 };
 window.fpAdicionar = function(pid) {
     const x = produtoPorId(pid), ja = PC.form.itens.find(i => i.produto_id === pid), it = itemDaPagina(paginas().find(g => g.id === PC.form.pagina), pid);
-    if (ja) ja.qtd++; else PC.form.itens.push({ produto_id: pid, nome: nomeNaPagina(it, x), qtd: 1, preco: precoNaPagina(it, x), fotos: [] });
+    if (ja && !(x && x.personalizavel)) ja.qtd++; else PC.form.itens.push({ produto_id: pid, nome: nomeNaPagina(it, x), qtd: 1, preco: precoNaPagina(it, x), fotos: [], personalizacao: '' });
     $('fp-busca').value = ''; fpBuscar(); fpItens();
 };
 window.fpItemAvulso = async function() {
@@ -338,9 +360,10 @@ window.fpItemAvulso = async function() {
 };
 function fpItens() {
     const f = PC.form, box = $('fp-itens'); if (!box) return;
-    box.innerHTML = f.itens.length ? f.itens.map((i, n) => `<div class="fp-item"><img src="${esc(fotosItem(i)[0] || 'logo.png')}" alt="" onerror="this.src='logo.png'"><span class="fp-nome">${esc(i.nome)}</span>
+    box.innerHTML = f.itens.length ? f.itens.map((i, n) => { const x = i.produto_id && produtoPorId(i.produto_id), pers = (x && x.personalizavel) || i.personalizacao;
+        return `<div class="fp-item ${pers ? 'com-pers' : ''}"><img src="${esc(fotosItem(i)[0] || 'logo.png')}" alt="" onerror="this.src='logo.png'"><span class="fp-nome">${esc(i.nome)}${pers && !f.travado ? `<input type="text" class="pi-pers destaque" maxlength="255" value="${esc(i.personalizacao || '')}" placeholder="${esc((x && x.personalizacao_dica) || 'Personalização (nome, cor…)')}" oninput="PC.form.itens[${n}].personalizacao = this.value" aria-label="Personalização">` : i.personalizacao ? `<small>✏️ ${esc(i.personalizacao)}</small>` : ''}</span>
             ${f.travado ? `<b>${i.qtd}× ${i.preco > 0 ? window.fmt(i.preco) : 'a combinar'}</b>` : `<div class="pi-qtd"><button type="button" onclick="fpQtd(${n}, -1)">−</button><span>${i.qtd}</span><button type="button" onclick="fpQtd(${n}, 1)">+</button></div>
-            <input type="text" class="mask-money fp-preco" inputmode="numeric" value="${i.preco > 0 ? window.fmt(i.preco) : ''}" placeholder="a combinar" aria-label="Preço de ${esc(i.nome)}" oninput="setTimeout(() => fpPreco(${n}, this.value))">`}</div>`).join('')
+            <input type="text" class="mask-money fp-preco" inputmode="numeric" value="${i.preco > 0 ? window.fmt(i.preco) : ''}" placeholder="a combinar" aria-label="Preço de ${esc(i.nome)}" oninput="setTimeout(() => fpPreco(${n}, this.value))">`}</div>`; }).join('')
         : '<p class="texto-ajuda" style="margin:8px 0 0;">Toque nos produtos acima para pôr no pedido.</p>';
     fpTotal();
 }
@@ -358,13 +381,14 @@ window.salvarPedidoForm = async function() {
     const dados = { id: f.id, cliente, telefone: $('fp-tel').value.trim(), origem: f.origem, entrega: f.entrega, endereco: $('fp-end').value.trim(), data_entrega: $('fp-data').value,
         pagamento: $('fp-pgto').value, pago: $('fp-pago').checked, status: $('fp-status').value, obs: $('fp-obs').value.trim(), obs_interna: $('fp-interna').value.trim(),
         desconto: $('fp-desc').value ? window.fmtPlanilha(val($('fp-desc').value)) : '0', taxa_entrega: $('fp-taxa').value ? window.fmtPlanilha(val($('fp-taxa').value)) : '0',
-        itens: f.itens.map(i => ({ produto_id: i.produto_id, nome: i.nome, qtd: i.qtd, preco: i.preco > 0 ? window.fmtPlanilha(i.preco) : '' })) };
+        itens: f.itens.map(i => ({ produto_id: i.produto_id, nome: i.nome, qtd: i.qtd, preco: i.preco > 0 ? window.fmtPlanilha(i.preco) : '', personalizacao: i.personalizacao || '' })) };
+    if ($('fp-status').value === 'orcamento') dados.validade = $('fp-validade').value || '';
     if (!f.doSite) dados.pagina_id = f.pagina || 0;
     const b = $('btn-fp'); b.disabled = true;
     try {
         const r = await window.apiAcao('salvar_pedido_cliente', dados);
         window.fecharModalMM(); await window.carregarPedidos();
-        window.toastMM(f.id ? 'Pedido salvo' : `Pedido #${r.id} anotado`);
+        window.toastMM(f.id ? 'Salvo' : dados.status === 'orcamento' ? `Orçamento #${r.id} criado. Agora é só mandar o link.` : `Pedido #${r.id} anotado`);
         window.abrirPedido(f.id || r.id);
     } catch (e) { window.mostrarAlerta('Não deu para salvar', servidorAntigo(e), 'error'); b.disabled = false; }
 };

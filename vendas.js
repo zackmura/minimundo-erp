@@ -12,6 +12,7 @@ const n2 = v => Math.round((parseFloat(v) || 0) * 100) / 100;
 const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const FORMAS = ['Pix', 'Dinheiro', 'Cartão de crédito', 'Cartão de débito', 'Pela plataforma', 'Outro'];
 // Situação da venda: rótulo, classe de cor e ícone
+window.PDV_ENTREGA = 'levou';
 const SITUACAO = { Pago: ['Pago', 'pago', 'check'], Pendente: ['A receber', 'pend', 'relogio'], Cancelado: ['Cancelada', 'canc', 'x'] };
 const pilula = s => { const [r, c, i] = SITUACAO[s] || SITUACAO.Pago; return `<span class="pilula ${c}">${window.ic(i)}${r}</span>`; };
 
@@ -84,40 +85,39 @@ window.outroCanalPDV = async function() {
     const c = await window.pedirValorMM({ icone: '📱', titulo: 'Qual foi o canal da venda?', texto: 'Ex.: Instagram, feira, indicação…', campo: 'text', valor: '', ok: 'Usar', validar: v => v.trim() ? null : 'Digite o nome do canal.' });
     if (c) window.selecionarCanalPDV(c.trim());
 };
-window.selecionarFormaPDV = function(f) { PDV.forma = f; window.montarCanaisPDV(); };
+window.selecionarFormaPDV = function(f) { PDV.forma = f; window.montarCanaisPDV(); window.renderizarTotaisPDV(); };
 window.selecionarStatusPDV = function(s) { PDV.status = s; window.montarCanaisPDV(); window.renderizarCarrinhoPDV(); };
 window.preencherTelefonePDV = function() {
     const c = $('pdv-cliente').value.trim(), tel = PDV.contatos[c];
     if (tel && !$('pdv-telefone').value.trim()) $('pdv-telefone').value = tel;
 };
 
-// ---------- ESCOLHER PRODUTOS: busca com lista suspensa ----------
-// A lista só aparece quando você toca na busca ou digita; tocar num produto põe 1 no carrinho e a lista continua
-// aberta para escolher outros. "Ver todos" abre a lista com fotos em tela cheia.
-window.abrirListaPDV = function() { PDV.listaAberta = true; window.renderizarCatalogoPDV(); };
-window.fecharListaPDV = function() { PDV.listaAberta = false; const g = $('pdv-grade'); if (g) g.hidden = true; };
-document.addEventListener('pointerdown', e => { if (PDV.listaAberta && !e.target.closest('#pdv-busca-box')) window.fecharListaPDV(); });
+// ---------- ESCOLHER PRODUTOS: grade com fotos ----------
+// As fotos ficam sempre à vista (com estoque primeiro). Tocar na foto põe 1 na venda; −/+ no próprio cartão.
+// A busca e as categorias filtram a grade.
+window.abrirListaPDV = function() { window.renderizarCatalogoPDV(); };
+window.fecharListaPDV = function() { /* a grade fica sempre à vista */ };
+window.categoriaPDV = function(i) { PDV.cat = (PDV.cats || [])[i] || ''; window.renderizarCatalogoPDV(); };
 window.renderizarCatalogoPDV = function() {
-    const grade = $('pdv-grade'); if (!grade) return;
+    const grade = $('pdv-fotos'); if (!grade) return;
     const t = $('pdv-busca').value, todos = produtosParaVender();
     const comEstoque = todos.filter(p => estoqueDe(p) > 0).length;
     $('pdv-info').innerText = todos.length ? `${comEstoque} com estoque` : '';
-    if (!PDV.listaAberta && !t.trim()) { grade.hidden = true; return; }
-    PDV.listaAberta = true; grade.hidden = false;
-    const lista = todos.filter(p => window.produtoBate(p, t));
-    if (!lista.length) {
-        grade.innerHTML = `<div class="pdv-sug-vazio">${!todos.length ? 'Nenhum produto cadastrado. Cadastre em <a onclick="switchTab(\'precificar\')">Precificar</a>.' : `Nada encontrado para "<b>${esc(t)}</b>".`}</div>`;
-        return;
-    }
-    grade.innerHTML = lista.slice(0, 80).map(p => {
+    const cats = [...new Set(todos.map(p => p.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    PDV.cats = ['', ...cats]; if (!PDV.cats.includes(PDV.cat || '')) PDV.cat = '';
+    $('pdv-cats').innerHTML = cats.length > 1 ? PDV.cats.map((c, i) => `<button type="button" class="chip-op ${(PDV.cat || '') === c ? 'active' : ''}" onclick="categoriaPDV(${i})">${c ? esc(c) : 'Todos'}</button>`).join('') : '';
+    const lista = todos.filter(p => window.produtoBate(p, t) && (!PDV.cat || p.categoria === PDV.cat));
+    if (!lista.length) { grade.innerHTML = `<div class="pdv-sug-vazio">${!todos.length ? 'Nenhum produto cadastrado. Cadastre em <a onclick="switchTab(\'precificar\')">Precificar</a>.' : `Nada encontrado para "<b>${esc(t)}</b>".`}</div>`; return; }
+    grade.innerHTML = lista.slice(0, 120).map(p => {
         const noCar = PDV.itens.find(i => i.produto_id === p.linha), est = estoqueDe(p), preco = window.precoVendaDe(p);
-        return `<button type="button" class="pdv-sug ${noCar ? 'no-carrinho' : ''} ${est > 0 ? '' : 'sem'}" onclick="addPDV(${p.linha})">
-            <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">
-            <span class="pdv-sug-info"><b>${p.tipo === 'kit' ? '<span class="tag-kit">Kit</span> ' : ''}${esc(p.modelo)}</b>
-                <small><span class="pl-preco">${preco ? window.fmt(preco) : 'sem preço'}</span> · <span class="pp-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sem estoque · sob encomenda'}</span></small>${window.temMedidas(p.medidas) ? `<small class="pdv-tam">${window.ic('regua')}${window.medidasTxt(p.medidas)}</small>` : ''}</span>
-            ${noCar ? `<span class="pdv-sug-qtd">${noCar.qtd}</span>` : `<span class="pl-add" aria-hidden="true">${window.ic('mais')}</span>`}
-        </button>`;
-    }).join('') + `<div class="pdv-sug-rodape"><span>${lista.length > 80 ? `Mostrando 80 de ${lista.length}. Digite para achar mais rápido.` : `${lista.length} produto${lista.length > 1 ? 's' : ''}`}</span><button type="button" onclick="fecharListaPDV()">Fechar lista</button></div>`;
+        return `<div class="pdv-cartao ${noCar ? 'no-carrinho' : ''}" id="pdv-c-${p.linha}">
+            <button type="button" class="pdv-cartao-foto" onclick="addPDV(${p.linha})" aria-label="Pôr ${esc(p.modelo)} na venda"><img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="" loading="lazy">
+                <span class="pdv-est ${est > 0 ? '' : 'zero'}">${est > 0 ? `${est} no Ateliê` : 'sob encomenda'}</span>${p.tipo === 'kit' ? '<span class="pdv-kit">Kit</span>' : ''}${noCar ? `<span class="pdv-qtd-selo">${noCar.qtd}</span>` : ''}</button>
+            <div class="pdv-cartao-info"><b>${esc(p.modelo)}</b><span>${preco ? window.fmt(preco) : 'sem preço'}</span></div>
+            ${noCar ? `<div class="pdv-cartao-passo"><button type="button" onclick="menosPDV(${p.linha})" aria-label="Tirar um">−</button><b>${noCar.qtd}</b><button type="button" onclick="addPDV(${p.linha})" aria-label="Mais um">+</button></div>`
+                : `<button type="button" class="pdv-cartao-add" onclick="addPDV(${p.linha})">${window.ic('mais')} Adicionar</button>`}
+        </div>`;
+    }).join('') + (lista.length > 120 ? `<div class="pdv-sug-vazio">Mostrando 120 de ${lista.length}. Digite o nome para achar mais rápido.</div>` : '');
 };
 window.verTodosPDV = function() {
     window.fecharListaPDV();
@@ -128,7 +128,7 @@ window.verTodosPDV = function() {
 window.addPDV = function(id) {
     const p = produtoPorId(id); if (!p) return;
     const ja = PDV.itens.find(i => i.produto_id === id);
-    if (ja) ja.qtd++; else PDV.itens.push({ produto_id: id, nome: p.modelo, qtd: 1, unit: window.precoVendaDe(p), sugerido: !p.preco_venda });
+    if (ja) ja.qtd++; else PDV.itens.push({ produto_id: id, nome: p.modelo, qtd: 1, unit: window.precoVendaDe(p), sugerido: !p.preco_venda, pers: '' });
     window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV();
     if (!ja) window.toastMM(`${p.modelo} na venda`);
 };
@@ -140,6 +140,15 @@ window.menosPDV = function(id) {
 window.qtdPDV = function(i, d) { const it = PDV.itens[i]; if (!it) return; it.qtd = Math.max(1, it.qtd + d); window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV(); };
 window.qtdPDVSet = function(i, v) { const it = PDV.itens[i]; if (!it) return; it.qtd = Math.max(1, parseInt(v) || 1); window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV(); };
 window.precoPDV = function(i, v) { const it = PDV.itens[i]; if (!it) return; it.unit = val(v); it.sugerido = false; window.renderizarTotaisPDV(); const el = document.querySelector(`[data-pi-total="${i}"]`); if (el) el.innerText = window.fmt(it.unit * it.qtd); };
+window.persPDV = function(i, v) { const it = PDV.itens[i]; if (it) it.pers = String(v || '').slice(0, 255); };
+// Entrega: o cliente já levou (como sempre foi) ou fazer depois (o que não tem no Ateliê vai para a fila de impressão)
+window.entregaPDV = function(e) {
+    window.PDV_ENTREGA = e;
+    document.querySelectorAll('#pdv-entrega button').forEach(b => b.classList.toggle('active', b.dataset.e === e));
+    $('pdv-prazo-box').hidden = e !== 'fila';
+    window.renderizarCarrinhoPDV();
+};
+window.pixPDV = function() { const c = window.calcularPDV(); if (!(c.total > 0)) return window.mostrarAlerta('Sem valor', 'Ponha os produtos na venda primeiro.', 'warning'); window.abrirPixQR(c.total, ($('pdv-cliente').value.trim() || 'Mini Mundo').slice(0, 30)); };
 window.tirarPDV = function(i) { PDV.itens.splice(i, 1); window.renderizarCarrinhoPDV(); window.renderizarCatalogoPDV(); };
 window.limparPDV = async function() {
     if (PDV.itens.length && !await window.confirmarMM({ icone: '🧹', titulo: 'Tirar todos os produtos?', texto: 'Os produtos escolhidos saem desta venda.', ok: 'Tirar todos', tipo: 'perigo' })) return;
@@ -154,10 +163,12 @@ window.renderizarCarrinhoPDV = function() {
         box.innerHTML = `<div class="pdv-vazio">${window.ic('carrinho')}<span>Nenhum produto ainda. Busque acima ou toque em <b>Ver todos</b>.</span></div>`;
     } else box.innerHTML = PDV.itens.map((it, i) => {
         const p = produtoPorId(it.produto_id), b = baixaDoItem(it);
-        const nota = b.baixar ? `<span class="pi-nota ok">Sai do Ateliê (tem ${b.est})</span>` : b.est > 0 ? `<span class="pi-nota aviso">Só ${b.est} no Ateliê — não dá baixa</span>` : `<span class="pi-nota aviso">Sem estoque — sob encomenda</span>`;
+        const fila = window.PDV_ENTREGA === 'fila';
+        const nota = b.baixar ? `<span class="pi-nota ok">Sai do Ateliê (tem ${b.est})</span>` : fila ? `<span class="pi-nota fila">${window.ic('impressora')} Vai para a fila de impressão</span>` : b.est > 0 ? `<span class="pi-nota aviso">Só ${b.est} no Ateliê — não dá baixa</span>` : `<span class="pi-nota aviso">Sem estoque — sob encomenda</span>`;
+        const dica = p && p.personalizacao_dica ? p.personalizacao_dica : 'Personalização (nome, cor…) — opcional';
         return `<div class="pdv-item">
             <img src="${esc(fotoDe(p) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
-            <div class="pi-info"><b>${esc(it.nome)}</b>${nota}${p ? window.chipMedidas(p.linha, p.medidas) : ''}</div>
+            <div class="pi-info"><b>${esc(it.nome)}</b>${nota}${p ? window.chipMedidas(p.linha, p.medidas) : ''}<input type="text" class="pi-pers ${p && p.personalizavel ? 'destaque' : ''}" maxlength="255" placeholder="${esc(dica)}" value="${esc(it.pers || '')}" oninput="persPDV(${i}, this.value)" aria-label="Personalização de ${esc(it.nome)}"></div>
             <div class="pi-qtd"><button type="button" onclick="qtdPDV(${i},-1)" aria-label="Menos">−</button><input type="number" min="1" value="${it.qtd}" onchange="qtdPDVSet(${i},this.value)" aria-label="Quantidade"><button type="button" onclick="qtdPDV(${i},1)" aria-label="Mais">+</button></div>
             <div class="pi-preco"><input type="text" class="mask-money" value="${window.fmt(it.unit)}" oninput="setTimeout(()=>precoPDV(${i},this.value))" aria-label="Preço unitário"><small>${it.sugerido ? 'sugerido · un.' : 'por unidade'}</small></div>
             <b class="pi-total" data-pi-total="${i}">${window.fmt(it.unit * it.qtd)}</b>
@@ -184,6 +195,7 @@ window.renderizarTotaisPDV = function() {
             <div><small>Taxa ${esc(PDV.canal)}</small><b>${c.taxa > 0 ? '− ' + window.fmt(c.taxa) : 'R$ 0,00'}</b></div>
             <div><small>Seu lucro</small><b>${window.fmt(c.lucro)} <em>${c.total > 0 ? Math.round(c.margem) + '%' : ''}</em></b></div>
         </div>`;
+    if ($('pdv-pix')) $('pdv-pix').hidden = !(c.total > 0) || PDV.forma !== 'Pix';
     const bt = $('pdv-finalizar');
     bt.className = `btn-magic btn-finalizar ${PDV.status === 'Pago' ? 'btn-global' : 'btn-amarelo'}`;
     bt.innerHTML = `${window.ic(PDV.status === 'Pago' ? 'check' : 'relogio')} ${PDV.status === 'Pago' ? 'Finalizar venda (paga)' : 'Finalizar (a receber)'}${c.total > 0 ? ' · ' + window.fmt(c.total) : ''}`;
@@ -214,19 +226,22 @@ window.finalizarPedido = async function() {
     try {
         const r = await window.apiAcao('salvar_pedido', {
             data_venda: data, cliente, telefone, plataforma: PDV.canal, forma_pgto: PDV.forma, status: PDV.status, obs: $('pdv-obs').value.trim(), desconto: window.fmtPlanilha(c.desconto),
-            itens: PDV.itens.map(i => ({ produto_id: i.produto_id, produto: i.nome, qtd: i.qtd, valor_unit: window.fmtPlanilha(i.unit), baixar_estoque: baixaDoItem(i).baixar }))
+            itens: PDV.itens.map(i => ({ produto_id: i.produto_id, produto: i.nome, qtd: i.qtd, valor_unit: window.fmtPlanilha(i.unit), baixar_estoque: baixaDoItem(i).baixar, personalizacao: i.pers || '' })),
+            para_fila: window.PDV_ENTREGA === 'fila', prazo: window.PDV_ENTREGA === 'fila' ? $('pdv-prazo').value : ''
         });
         const venda = { id: r.pedido_id, cliente, telefone, status: PDV.status, forma: PDV.forma, iso: data, total: r.total, desconto: c.desconto, itens: itensTexto };
         if (telefone) PDV.contatos[cliente] = telefone;
-        PDV.itens = []; ['pdv-cliente', 'pdv-telefone', 'pdv-obs', 'pdv-desconto', 'pdv-busca'].forEach(id => { $(id).value = ''; });
+        PDV.itens = []; ['pdv-cliente', 'pdv-telefone', 'pdv-obs', 'pdv-desconto', 'pdv-busca', 'pdv-prazo'].forEach(id => { if ($(id)) $(id).value = ''; }); window.entregaPDV('levou');
         window.renderizarCarrinhoPDV();
         window.carregarVendas(); window.carregarBancoDeCustos(); window.carregarOpcoesVenda();
         if (window.painelEstoque) window.carregarPainelEstoque();
         window.abrirModalMM(`<div class="mm-sucesso"><span class="modal-icon-alert ok">${window.ICONES.ok}</span>
             <h3 class="modal-title-alert">Venda #${r.pedido_id} registrada!</h3>
-            <p class="modal-text-alert">${esc(cliente)} · <b>${window.fmt(r.total)}</b> · ${venda.status === 'Pago' ? 'paga' : 'a receber'}${r.taxa > 0 ? `<br><small>Taxa ${esc(PDV.canal)}: ${window.fmt(r.taxa)}</small>` : ''}</p>
+            <p class="modal-text-alert">${esc(cliente)} · <b>${window.fmt(r.total)}</b> · ${venda.status === 'Pago' ? 'paga' : 'a receber'}${r.taxa > 0 ? `<br><small>Taxa ${esc(PDV.canal)}: ${window.fmt(r.taxa)}</small>` : ''}${r.fila ? `<br>🖨️ <b>${r.fila} peça${r.fila === 1 ? '' : 's'}</b> foram para a fila de impressão.` : ''}</p>
             <div class="acoes-sucesso">
                 <a class="btn-magic btn-zap" href="${window.linkZap(telefone, window.textoPedidoZap(venda))}" target="_blank" rel="noopener">${window.ic('zap')} ${venda.status === 'Pago' ? 'Mandar recibo no WhatsApp' : 'Mandar resumo no WhatsApp'}</a>
+                ${venda.status !== 'Pago' && PDV.forma === 'Pix' ? `<button class="btn-magic btn-azul" onclick="abrirPixQR(${r.total}, 'Venda ${r.pedido_id}')">💠 Mostrar o QR do Pix</button>` : ''}
+                ${r.fila ? `<button class="btn-magic btn-secundario" onclick="fecharModalMM(); switchTab('fila')">${window.ic('impressora')} Ver a fila de impressão</button>` : ''}
                 <button class="btn-magic btn-secundario" onclick="fecharModalMM(); abaVendas('historico')">${window.ic('recibo')} Ver no histórico</button>
                 <button class="btn-magic" onclick="fecharModalMM()">${window.ic('mais')} Nova venda</button>
             </div></div>`);
@@ -341,7 +356,7 @@ window.filtrarVendas = function() {
             const c = (SITUACAO[p.status] || SITUACAO.Pago)[1];
             return `<div class="vd st-${c}" onclick="abrirVenda(${p.id})" role="button" tabindex="0">
                 <div class="vd-topo"><span class="vd-num">#${p.id}</span><b class="vd-cli">${esc(p.cliente)}</b>${pilula(p.status)}</div>
-                <div class="vd-itens">${p.itens.map(i => `${i.qtd}x ${esc(i.nome)}`).join(' · ')}</div>
+                <div class="vd-meio">${fotosVenda(p)}<div class="vd-itens">${p.linhas.map(l => `${esc(l.qtd)}x ${esc(l.produto)}${l.personalizacao ? ` <i>(${esc(l.personalizacao)})</i>` : ''}`).join(' · ')}</div></div>
                 <div class="vd-rodape"><span class="vd-meta">${[p.plataforma, p.forma].filter(Boolean).map(esc).join(' · ')}${p.obs ? ` · <span title="${esc(p.obs)}">${esc(p.obs.slice(0, 32))}</span>` : ''}</span>
                     ${p.status === 'Pendente' ? `<button type="button" class="vd-rapido" onclick="event.stopPropagation(); statusVenda(${p.id}, 'Pago', true)">${window.ic('check')}Recebi</button>` : ''}
                     <b class="vd-valor">${window.fmt(p.total)}</b></div>
@@ -381,6 +396,12 @@ window.copiarExtratoCliente = function() {
 window.verVenda = async function(id) { window.switchTab('vendas'); window.abaVendas('historico'); await window.carregarVendas(); window.abrirVenda(id); };
 const vendaPorId = id => window.agruparPedidos(window.arrayVendas).find(p => p.id === id);
 const pecasQueSairam = p => p.linhas.filter(l => l.baixa_estoque).reduce((s, l) => s + (parseFloat(l.qtd) || 0), 0);
+// Até 4 fotos dos produtos da venda (as que faltam viram o logo)
+const fotoLinha = l => l.foto || fotoDe(produtoPorId(l.produto_id));
+function fotosVenda(p) {
+    const fs = [...new Set(p.linhas.map(fotoLinha).filter(Boolean))].slice(0, 4);
+    return `<span class="vd-fotos n${Math.max(1, fs.length)}">${(fs.length ? fs : ['logo.png']).map(f => `<img src="${esc(f)}" alt="" loading="lazy" onerror="this.src='logo.png'">`).join('')}</span>`;
+}
 window.abrirVenda = function(id) {
     const p = vendaPorId(id); if (!p) return;
     const pend = p.status === 'Pendente', canc = p.status === 'Cancelado', bruto = p.total + p.desconto;
@@ -395,8 +416,8 @@ window.abrirVenda = function(id) {
         </div>
         ${p.obs ? `<div class="ped-det-obs">${window.ic('recibo')} ${esc(p.obs)}</div>` : ''}
         <div class="vdet-itens">${p.linhas.map(l => `<div class="vdi">
-            <img src="${esc(fotoDe(produtoPorId(l.produto_id)) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
-            <div class="vdi-n"><b>${esc(l.qtd)}x ${esc(l.produto)}</b><small>${notaLinha(l)} · custo ${window.fmt(l.custo_total || 0)}</small></div>
+            <img src="${esc(fotoLinha(l) || 'logo.png')}" onerror="this.src='logo.png'" alt="">
+            <div class="vdi-n"><b>${esc(l.qtd)}x ${esc(l.produto)}</b>${l.personalizacao ? `<small class="vdi-pers">✏️ ${esc(l.personalizacao)}</small>` : ''}<small>${notaLinha(l)} · custo ${window.fmt(l.custo_total || 0)}</small></div>
             <b class="vdi-v">${window.fmt(val(l.valor_venda))}</b></div>`).join('')}</div>
         <div class="ped-det-tot">
             ${p.desconto > 0 ? `<div><span>Subtotal</span><span>${window.fmt(bruto)}</span></div><div><span>Desconto</span><span>− ${window.fmt(p.desconto)}</span></div>` : ''}
@@ -407,7 +428,7 @@ window.abrirVenda = function(id) {
         </div>
         <div class="vdet-acoes">
             ${canc ? `<button class="btn-magic btn-azul" onclick="reativarVenda(${p.id})">${window.ic('desfazer')} Reativar venda</button>`
-                : pend ? `<button class="btn-magic btn-global" onclick="statusVenda(${p.id}, 'Pago')">${window.ic('check')} Marcar como paga</button>`
+                : pend ? `<button class="btn-magic btn-global" onclick="statusVenda(${p.id}, 'Pago')">${window.ic('check')} Marcar como paga</button><button class="btn-magic btn-azul" onclick="abrirPixQR(${p.total}, 'Venda ${p.id}')">💠 Cobrar com QR do Pix</button>`
                 : `<button class="btn-magic btn-amarelo-leve" onclick="statusVenda(${p.id}, 'Pendente')">${window.ic('relogio')} Voltar para "a receber"</button>`}
             ${canc ? '' : `<a class="btn-magic btn-zap" href="${window.linkZap(p.telefone, window.textoPedidoZap(p))}" target="_blank" rel="noopener">${window.ic('zap')} ${pend ? 'Cobrar no WhatsApp' : 'Recibo no WhatsApp'}</a>`}
             <div class="vdet-grade">

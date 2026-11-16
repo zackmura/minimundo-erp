@@ -10,7 +10,7 @@ window.painelEstoque = null; window.painelVendedor = null; window.vendAberto = n
 
 // POST com o crachá; dá erro amigável se o servidor recusar.
 // No modo "ver como o vendedor", as telas do vendedor vão com o id dele (o servidor só aceita isso do Admin).
-window.ACOES_DA_TELA_VENDEDOR = ['meu_painel', 'dar_baixa', 'salvar_encomenda'];
+window.ACOES_DA_TELA_VENDEDOR = ['meu_painel', 'dar_baixa', 'salvar_encomenda', 'sugestao_mala'];
 window.apiAcao = async function(acao, dados = {}) {
     if (window.vendedorVisto && window.ACOES_DA_TELA_VENDEDOR.includes(acao) && !dados.vendedor_id) dados = Object.assign({ vendedor_id: window.vendedorVisto.id }, dados);
     const r = await window.apiFetch(API_PRECIFICACAO, { method: "POST", body: JSON.stringify(Object.assign({ acao }, dados)) });
@@ -315,6 +315,7 @@ window.abrirMala = function(vidPre) {
     window.abrirModalMM(`<h3 class="modal-title">🧳 Enviar mala</h3>
         <div class="input-group"><label>Para qual vendedor?</label><select id="mala-vendedor" onchange="window.atualizarMala()">${vends.map(v => `<option value="${v.id}" ${v.id === vidPre ? 'selected' : ''}>${window.esc(v.nome)}</option>`).join('')}</select></div>
         ${atelieVazio ? '<div class="mm-alerta">🏠 O Ateliê está sem peças, então estou mostrando todos os produtos. O que você mandar entra como produção na hora do envio.</div>' : ''}
+        <button type="button" class="btn-limpar" style="width:100%;margin:0 0 10px;padding:10px;" onclick="window.sugestaoMala()">✨ Preencher com a sugestão (o que esse vendedor mais vende)</button>
         <input type="text" id="mala-busca" class="search-bar" placeholder="🔍 Filtrar produtos..." onkeyup="window.filtrarMala()" style="margin-bottom:10px;">
         <div class="linha-opcao"><label class="chave"><input type="checkbox" id="mala-mostrar-sem" onchange="window.filtrarMala()" ${atelieVazio ? 'checked' : ''}> Mostrar também sem estoque</label><span id="mala-info" class="info-lista"></span></div>
         <div id="mala-lista" class="lista-escolha">${prods.map(p => { const at = window.qtdEm(p.id, 0); return `
@@ -325,6 +326,16 @@ window.abrirMala = function(vidPre) {
         <div class="input-group"><label>Observação (opcional)</label><input type="text" id="mala-obs" placeholder="Ex: feira de sábado"></div>
         <button class="btn-magic btn-global" id="btn-mala" onclick="window.confirmarMala()">🧳 Enviar mala</button>`);
     window.atualizarMala(); window.filtrarMala();
+};
+window.sugestaoMala = async function() {
+    const vid = parseInt(window.$('mala-vendedor').value);
+    try {
+        const r = await window.apiAcao('sugestao_mala', { vendedor_id: vid });
+        if (!r.itens.length) return window.toastMM('Sem sugestão: esse vendedor ainda não vendeu nos últimos 60 dias, ou já tem o bastante');
+        r.itens.forEach(i => { const inp = document.querySelector(`.mala-qtd[data-pid="${i.produto_id}"]`); if (inp) inp.value = i.sugerido; });
+        window.$('mala-mostrar-sem').checked = true; window.filtrarMala(); window.atualizarMalaTotal();
+        window.toastMM(`Sugestão: ${r.itens.reduce((s, i) => s + i.sugerido, 0)} peça(s) de ${r.itens.length} produto(s). Confira antes de enviar.`);
+    } catch (e) { window.mostrarAlerta('Não deu', e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga. Atualize o server.js primeiro.' : e.message, 'warning'); }
 };
 window.atualizarMala = function() {
     const vid = parseInt(window.$('mala-vendedor').value);
@@ -578,6 +589,9 @@ window.renderizarCorpoVendedor = function() {
             <div class="row"><div class="col"><div class="input-group"><label for="fv-usuario">Usuário (login)</label><input type="text" id="fv-usuario" value="${nome}"></div></div><div class="col"><div class="input-group"><label for="fv-telefone">WhatsApp</label><input type="tel" id="fv-telefone" value="${window.esc(v.telefone)}"></div></div></div>
             <div class="input-group"><label for="fv-ativo">Situação</label><select id="fv-ativo"><option value="true" ${info.ativo ? 'selected' : ''}>Ativo</option><option value="false" ${info.ativo ? '' : 'selected'}>Desativado (não consegue mais entrar)</option></select></div>
             <button class="btn-magic btn-global" onclick="salvarDadosVendedor(${vid})">${window.ic('check')} Salvar</button>
+            <div class="cv-meta"><div class="input-group"><label for="fv-meta">🎯 Meta de vendas do mês <small class="rot-dica">o vendedor vê a barra em Minhas vendas · vazio = sem meta</small></label>
+                <div class="ck-form"><input type="text" id="fv-meta" class="mask-money" inputmode="numeric" value="${d.meta && d.meta.valor > 0 ? window.fmt(d.meta.valor) : ''}" placeholder="R$ 0,00"><button class="btn-magic btn-pequeno" onclick="salvarMetaVendedor(${vid})">Salvar meta</button></div></div>
+                ${window.barraMetaVendedor && d.meta ? window.barraMetaVendedor(d.meta) : ''}</div>
             <div class="cv-bts-rodape">
                 <button class="btn-limpar" onclick="resetarSenhaVendedor(${vid})">${window.ic('chave')}Nova senha</button>
                 ${v.codigo_vitrine ? `<button class="btn-limpar" onclick="copiarTexto('${window.linkVitrine(v.codigo_vitrine)}', 'Link da vitrine copiado!')">${window.ic('link')}Copiar link da vitrine</button>` : ''}
@@ -642,6 +656,11 @@ window.definirRepasseEspecial = async function(vid, pid) {
 window.salvarDadosVendedor = async function(vid) {
     try { await window.apiAcao("atualizar_vendedor", { id: vid, usuario: window.$('fv-usuario').value.trim(), telefone: window.$('fv-telefone').value.trim(), ativo: window.$('fv-ativo').value === "true" }); await window.carregarPainelEstoque(); await window.abrirVendedor(vid); window.mostrarAlerta("Salvo!", "Dados do vendedor atualizados.", "success"); }
     catch (e) { window.mostrarAlerta("Erro", e.message, "error"); }
+};
+window.salvarMetaVendedor = async function(vid) {
+    const v = window.$('fv-meta').value.trim(), n = v ? window.limparValorPlanilha(v) : 0;
+    try { await window.apiAcao('meta_vendedor', { vendedor_id: vid, meta: n > 0 ? window.fmtPlanilha(n) : '' }); await window.abrirVendedor(vid, 'dados'); window.toastMM(n > 0 ? 'Meta salva' : 'Meta tirada'); }
+    catch (e) { window.mostrarAlerta('Não deu', e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga. Atualize o server.js primeiro.' : e.message, 'error'); }
 };
 window.resetarSenhaVendedor = async function(vid) {
     const s = await window.pedirValorMM({ icone: '🔑', titulo: 'Nova senha', texto: `Digite a nova senha de ${window.vendAberto.vendedor.nome}. Depois passe pra ele(a).`, placeholder: 'Mínimo 4 caracteres', ok: '🔑 Redefinir',
@@ -849,6 +868,28 @@ window.renderizarVendedorEncomendas = function() {
         <div class="mm-chips"><span class="mm-chip ${cor[e.status] || ''}">${window.esc(e.status)}</span><span class="mm-chip">📅 ${window.fmtDataHora(e.data_hora)}</span>${e.prazo ? `<span class="mm-chip">⏰ até ${window.fmtDataHora(e.prazo)}</span>` : ''}</div>
         ${e.obs_admin ? `<span class="mm-sub">💬 ${window.esc(e.obs_admin)}</span>` : ''}</div>
         ${e.status === 'Pendente' ? `<div class="mm-acoes"><button class="btn-novera btn-n-apagar" title="Cancelar pedido" onclick="window.cancelarEncomendaVendedor(${e.id})">✖</button></div>` : ''}</div>`).join('') : '<p class="mm-vazio">Nenhum pedido ainda.</p>';
+};
+window.pedirReposicao = async function() {
+    window.abrirModalMM(`<h3 class="modal-title">🔄 Pedir reposição</h3><div class="carregando-box"><span class="girando"></span>Vendo o que você mais vende…</div>`);
+    try {
+        const r = await window.apiAcao('sugestao_mala');
+        window.REPOSICAO = r.itens;
+        window.preencherModalMM(`<h3 class="modal-title">🔄 Pedir reposição</h3>
+            <p class="texto-ajuda" style="margin-top:0;">Pelo que você vendeu nos últimos 60 dias, para não faltar no próximo mês. Mude as quantidades se quiser.</p>
+            ${r.itens.length ? `<div class="lista-escolha">${r.itens.map((i, n) => `<div class="mm-linha">${window.imgProduto(i.foto)}<span class="mm-nome">${window.esc(i.nome)}<span class="mm-sub">vendeu ${i.vendidos60} · tem ${i.na_mala} com você</span></span><input type="number" class="rep-qtd" data-n="${n}" min="0" value="${i.sugerido}" inputmode="numeric"></div>`).join('')}</div>
+            <button class="btn-magic btn-global" id="btn-rep" onclick="confirmarReposicao()">📨 Pedir para a Mini Mundo</button>`
+            : `<div class="vazio-box pequeno">${window.ic('check')}<b>Nada para repor agora</b><span>Você tem peças suficientes do que mais vende. Se quiser algo diferente, peça na tela de pedidos.</span></div>`}`);
+    } catch (e) { window.preencherModalMM(`<h3 class="modal-title">🔄 Pedir reposição</h3><p class="mm-vazio">${window.esc(e.message === 'Ação não reconhecida.' ? 'O servidor ainda está na versão antiga.' : e.message)}</p>`); }
+};
+window.confirmarReposicao = async function() {
+    const itens = [...document.querySelectorAll('.rep-qtd')].map(i => ({ ...window.REPOSICAO[+i.dataset.n], qtd: parseInt(i.value) || 0 })).filter(i => i.qtd > 0);
+    if (!itens.length) return window.mostrarAlerta('Nada escolhido', 'Coloque a quantidade em pelo menos um produto.', 'warning');
+    const b = window.$('btn-rep'); b.disabled = true; b.textContent = 'Enviando…';
+    let ok = 0;
+    for (const i of itens) { try { await window.apiAcao('salvar_encomenda', { produto_id: i.produto_id, descricao: '', qtd: i.qtd, reposicao: true }); ok++; } catch (e) { /* segue com os outros */ } }
+    window.fecharModalMM();
+    window.mostrarAlerta(ok === itens.length ? 'Pedido enviado!' : 'Enviado em parte', ok === itens.length ? `A Mini Mundo recebeu o pedido de reposição (${ok} produto${ok === 1 ? '' : 's'}).` : `Foram ${ok} de ${itens.length}. Tente os outros de novo.`, ok === itens.length ? 'success' : 'warning');
+    window.carregarPainelVendedor();
 };
 window.salvarEncomendaVendedor = async function() {
     const produto_id = parseInt(window.$('ve-produto').value) || null, descricao = window.$('ve-descricao').value.trim();

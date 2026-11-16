@@ -23,6 +23,14 @@ const apagarRascunho = () => window.rascunhoApagar && window.rascunhoApagar('pre
 const guardarRascunho = () => window.rascunhoGuardar && window.rascunhoGuardar('precificar');
 
 // ---------- CARREGAR PRODUTOS (usado por várias telas) ----------
+// Horas de impressora de um produto (kit = soma das peças) e quanto sobra por hora de impressora
+const horasDe = p => !p ? 0 : p.tipo === 'kit' ? (p.itens || []).reduce((s, i) => { const x = produtoPorId(i.produto_id); return s + (x ? (parseFloat(x.tempo) || 0) * i.qtd : 0); }, 0) : (parseFloat(p.tempo) || 0);
+window.lucroPorHora = function(p, preco) {
+    const h = horasDe(p), venda = preco === undefined ? (p && p.preco_venda) || 0 : preco;
+    return h > 0 && venda > 0 ? (venda - val(p.custo_total)) / h : null;
+};
+const chipHora = p => { const r = window.lucroPorHora(p); return r === null ? '' : `<span class="rh-chip ${r < 5 ? 'baixo' : r >= 15 ? 'alto' : ''}" title="Quanto sobra por hora de impressora">${window.fmt(r)}/h</span>`; };
+
 window.carregarBancoDeCustos = async function() {
     const ld = $('loading-banco'); if (ld) ld.style.display = 'block';
     try {
@@ -30,6 +38,8 @@ window.carregarBancoDeCustos = async function() {
         window.renderizarProdutos(); window.pfMontarListas();
         if (window.renderizarCatalogoPDV) { window.renderizarCatalogoPDV(); window.renderizarCarrinhoPDV(); }
         if (window.renderizarKits) window.renderizarKits();
+        // O Início mostra o lucro por hora de cada produto: redesenha se ele estiver aberto
+        if (window.DASH && window.DASH.painel && ($('tab-dashboard_erp') || {}).classList?.contains('active') && !window.DASH.rankHora) { window.DASH.rankHora = true; window.renderizarDashboard(); }
     } catch (e) { if ($('lista-produtos')) $('lista-produtos').innerHTML = `<p class="mm-vazio">Não consegui carregar os produtos: ${esc(e.message)}</p>`; }
     finally { if (ld) ld.style.display = 'none'; }
 };
@@ -57,7 +67,7 @@ window.renderizarProdutos = function() {
     box.innerHTML = `<div class="tabela-prod"><div class="tp-cab"><span>Produto</span><span>Custo</span><span>Venda</span><span>Repasse</span><span>Margem</span><span>Estoque</span></div>`
         + lista.map(p => {
             const custo = val(p.custo_total), venda = p.preco_venda || 0, margem = venda > 0 ? Math.round((venda - custo) / venda * 100) : null;
-            const sub = (p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`);
+            const sub = (p.tipo === 'kit' ? `<span class="tag-kit">Kit · ${p.itens.reduce((s, i) => s + i.qtd, 0)} peças</span>` : `${esc(p.peso || 0)}g · ${esc(p.tempo || 0)}h`) + chipHora(p) + (p.personalizavel ? ' <span class="tag-pers" title="O cliente escolhe nome, cor ou frase">✏️ personalizável</span>' : '');
             // No celular as colunas somem e o resumo (venda · repasse · margem) aparece embaixo do nome
             const resumo = `${venda ? 'Venda ' + window.fmt(venda) : 'sem preço'} · ${p.preco_repasse ? 'repasse ' + window.fmt(p.preco_repasse) : '<b class="neg">sem repasse</b>'}${margem !== null ? ` · <span class="${margem < 30 ? 'neg' : ''}">${margem}%</span>` : ''}`;
             return `<div class="tp-linha ${p.ativo === false ? 'inativo' : ''}" onclick="abrirEdicaoProduto(${p.linha})" role="button" tabindex="0" title="Editar">
@@ -563,18 +573,22 @@ window.abrirEdicaoProduto = function(id) {
             <div class="col"><div class="input-group"><label for="ep-catalogo">Item da vitrine</label><select id="ep-catalogo" data-fotos><option value="0">— não aparece na vitrine —</option>${(window.catalogoAdminArray || []).map(k => `<option value="${k.linha}" data-foto="${esc(window.primeiraFotoMM(k.foto))}" ${String(k.linha) === String(p.catalogo_id) ? 'selected' : ''}>${esc(k.nome)}</option>`).join('')}</select></div></div>
         </div>
         <label class="chave" style="margin:0 0 12px;"><input type="checkbox" id="ep-ativo" ${p.ativo !== false ? 'checked' : ''}> Produto ativo (aparece para vender e para a mala)</label>
+        <label class="chave" style="margin:0 0 8px;"><input type="checkbox" id="ep-pers" ${p.personalizavel ? 'checked' : ''} onchange="$('ep-pers-box').hidden = !this.checked"> Personalizável (o cliente escolhe nome, cor, frase…)</label>
+        <div class="input-group" id="ep-pers-box" ${p.personalizavel ? '' : 'hidden'}><label for="ep-pers-dica">O que o cliente escreve? <small class="rot-dica">aparece no site e na venda</small></label><input type="text" id="ep-pers-dica" maxlength="80" value="${esc(p.personalizacao_dica || '')}" placeholder="Ex.: Nome para a caneca"></div>
         <p class="texto-ajuda" id="ep-info" style="margin:0 0 14px;"></p>
         <button class="btn-magic btn-global" id="btn-ep" onclick="salvarEdicaoProduto()">${window.ic('check')} Salvar</button>
         <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); editarProduto(${id})">${window.ic('calculadora')} ${kit ? 'Mudar as peças do kit' : 'Refazer a conta do custo'} no Precificar</button>
         <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); duplicarProduto(${id})">${window.ic('copiar')} Criar ${kit ? 'outro kit parecido' : 'outra peça parecida'}</button>
-        <button type="button" class="btn-limpar ep-link" onclick="paginasDoProduto(${id})">${window.ic('sacola')} Páginas de venda (onde aparece para os clientes)</button>`);
+        <button type="button" class="btn-limpar ep-link" onclick="paginasDoProduto(${id})">${window.ic('sacola')} Páginas de venda (onde aparece para os clientes)</button>
+        <button type="button" class="btn-limpar ep-link" onclick="fecharModalMM(); etiquetaDoProduto(${id})">${window.ic('etiqueta')} Imprimir etiqueta com QR</button>`);
     window.epInfo(); window.epMedidas();
 };
 window.epInfo = function() {
     const p = produtoPorId(epId), box = $('ep-info'); if (!p || !box) return;
     const custo = val(p.custo_total), venda = dinheiroCampo('ep-venda'), rep = dinheiroCampo('ep-repasse');
     box.innerHTML = [venda > 0 ? `Na venda direta sobra <b class="${venda < custo ? 'neg' : ''}">${window.fmt(venda - custo)}</b> (${Math.round((venda - custo) / venda * 100)}%).` : '',
-        rep > 0 ? `Cada peça vendida pelo vendedor te dá <b class="${rep < custo ? 'neg' : ''}">${window.fmt(rep - custo)}</b>.` : 'Sem repasse o produto não vai na mala dos vendedores.'].filter(Boolean).join(' ');
+        rep > 0 ? `Cada peça vendida pelo vendedor te dá <b class="${rep < custo ? 'neg' : ''}">${window.fmt(rep - custo)}</b>.` : 'Sem repasse o produto não vai na mala dos vendedores.',
+        window.lucroPorHora(p, venda) !== null ? `Cada hora de impressora rende <b>${window.fmt(window.lucroPorHora(p, venda))}</b>.` : ''].filter(Boolean).join(' ');
 };
 window.salvarEdicaoProduto = async function() {
     const id = epId, p = produtoPorId(id); if (!p) return;
@@ -586,7 +600,7 @@ window.salvarEdicaoProduto = async function() {
     const b = $('btn-ep'), txt = b.innerHTML; b.disabled = true; b.innerText = '⏳ Salvando…';
     const dinheiro = v => v > 0 ? window.fmtPlanilha(v) : '';
     try {
-        await window.apiAcao('editar_produto', { linha: id, modelo: nome, categoria: $('ep-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), catalogo_id: parseInt($('ep-catalogo').value) || 0, ativo: $('ep-ativo').checked, ...paraSalvar(medidasDos('ep')) });
+        await window.apiAcao('editar_produto', { linha: id, modelo: nome, categoria: $('ep-categoria').value.trim(), preco_venda: dinheiro(venda), preco_repasse: dinheiro(repasse), preco_sugerido: dinheiro(sugerido), catalogo_id: parseInt($('ep-catalogo').value) || 0, ativo: $('ep-ativo').checked, personalizavel: $('ep-pers').checked, personalizacao_dica: $('ep-pers-dica').value.trim(), ...paraSalvar(medidasDos('ep')) });
         window.fecharModalMM();
         await window.carregarBancoDeCustos();
         if (window.painelEstoque) window.carregarPainelEstoque();

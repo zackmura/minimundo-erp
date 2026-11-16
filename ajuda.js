@@ -22,7 +22,7 @@ const GUIAS = [
     { id: 'boasvindas', grupo: 'Comece aqui', icone: 'play', titulo: 'Tour rápido pelo sistema', desc: 'Um minuto para conhecer onde fica cada coisa.', tour: [
         { titulo: 'Bem-vindo ao Mini Mundo 3D!', texto: 'Vou te mostrar onde fica cada coisa. Toque em Próximo para seguir, ou em × para sair quando quiser.', antes: () => window.switchTab('dashboard_erp') },
         { alvo: ['#bottom-nav-admin', '#menu-abas'], titulo: 'Atalhos', texto: 'Aqui ficam as telas que você mais usa. No celular dá para escolher quais aparecem: Menu → Personalizar a barra de baixo.' },
-        { alvo: ['#nav-menu_mobile', '#menu-abas .sb-grupo'], titulo: 'Menu', texto: 'No Menu estão todas as telas, separadas por assunto: Vender, Produção e estoque, Equipe e dinheiro, Site e extras e Sistema.' },
+        { alvo: ['#nav-menu_mobile', '#menu-abas .sb-grupo'], titulo: 'Menu', texto: 'No Menu estão todas as telas, separadas por assunto: Vender, Produzir, Produtos, Dinheiro e equipe, Site, Extras e Sistema. A lupa "Consultar preço", lá em cima, abre de qualquer tela.' },
         { alvo: '#dash-chips', titulo: 'Início', texto: 'O Início mostra como está o negócio: quanto entrou, o lucro e o que precisa de atenção. Escolha o período aqui.' },
         { alvo: '#vendas-abas', titulo: 'Vendas', texto: 'Em Vendas você lança uma venda nova e vê o histórico, com o que falta receber.', antes: () => { window.switchTab('vendas'); window.abaVendas('nova'); } },
         { alvo: ['#nav-v-ajuda', '#btn-ajuda'], titulo: 'Sempre que tiver dúvida', texto: 'Volte em Ajuda e tutoriais. Cada tarefa tem o passo a passo e o botão "Mostrar na tela".', antes: () => window.switchTab('ajuda') }
@@ -138,6 +138,64 @@ const GUIAS = [
         'iPhone (Safari): toque no botão de compartilhar (quadrado com seta) e em "Adicionar à Tela de Início".',
         'Depois de uma atualização grande, se algo ficar estranho, feche o app e abra de novo.'
     ] },
+    { id: 'consulta', grupo: 'Vender', icone: 'busca', titulo: 'Consultar preço na frente do cliente', desc: 'Foto grande, preço e tamanho em 2 segundos.', passos: [
+        'Toque na lupa "Consultar preço" lá em cima (no computador, aperte / ou Ctrl+K). Funciona em qualquer tela.',
+        'Digite um pedaço do nome, ou toque na câmera e aponte para o QR da etiqueta.',
+        'Ligue o "Modo cliente" para virar a tela para o cliente: some o custo e o lucro, fica só a foto, o preço e o tamanho.',
+        'Dali mesmo dá para Vender, Mandar no WhatsApp do cliente ou imprimir a Etiqueta.'
+    ] },
+    { id: 'balcao', grupo: 'Vender', icone: 'carrinho', titulo: 'Vender no balcão (com ou sem estoque)', desc: 'Grade de fotos, personalização e "fazer depois".', passos: [
+        'Em Vender e vendas → Nova venda, toque nas fotos dos produtos (use as categorias em cima para achar mais rápido).',
+        'Produto personalizável (ex.: caneca com nome)? Escreva a personalização no carrinho, no campo em destaque.',
+        'Em "Entrega", escolha "Levou agora" (sai do estoque) ou "Fazer depois" (as peças vão sozinhas para a Fila de impressão, com o prazo).',
+        'Pagamento em Pix? Toque em "Mostrar o QR do Pix": o cliente aponta a câmera do banco e o valor já vem preenchido.',
+        'Nada se perde: sem estoque, a venda é lançada do mesmo jeito e a peça entra na fila.'
+    ] },
+    { id: 'orcamento', grupo: 'Vender', icone: 'recibo', titulo: 'Fazer um orçamento que o cliente aprova', desc: 'Manda o link, o cliente toca em Aprovar.', passos: [
+        'Em Pedidos e orçamentos, toque em "Novo orçamento".',
+        'Coloque o cliente, os produtos e os preços. A validade já vem com 7 dias (dá para mudar).',
+        'Toque em "Criar orçamento" e depois em "Mandar no WhatsApp": o cliente recebe a lista e o link.',
+        'No link ele vê as fotos e toca em "Aprovar orçamento". O pedido vira "Confirmado" sozinho, as peças entram na fila de impressão e chega um aviso no Telegram.',
+        'O filtro "Orçamentos" mostra os que ainda esperam resposta.'
+    ] },
+    { id: 'pix', grupo: 'Vender', icone: 'dinheiro', titulo: 'Receber com Pix QR Code', desc: 'O valor já vai preenchido, sem maquininha.', passos: [
+        'Uma vez só: Ajustes → Pix com QR Code. Coloque a chave, o tipo, o nome e a cidade, e toque em "Salvar e ver um QR de teste".',
+        'Na venda (ou no detalhe de uma venda a receber), toque em "Mostrar o QR do Pix" ou "Cobrar com QR do Pix".',
+        'O cliente lê o QR com o app do banco. Se ele estiver longe, toque em "Mandar o Pix no WhatsApp": vai o "copia e cola" com o valor.',
+        'Nos pedidos do site com Pix, o acompanhamento do cliente já mostra o QR e o copia e cola com o valor certo.'
+    ] },
+    { id: 'clientes', grupo: 'Vender', icone: 'usuarios', titulo: 'Clientes: quem compra, quem deve, quem sumiu', desc: 'A lista se monta sozinha pelas vendas.', passos: [
+        'Em Clientes aparecem todos que já compraram ou pediram pelo site, com o total e a última compra.',
+        'Filtros: "Devendo" (para cobrar), "Sumidos" (60 dias sem comprar, para chamar de volta) e "Aniversário" (próximos 30 dias).',
+        'Toque no cliente para ver as compras com foto, cobrar no WhatsApp e anotar aniversário e observações.',
+        'No dia do aniversário, o bom dia do Telegram avisa.'
+    ] },
+    { id: 'fila', grupo: 'Produção e estoque', icone: 'impressora', titulo: 'Fila de impressão: o que imprimir agora', desc: 'Vendas, pedidos e encomendas caem aqui sozinhos.', passos: [
+        'Em Fila de impressão estão as peças para imprimir, na ordem, com o prazo e a previsão de quando ficam prontas.',
+        'Use as setas para mudar a ordem e ▶ para marcar "imprimindo".',
+        'Terminou? Toque em "Imprimi" e escolha o carretel: o peso da peça sai do filamento. Se a peça já estava pronta no Ateliê, toque em "Já tinha pronta".',
+        'Quando a venda inteira fica pronta, o sistema oferece avisar o cliente no WhatsApp.',
+        '"Imprimir para o estoque" põe peças na fila que entram no Ateliê quando ficam prontas.'
+    ] },
+    { id: 'filamento', grupo: 'Produção e estoque', icone: 'impressora', titulo: 'Controlar o filamento', desc: 'Quanto sobra em cada carretel.', passos: [
+        'Na Fila, aba Filamento, toque em "Cadastrar carretel" (material, cor e peso). Dá para lançar a compra como despesa junto.',
+        'Cada "Imprimi" desconta o peso da peça do carretel escolhido.',
+        'De vez em quando, pese o carretel e toque em "Pesei" para acertar o número.',
+        'Quando sobra menos de 150 g, chega um aviso no Telegram e aparece no Início.'
+    ] },
+    { id: 'etiquetas', grupo: 'Produção e estoque', icone: 'etiqueta', titulo: 'Imprimir etiquetas com QR', desc: 'Várias por folha, no papel que você tiver.', passos: [
+        'Em Etiquetas com QR, escolha os produtos e quantas de cada (ou toque em "Todos com estoque no Ateliê").',
+        'Escolha o modelo do papel: folhas A4 de etiqueta (21, 24, 14, 8, 40 ou 65 por folha), papel comum com linhas de corte, rolo térmico ou "Meu tamanho".',
+        'Folha já usada pela metade? Em "Começar na nº" diga de qual etiqueta começar.',
+        'Escolha o que vai na etiqueta (QR, nome, preço, tamanho) e confira na prévia.',
+        'Na primeira vez, imprima o "teste de alinhamento". Na janela de impressão use Escala 100% e Margens: nenhuma.',
+        'O QR abre o produto no site, já pronto para o cliente pedir. Também tem a "Plaquinha do Pix" para o balcão ou a feira.'
+    ] },
+    { id: 'personalizavel', grupo: 'Produção e estoque', icone: 'lapis', titulo: 'Produto personalizável (nome, cor, frase)', desc: 'O cliente escreve no site e na venda.', passos: [
+        'Em Produtos e preços, toque no produto e marque "Personalizável".',
+        'Escreva o que o cliente deve pôr, por exemplo "Nome para a caneca".',
+        'No site aparece o campo para o cliente escrever, e a personalização segue para o pedido, para a venda e para a fila de impressão.'
+    ] },
     { id: 'voltar', grupo: 'Sistema', icone: 'voltar', titulo: 'Botão voltar do celular', desc: 'Agora ele volta de tela, não fecha o app.', passos: [
         'Com uma janela aberta, o voltar fecha a janela.',
         'Dentro do controle de um vendedor ou do editor de uma página, o voltar volta para a lista.',
@@ -159,6 +217,25 @@ const GUIAS_VENDEDOR = [
         { alvo: ['#btn-ms-criar', '.ms-abas'], titulo: 'Criar ou ajustar', texto: 'Na primeira vez, confira o seu WhatsApp e toque em "Criar meu site". Depois, use as abas Pedidos, Meus preços e Divulgar.' },
         { alvo: ['.ms-precos', '#v-site'], titulo: 'Seus preços', texto: 'Em "Meus preços", coloque o preço de cada produto e toque em Salvar. Campo vazio = vale o sugerido. O preço não pode ser menor que o repasse.', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('precos'); } },
         { alvo: ['.ms-links', '#v-site'], titulo: 'Divulgar', texto: 'Em "Divulgar" estão os seus links: copie ou mande direto pelo WhatsApp. Os pedidos chegam em "Pedidos". Entregou? Toque em "Dar baixa nas peças".', antes: () => { if (window.MS && window.MS.dados && window.MS.dados.loja.ativa) window.abaMeuSite('divulgar'); } }
+    ] },
+    { id: 'v-pix', grupo: 'No dia a dia', icone: 'dinheiro', titulo: 'Receber com Pix QR Code', desc: 'O valor já vai preenchido no app do banco.', passos: [
+        'Uma vez só: coloque a sua chave Pix em Meu site → Divulgar.',
+        'Na hora de fechar a venda, toque em "Cobrar com QR do Pix": o cliente aponta a câmera do banco. Depois toque em "Voltar para a venda" e lance.',
+        'Em Minhas vendas, as vendas a receber têm o botão 💠 com o QR, e o "Cobrar" no WhatsApp já leva o Pix copia e cola com o valor.'
+    ] },
+    { id: 'v-meta', grupo: 'No dia a dia', icone: 'barras', titulo: 'Sua meta do mês', desc: 'Quanto falta para bater.', passos: [
+        'Se a Mini Mundo combinou uma meta com você, ela aparece em Minhas vendas, com a barra de quanto já vendeu.',
+        'Embaixo da barra aparece quanto falta e quanto vender por dia até o fim do mês.'
+    ] },
+    { id: 'v-repor', grupo: 'No dia a dia', icone: 'presente', titulo: 'Pedir reposição da mala', desc: 'O sistema sugere o que você mais vende.', passos: [
+        'Em Encomendas, toque em "Pedir reposição do que eu mais vendo".',
+        'A lista mostra o que você vendeu nos últimos 60 dias e quantas pedir. Mude as quantidades se quiser.',
+        'Toque em "Pedir para a Mini Mundo". O pedido chega na hora para a fábrica.'
+    ] },
+    { id: 'v-etiquetas', grupo: 'No dia a dia', icone: 'etiqueta', titulo: 'Etiquetas com QR das suas peças', desc: 'O QR abre o seu site, com o seu preço.', passos: [
+        'Em Etiquetas com QR, toque em "Todas da minha mala" (ou escolha as peças).',
+        'Escolha o papel e quantas por folha, confira a prévia e imprima.',
+        'O QR leva o cliente ao seu site, com o seu preço e o seu WhatsApp.'
     ] },
     { id: 'v-vitrine', grupo: 'No dia a dia', icone: 'link', titulo: 'Mandar sua vitrine para clientes', desc: 'Link com as peças que estão com você.', passos: ['Em Vender, no fim da página, toque em "Copiar link" da sua vitrine.', 'Mande para os clientes: eles veem as fotos e falam com você no WhatsApp.'] }
 ];
@@ -335,6 +412,18 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v8.0', data: '16/11/2026', titulo: 'Sistema de fábrica: fila de impressão, etiquetas com QR, Pix QR e orçamentos', itens: [
+        'Consultar preço: a lupa lá em cima abre de qualquer tela, com foto grande, preço e tamanho. O "Modo cliente" esconde custo e lucro para virar a tela para o cliente. Também lê o QR da etiqueta com a câmera.',
+        'Vender ficou visual: grade de fotos com categorias, personalização por item (ex.: nome na caneca) e "Fazer depois". Sem estoque, a venda é lançada do mesmo jeito e as peças vão sozinhas para a Fila de impressão.',
+        'Fila de impressão: vendas, pedidos do site confirmados, orçamentos aprovados e encomendas dos vendedores caem sozinhos, com prazo e previsão. "Imprimi" desconta o filamento do carretel e avisa quando a venda inteira ficou pronta.',
+        'Etiquetas com QR: várias por folha, no papel que você tiver (A4 de etiqueta, papel comum com linhas de corte, rolo térmico ou o seu tamanho), começando em qualquer posição da folha. O QR abre o produto no site.',
+        'Pix com QR Code e o valor preenchido: no balcão, nas vendas a receber, no acompanhamento dos pedidos do site e para os vendedores. Configure em Ajustes → Pix com QR Code.',
+        'Orçamentos: monte, mande o link e o cliente aprova com um toque. Vira pedido confirmado e entra na fila.',
+        'Clientes: lista montada sozinha pelas vendas, com quem está devendo, quem sumiu e os aniversariantes (o bom dia do Telegram avisa).',
+        'O histórico de vendas mostra as fotos dos produtos. O Início ganhou atalhos e o "Lucro por hora de impressora", para saber o que vale mais a pena imprimir.',
+        'Vendedores: Pix QR na venda, meta do mês com barra de progresso e "Pedir reposição" com a sugestão do que eles mais vendem. Na mala, o botão "Preencher com a sugestão".',
+        'O menu foi reorganizado: Vender, Produzir, Produtos, Dinheiro e equipe, Site, Extras e Sistema. Nenhuma tela foi tirada.'
+    ] },
     { v: 'v7.6', data: '16/11/2026', titulo: 'Telegram: avisos num grupo e consultas pelo chat', itens: [
         'Igual à Novera: os avisos caem sozinhos num grupo do Telegram. São vendas, pagamentos, vendas canceladas, pedidos do site, vendas dos vendedores, acertos, malas, encomendas e despesas.',
         'Todo dia chegam o bom dia, com a agenda (pedidos para confirmar e para entregar, encomendas, o que falta receber), e o fechamento do dia, com vendas, caixa, despesas e saldo. Você escolhe os horários.',

@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v7.6.0";
+const VERSAO_APP = "v8.0.0";
 window.VERSAO_APP_MM = VERSAO_APP;
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
@@ -143,7 +143,11 @@ window.ic = (nome, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use 
 // Cada tela: ícone, título e a frase que aparece embaixo do título
 window.TELAS = {
     dashboard_erp: ['painel', 'Início', 'Como está o negócio no período'],
-    vendas: ['carrinho', 'Vendas', 'Lance vendas e acompanhe o que falta receber'],
+    vendas: ['carrinho', 'Vender e vendas', 'Balcão com fotos, Pix na tela e o que falta receber'],
+    fila: ['impressora', 'Fila de impressão', 'O que imprimir, por ordem, e o filamento'],
+    clientes: ['usuarios', 'Clientes', 'Quem compra, quem deve e quem sumiu'],
+    etiquetas: ['etiqueta', 'Etiquetas com QR', 'Várias por folha, no papel que você usar'],
+    v_etiquetas: ['etiqueta', 'Etiquetas com QR', 'Com o seu preço e o link do seu site'],
     precificar: ['calculadora', 'Precificar', 'Calcule o custo e cadastre peças e kits'],
     modelos: ['pacote', 'Produtos', 'Peças e kits com custo, preços e estoque'],
     kits: ['camadas', 'Kits', 'Kits com foto: montar e ver o que falta'],
@@ -249,7 +253,10 @@ window.switchTab = function(tabName, tituloAba = null, semHistorico = false) {
     if(tabName==='kits') window.carregarKits();
     if(tabName==='paginas') window.carregarPaginas();
     if(tabName==='pedidos') window.carregarPedidos();
-    if(tabName==='dashboard_erp') window.carregarDashboardERP();
+    if(tabName==='dashboard_erp') { window.carregarDashboardERP(); if (window.renderizarAtalhos) window.renderizarAtalhos(); }
+    if(tabName==='fila' && window.carregarFila) window.carregarFila();
+    if(tabName==='clientes' && window.carregarClientes) window.carregarClientes();
+    if((tabName==='etiquetas' || tabName==='v_etiquetas') && window.carregarEtiquetas) window.carregarEtiquetas();
     if(tabName==='imas') window.carregarImas();
     if(tabName==='registros' && window.carregarRegistros) window.carregarRegistros();
     if(tabName==='novidades' && window.renderizarNovidades) window.renderizarNovidades();
@@ -292,6 +299,7 @@ function janelasAbertas() {
     document.querySelectorAll('.lf-fundo').forEach(f => l.push(() => f.querySelector('.lf-fechar').click()));
     if (document.querySelector('.tour-fundo')) l.push(() => window.fecharTour());
     if (document.querySelector('.gal:not([hidden])')) l.push(() => window.fecharGaleria());
+    if ($('cq') && !$('cq').hidden) l.push(() => window.fecharConsulta());
     if (window.perguntaAtual) l.push(() => window.responderPergunta(false));
     if ($('custom-modal') && $('custom-modal').style.display === 'flex') l.push(() => window.fecharAlerta());
     [...document.querySelectorAll('.modal-overlay, .modal-overlay-alert')].reverse()
@@ -333,9 +341,9 @@ document.addEventListener('pointerdown', () => {
 // 📱 BARRA DE BAIXO DO CELULAR: você escolhe os atalhos e a ordem (fica guardado neste aparelho)
 // ==========================================
 // O "Menu" fica sempre no fim, porque é por ele que se chega em todas as telas.
-window.BARRA_OPCOES = { dashboard_erp: 'Início', vendas: 'Vendas', pedidos: 'Pedidos', precificar: 'Precificar', modelos: 'Produtos', kits: 'Kits', custos: 'Custos', estoque: 'Estoque', vendedores: 'Vendedores',
+window.BARRA_OPCOES = { dashboard_erp: 'Início', vendas: 'Vender', fila: 'Fila', clientes: 'Clientes', etiquetas: 'Etiquetas', pedidos: 'Pedidos', precificar: 'Precificar', modelos: 'Produtos', kits: 'Kits', custos: 'Custos', estoque: 'Estoque', vendedores: 'Vendedores',
     paginas: 'Páginas', loja: 'Catálogo', imas: 'Ímãs', anuncios: 'Anúncios', analytics: 'Analytics', quiz: 'Quiz', usuarios: 'Usuários', config: 'Ajustes', registros: 'Registros', ajuda: 'Ajuda' };
-const BARRA_PADRAO = ['dashboard_erp', 'vendas', 'estoque', 'vendedores'], BARRA_MAX = 5;
+const BARRA_PADRAO = ['dashboard_erp', 'vendas', 'fila', 'vendedores'], BARRA_MAX = 5;
 window.barraAtalhos = function() {
     try { const l = JSON.parse(localStorage.getItem('mm_barra') || 'null'); if (Array.isArray(l)) { const v = [...new Set(l)].filter(id => window.BARRA_OPCOES[id]).slice(0, BARRA_MAX); if (v.length) return v; } }
     catch (e) { /* aparelho sem armazenamento: usa o padrão */ }
@@ -344,7 +352,7 @@ window.barraAtalhos = function() {
 window.montarBarra = function() {
     const nav = window.$('bottom-nav-admin'); if (!nav) return;
     const ids = window.barraAtalhos(), ativa = ((document.querySelector('.tab-content.active') || {}).id || '').replace('tab-', '');
-    nav.innerHTML = [...ids, 'menu_mobile'].map(id => `<button id="nav-${id}" class="bottom-nav-btn ${id === ativa ? 'active' : ''}" onclick="switchTab('${id}')">${window.ic(window.TELAS[id][0])}<span>${id === 'menu_mobile' ? 'Menu' : window.BARRA_OPCOES[id]}</span>${id === 'pedidos' ? '<b class="aviso-num" data-aviso-pedidos hidden></b>' : ''}</button>`).join('');
+    nav.innerHTML = [...ids, 'menu_mobile'].map(id => `<button id="nav-${id}" class="bottom-nav-btn ${id === ativa ? 'active' : ''}" onclick="switchTab('${id}')">${window.ic(window.TELAS[id][0])}<span>${id === 'menu_mobile' ? 'Menu' : window.BARRA_OPCOES[id]}</span>${id === 'pedidos' ? '<b class="aviso-num" data-aviso-pedidos hidden></b>' : id === 'fila' ? '<b class="aviso-num" data-aviso-fila hidden></b>' : ''}</button>`).join('');
     nav.dataset.n = ids.length + 1;
     if (window.pintarAvisoPedidos) window.pintarAvisoPedidos();
 };
@@ -424,7 +432,7 @@ window.abrirPergunta = function(o, comCampo) {
         window.$('pergunta-campo').style.display = comCampo ? 'block' : 'none';
         window.$('pergunta-erro').innerText = '';
         if (comCampo) {
-            inp.type = o.campo === 'number' ? 'number' : 'text';
+            inp.type = ['number', 'date'].includes(o.campo) ? o.campo : 'text';
             inp.className = o.campo === 'dinheiro' ? 'mask-money' : '';
             inp.inputMode = o.campo === 'dinheiro' ? 'numeric' : '';
             inp.readOnly = !!o.somenteLeitura;

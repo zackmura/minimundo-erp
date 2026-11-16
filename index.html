@@ -17,7 +17,7 @@
     <link rel="icon" href="logo1.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=7.6.0">
+    <link rel="stylesheet" href="style.css?v=8.0.0">
 </head>
 <body>
 
@@ -108,22 +108,29 @@
             <button id="btn-dashboard_erp" class="tab-btn active" onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg><span>Início</span></button>
 
             <div class="sb-grupo">Vender</div>
-            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vendas</span></button>
-            <button id="btn-pedidos" class="tab-btn" onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg><span>Pedidos</span><b class="aviso-num" data-aviso-pedidos hidden></b></button>
-            <button id="btn-paginas" class="tab-btn" onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg><span>Páginas de venda</span></button>
+            <button id="btn-vendas" class="tab-btn" onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg><span>Vender e vendas</span></button>
+            <button id="btn-pedidos" class="tab-btn" onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg><span>Pedidos e orçamentos</span><b class="aviso-num" data-aviso-pedidos hidden></b></button>
+            <button id="btn-clientes" class="tab-btn" onclick="switchTab('clientes')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Clientes</span></button>
 
-            <div class="sb-grupo">Produção e estoque</div>
-            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos</span></button>
+            <div class="sb-grupo">Produzir</div>
+            <button id="btn-fila" class="tab-btn" onclick="switchTab('fila')"><svg class="ic"><use href="#i-impressora"/></svg><span>Fila de impressão</span><b class="aviso-num" data-aviso-fila hidden></b></button>
+            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Estoque</span></button>
+            <button id="btn-etiquetas" class="tab-btn" onclick="switchTab('etiquetas')"><svg class="ic"><use href="#i-etiqueta"/></svg><span>Etiquetas com QR</span></button>
+
+            <div class="sb-grupo">Produtos</div>
+            <button id="btn-modelos" class="tab-btn" onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg><span>Produtos e preços</span></button>
             <button id="btn-precificar" class="tab-btn" onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg><span>Precificar</span></button>
             <button id="btn-kits" class="tab-btn" onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg><span>Kits</span></button>
-            <button id="btn-estoque" class="tab-btn" onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg><span>Estoque</span></button>
 
-            <div class="sb-grupo">Equipe e dinheiro</div>
+            <div class="sb-grupo">Dinheiro e equipe</div>
             <button id="btn-vendedores" class="tab-btn" onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg><span>Vendedores</span></button>
             <button id="btn-custos" class="tab-btn" onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg><span>Custos e compras</span></button>
 
-            <div class="sb-grupo">Site e extras</div>
-            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Catálogo do site</span></button>
+            <div class="sb-grupo">Site</div>
+            <button id="btn-paginas" class="tab-btn" onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg><span>Páginas de venda</span></button>
+
+            <div class="sb-grupo">Extras</div>
+            <button id="btn-loja" class="tab-btn" onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg><span>Vitrine antiga</span></button>
             <button id="btn-imas" class="tab-btn" onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg><span>Ímãs NFC</span></button>
             <button id="btn-anuncios" class="tab-btn" onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-estrela"/></svg><span>Anúncios</span></button>
             <button id="btn-analytics" class="tab-btn" onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg><span>Analytics</span></button>
@@ -143,6 +150,7 @@
             <button id="btn-v_vendas" class="tab-btn" onclick="switchTab('v_vendas')"><svg class="ic"><use href="#i-recibo"/></svg><span>Minhas vendas</span></button>
             <button id="btn-v_acerto" class="tab-btn" onclick="switchTab('v_acerto')"><svg class="ic"><use href="#i-dinheiro"/></svg><span>Meu acerto</span></button>
             <button id="btn-v_encomendas" class="tab-btn" onclick="switchTab('v_encomendas')"><svg class="ic"><use href="#i-presente"/></svg><span>Encomendas</span></button>
+            <button id="btn-v_etiquetas" class="tab-btn" onclick="switchTab('v_etiquetas')"><svg class="ic"><use href="#i-etiqueta"/></svg><span>Etiquetas com QR</span></button>
             <button id="btn-v_site" class="tab-btn" onclick="switchTab('v_site')"><svg class="ic"><use href="#i-sacola"/></svg><span>Meu site</span><b class="aviso-num" data-aviso-site hidden></b></button>
             <button class="tab-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg><span>Ajuda</span></button>
         </nav>
@@ -161,6 +169,7 @@
             <img class="topo-logo" src="logo.png" alt="" onerror="this.src='logo.jpg'; this.onerror=null;">
             <span class="topo-ic" id="topo-ic"><svg class="ic"><use href="#i-painel"/></svg></span>
             <div class="topo-titulos"><h1 id="titulo-modulo-ativo">Dashboard</h1><small id="topo-sub">Como está o negócio no período</small></div>
+            <button class="topo-consulta" type="button" onclick="abrirConsulta()" title="Consultar preço (atalho: /)"><svg class="ic"><use href="#i-busca"/></svg><span>Consultar preço</span><kbd>/</kbd></button>
             <button class="btn-sair topo-sair" onclick="fazerLogout()" title="Sair"><svg class="ic"><use href="#i-sair"/></svg></button>
         </header>
 
@@ -178,26 +187,36 @@
             <button class="menu-ajuda" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg><span><b>Ajuda e tutoriais</b><small>Passo a passo de cada tarefa, mostrando onde tocar</small></span><svg class="ic"><use href="#i-seta-dir"/></svg></button>
             <div class="menu-grupo">Vender</div>
             <div class="grid-menu">
-                <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vendas</button>
+                <button onclick="switchTab('vendas')"><svg class="ic"><use href="#i-carrinho"/></svg>Vender e vendas</button>
                 <button onclick="switchTab('pedidos')"><svg class="ic"><use href="#i-recibo"/></svg>Pedidos<b class="aviso-num" data-aviso-pedidos hidden></b></button>
-                <button onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg>Páginas de venda</button>
+                <button onclick="switchTab('clientes')"><svg class="ic"><use href="#i-usuarios"/></svg>Clientes</button>
+                <button onclick="abrirConsulta()"><svg class="ic"><use href="#i-busca"/></svg>Consultar preço</button>
             </div>
-            <div class="menu-grupo">Produção e estoque</div>
+            <div class="menu-grupo">Produzir</div>
             <div class="grid-menu">
-                <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos</button>
+                <button onclick="switchTab('fila')"><svg class="ic"><use href="#i-impressora"/></svg>Fila de impressão<b class="aviso-num" data-aviso-fila hidden></b></button>
+                <button onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
+                <button onclick="switchTab('etiquetas')"><svg class="ic"><use href="#i-etiqueta"/></svg>Etiquetas com QR</button>
+            </div>
+            <div class="menu-grupo">Produtos</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('modelos')"><svg class="ic"><use href="#i-pacote"/></svg>Produtos e preços</button>
                 <button onclick="switchTab('precificar')"><svg class="ic"><use href="#i-calculadora"/></svg>Precificar</button>
                 <button onclick="switchTab('kits')"><svg class="ic"><use href="#i-camadas"/></svg>Kits</button>
-                <button onclick="switchTab('estoque')"><svg class="ic"><use href="#i-arquivo"/></svg>Estoque</button>
             </div>
-            <div class="menu-grupo">Equipe e dinheiro</div>
+            <div class="menu-grupo">Dinheiro e equipe</div>
             <div class="grid-menu">
                 <button onclick="switchTab('dashboard_erp')"><svg class="ic"><use href="#i-painel"/></svg>Início</button>
                 <button onclick="switchTab('vendedores')"><svg class="ic"><use href="#i-usuarios"/></svg>Vendedores</button>
                 <button onclick="switchTab('custos')"><svg class="ic"><use href="#i-carteira"/></svg>Custos e compras</button>
             </div>
-            <div class="menu-grupo">Site e extras</div>
+            <div class="menu-grupo">Site</div>
             <div class="grid-menu">
-                <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Catálogo do site</button>
+                <button onclick="switchTab('paginas')"><svg class="ic"><use href="#i-megafone"/></svg>Páginas de venda</button>
+            </div>
+            <div class="menu-grupo">Extras</div>
+            <div class="grid-menu">
+                <button onclick="switchTab('loja')"><svg class="ic"><use href="#i-sacola"/></svg>Vitrine antiga</button>
                 <button onclick="switchTab('imas')"><svg class="ic"><use href="#i-ima"/></svg>Ímãs NFC</button>
                 <button onclick="switchTab('anuncios')"><svg class="ic"><use href="#i-estrela"/></svg>Anúncios</button>
                 <button onclick="switchTab('analytics')"><svg class="ic"><use href="#i-barras"/></svg>Analytics</button>
@@ -218,6 +237,7 @@
         <!-- 📊 DASHBOARD                               -->
         <!-- ========================================== -->
         <div id="tab-dashboard_erp" class="tab-content active">
+            <div class="atalhos" id="dash-atalhos"></div>
             <div class="barra-periodo">
                 <div class="chips-rolagem" id="dash-chips">
                     <button class="chip-op active" data-p="mes" onclick="periodoDash('mes')">Este mês</button>
@@ -248,12 +268,14 @@
                     <div class="pdv-esq">
                         <div class="pdv-card">
                             <div class="pdv-cab"><span class="pdv-passo">1</span><b>Produtos</b><span class="info-lista" id="pdv-info"></span><button class="btn-limpar" id="pdv-esvaziar" hidden onclick="limparPDV()">Tirar todos</button></div>
-                            <div class="pdv-busca" id="pdv-busca-box">
+                            <div class="pdv-busca pdv-busca-fotos" id="pdv-busca-box">
                                 <div class="busca-linha">
                                     <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pdv-busca" placeholder="Toque para escolher ou digite o nome…" autocomplete="off" enterkeyhint="search" oninput="renderizarCatalogoPDV()" onfocus="abrirListaPDV()"></div>
                                     <button type="button" class="btn-limpar pdv-ver-todos" onclick="verTodosPDV()"><svg class="ic"><use href="#i-imagem"/></svg>Ver todos</button>
                                 </div>
                                 <div id="pdv-grade" class="pdv-sugestoes" hidden></div>
+                                <div class="chips-rolagem pdv-cats" id="pdv-cats"></div>
+                                <div class="pdv-fotos" id="pdv-fotos"></div>
                             </div>
                             <div id="pdv-itens" class="pdv-escolhidos"></div>
                         </div>
@@ -267,6 +289,9 @@
                                 <div class="col" style="max-width:210px;"><div class="input-group"><label>Data da venda</label><input type="date" id="pdv-data"></div></div>
                                 <div class="col"><div class="input-group"><label>Já pagou?</label><div class="seg-mini largo seg-situacao" id="pdv-status"><button class="active pago" data-s="Pago" onclick="selecionarStatusPDV('Pago')"><svg class="ic"><use href="#i-check"/></svg>Pago</button><button class="pend" data-s="Pendente" onclick="selecionarStatusPDV('Pendente')"><svg class="ic"><use href="#i-relogio"/></svg>Vai pagar depois</button></div></div></div>
                             </div>
+                            <label>Entrega</label>
+                            <div class="seg-mini largo pdv-entrega" id="pdv-entrega"><button class="active" data-e="levou" onclick="entregaPDV('levou')"><svg class="ic"><use href="#i-check"/></svg>O cliente já levou</button><button data-e="fila" onclick="entregaPDV('fila')"><svg class="ic"><use href="#i-impressora"/></svg>Fazer depois</button></div>
+                            <div class="pdv-prazo" id="pdv-prazo-box" hidden><small>O que não tem no Ateliê vai para a <b>fila de impressão</b>.</small><div class="input-group"><label for="pdv-prazo">Entregar até (opcional)</label><input type="date" id="pdv-prazo"></div></div>
                             <label>Canal da venda</label><div class="chips-op" id="pdv-canais"></div>
                             <label>Forma de pagamento</label><div class="chips-op" id="pdv-formas"></div>
                             <div class="input-group"><label>Observação (opcional)</label><input type="text" id="pdv-obs" maxlength="255" placeholder="Ex: entregar sábado, cor azul…"></div>
@@ -277,6 +302,7 @@
                             <div class="pdv-cab"><span class="pdv-passo">3</span><b>Total e finalizar</b></div>
                             <div class="pdv-desconto"><label for="pdv-desconto">Desconto no pedido</label><input type="text" id="pdv-desconto" class="mask-money" placeholder="R$ 0,00" oninput="setTimeout(renderizarTotaisPDV)"></div>
                             <div id="pdv-totais"></div>
+                            <button type="button" class="btn-limpar pdv-pix" id="pdv-pix" hidden onclick="pixPDV()">💠 Mostrar o QR do Pix para o cliente pagar</button>
                             <button class="btn-magic btn-global btn-finalizar" id="pdv-finalizar" onclick="finalizarPedido()">Finalizar venda</button>
                         </div>
                     </div>
@@ -648,6 +674,7 @@
         <div id="tab-pedidos" class="tab-content">
             <div class="pl-topo">
                 <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="pc-busca" placeholder="Buscar por nome, número ou produto…" autocomplete="off" enterkeyhint="search" oninput="renderizarPedidos()"></div>
+                <button class="btn-limpar" onclick="novoOrcamento()"><svg class="ic"><use href="#i-recibo"/></svg>Novo orçamento</button>
                 <button class="btn-magic btn-pequeno" onclick="novoPedido()"><svg class="ic"><use href="#i-mais"/></svg>Anotar pedido</button>
             </div>
             <div class="pc-painel" id="pc-painel"></div>
@@ -731,6 +758,30 @@
             </div>
             <div class="grade-2">
                 <div class="card">
+                    <div class="card-titulo"><svg class="ic"><use href="#i-dinheiro"/></svg>Pix com QR Code</div>
+                    <p class="card-desc">Com isso o sistema mostra um QR do Pix já com o valor da venda: o cliente aponta a câmera do banco e paga certinho. Também vai no acompanhar dos pedidos do site e na plaquinha das etiquetas.</p>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="cfg-pix-chave">Chave Pix</label><input type="text" id="cfg-pix-chave" placeholder="Celular, CPF, CNPJ, e-mail ou aleatória" maxlength="120" autocomplete="off"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-pix-tipo">Tipo da chave</label><select id="cfg-pix-tipo"><option value="">Descobrir sozinho</option><option value="celular">Celular</option><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="email">E-mail</option><option value="aleatoria">Chave aleatória</option></select></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><div class="input-group"><label for="cfg-pix-nome">Nome de quem recebe</label><input type="text" id="cfg-pix-nome" placeholder="Mini Mundo" maxlength="25"></div></div>
+                        <div class="col"><div class="input-group"><label for="cfg-pix-cidade">Cidade</label><input type="text" id="cfg-pix-cidade" placeholder="São Paulo" maxlength="15"></div></div>
+                    </div>
+                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM(this)">Salvar</button>
+                    <button class="btn-magic btn-secundario" onclick="testarPixAjustes(this)">Salvar e ver um QR de teste (R$ 1,00)</button>
+                    <p class="texto-ajuda">Dica: pague o teste de R$ 1,00 com outra conta para conferir que o dinheiro cai na sua.</p>
+                </div>
+                <div class="card">
+                    <div class="card-titulo"><svg class="ic"><use href="#i-impressora"/></svg>Produção</div>
+                    <p class="card-desc">A fila de impressão divide o tempo entre as impressoras para dizer quando cada peça fica pronta (contando 12 h de impressão por dia).</p>
+                    <div class="input-group"><label for="cfg-impressoras">Quantas impressoras você usa?</label><input type="number" id="cfg-impressoras" min="1" max="50" placeholder="1"></div>
+                    <button class="btn-magic btn-global" style="margin-top:0;" onclick="salvarConfigMM(this)">Salvar</button>
+                    <button class="btn-magic btn-secundario" onclick="switchTab('fila')">Abrir a fila de impressão</button>
+                </div>
+            </div>
+            <div class="grade-2">
+                <div class="card">
                     <div class="card-titulo"><svg class="ic"><use href="#i-etiqueta"/></svg>Plataformas e taxas</div>
                     <p class="card-desc">A taxa é descontada do lucro nas vendas desse canal (Shopee, Elo7…).</p>
                     <div class="input-group"><label for="config-plat-nome">Nome da plataforma</label><input type="text" id="config-plat-nome" placeholder="Ex: Shopee"></div>
@@ -774,6 +825,14 @@
             <div class="chips-rolagem" id="rg-filtros"></div>
             <div id="rg-lista"></div>
         </div>
+        <div id="tab-fila" class="tab-content"><div id="fila-conteudo"></div></div>
+        <div id="tab-clientes" class="tab-content">
+            <div id="cl-resumo"></div>
+            <div class="busca-ic"><svg class="ic"><use href="#i-busca"/></svg><input type="search" id="cl-busca" placeholder="Buscar cliente ou WhatsApp…" autocomplete="off" oninput="renderizarClientes()"></div>
+            <div class="chips-rolagem" id="cl-filtros"></div>
+            <div id="cl-lista"></div>
+        </div>
+        <div id="tab-etiquetas" class="tab-content"><div id="etq-conteudo"></div></div>
         <div id="tab-novidades" class="tab-content"><div id="nv-lista"></div></div>
         <div id="tab-ajuda" class="tab-content"><div id="aj-conteudo"></div></div>
 
@@ -793,6 +852,7 @@
         <div id="tab-v_vendas" class="tab-content">
             <div id="v-vendas"></div>
         </div>
+        <div id="tab-v_etiquetas" class="tab-content"><div id="etq-conteudo-v"></div></div>
         <div id="tab-v_site" class="tab-content">
             <div id="v-site"></div>
         </div>
@@ -803,6 +863,7 @@
             <div class="card card-destaque">
                 <div class="card-titulo">🎁 Pedir peça para a fábrica</div>
                 <p class="card-desc">Cliente quer algo que você não tem, ou uma peça personalizada? Peça aqui.</p>
+                <button type="button" class="btn-magic btn-azul" style="margin:0 0 14px;" onclick="pedirReposicao()">🔄 Pedir reposição do que eu mais vendo</button>
                 <div class="input-group"><label>Produto (opcional)</label><input type="search" id="ve-busca" class="busca-select" placeholder="Buscar produto…" autocomplete="off" oninput="filtrarSelect('ve-produto', this.value)"><select id="ve-produto" data-fotos></select></div>
                 <div class="input-group"><label>Descrição / personalização</label><textarea id="ve-descricao" placeholder="Ex: Placa com o nome 'Helena', rosa, 15cm"></textarea></div>
                 <div class="row">
@@ -1047,26 +1108,32 @@
     <button id="nav-v-ajuda" class="bottom-nav-btn" onclick="switchTab('ajuda')"><svg class="ic"><use href="#i-ajuda"/></svg>Ajuda</button>
 </nav>
 
-<script src="galeria.js?v=7.6.0"></script>
-<script src="app.js?v=7.6.0"></script>
-<script src="regua.js?v=7.6.0"></script>
-<script src="lista-fotos.js?v=7.6.0"></script>
-<script src="consignado.js?v=7.6.0"></script>
-<script src="site-vendedor.js?v=7.6.0"></script>
-<script src="vender.js?v=7.6.0"></script>
-<script src="vendas.js?v=7.6.0"></script>
-<script src="produtos.js?v=7.6.0"></script>
-<script src="dashboard.js?v=7.6.0"></script>
-<script src="ajustes.js?v=7.6.0"></script>
-<script src="rascunho.js?v=7.6.0"></script>
-<script src="usuarios.js?v=7.6.0"></script>
-<script src="temas.js?v=7.6.0"></script>
-<script src="kits.js?v=7.6.0"></script>
-<script src="musica.js?v=7.6.0"></script>
-<script src="paginas.js?v=7.6.0"></script>
-<script src="pedidos.js?v=7.6.0"></script>
-<script src="telegram.js?v=7.6.0"></script>
-<script src="ajuda.js?v=7.6.0"></script>
+<script src="galeria.js?v=8.0.0"></script>
+<script src="qrcode-lib.js?v=8.0.0"></script>
+<script src="app.js?v=8.0.0"></script>
+<script src="pix.js?v=8.0.0"></script>
+<script src="regua.js?v=8.0.0"></script>
+<script src="lista-fotos.js?v=8.0.0"></script>
+<script src="consignado.js?v=8.0.0"></script>
+<script src="site-vendedor.js?v=8.0.0"></script>
+<script src="vender.js?v=8.0.0"></script>
+<script src="vendas.js?v=8.0.0"></script>
+<script src="produtos.js?v=8.0.0"></script>
+<script src="dashboard.js?v=8.0.0"></script>
+<script src="ajustes.js?v=8.0.0"></script>
+<script src="rascunho.js?v=8.0.0"></script>
+<script src="usuarios.js?v=8.0.0"></script>
+<script src="temas.js?v=8.0.0"></script>
+<script src="kits.js?v=8.0.0"></script>
+<script src="musica.js?v=8.0.0"></script>
+<script src="paginas.js?v=8.0.0"></script>
+<script src="pedidos.js?v=8.0.0"></script>
+<script src="telegram.js?v=8.0.0"></script>
+<script src="consulta.js?v=8.0.0"></script>
+<script src="fila.js?v=8.0.0"></script>
+<script src="clientes.js?v=8.0.0"></script>
+<script src="etiquetas.js?v=8.0.0"></script>
+<script src="ajuda.js?v=8.0.0"></script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
