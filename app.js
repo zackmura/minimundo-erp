@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES GERAIS E ESTADO (MIGRAÇÃO TOTAL PARA MYSQL)
 // ==========================================
 window.$ = id => document.getElementById(id); 
-const VERSAO_APP = "v7.5.0";
+const VERSAO_APP = "v7.6.0";
 window.VERSAO_APP_MM = VERSAO_APP;
 
 // 🔒 API NODE COM LOGIN (o token da OnionSys e as senhas ficam só no servidor)
@@ -158,7 +158,7 @@ window.TELAS = {
     analytics: ['barras', 'Analytics', 'Toques nos chaveiros NFC'],
     quiz: ['controle', 'Quiz', 'Perguntas geradas pela IA'],
     usuarios: ['escudo', 'Usuários', 'Admins e vendedores: acessos e senhas'],
-    config: ['ajustes', 'Ajustes', 'Parâmetros, taxas e chaves de acesso'],
+    config: ['ajustes', 'Ajustes', 'Telegram, parâmetros, taxas e chaves de acesso'],
     registros: ['historico', 'Registros', 'Tudo o que foi feito no sistema, por quem e quando'],
     novidades: ['presente', 'Novidades', 'O que mudou em cada versão'],
     ajuda: ['ajuda', 'Ajuda e tutoriais', 'Passo a passo de cada tarefa'],

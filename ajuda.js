@@ -117,6 +117,14 @@ const GUIAS = [
         { alvo: ['.pg-card .pg-botoes .btn-magic', '#pg-lista'], titulo: 'Divulgar', texto: 'Cria os posts prontos (story, feed, carrossel, enquete e vídeo) com a legenda e o link.' },
         { alvo: ['.pg-botoes-sec', '#pg-lista'], titulo: 'Editar e mais', texto: 'Editar abre as abas Produtos, Aparência e Divulgar. Em Mais: mandar mensagem, copiar link, pausar e excluir.' }
     ] },
+    { id: 'telegram', grupo: 'Sistema', icone: 'megafone', titulo: 'Ligar o Telegram (avisos e consultas)', desc: 'Grupo de avisos e chat com o bot, igual à Novera.', passos: [
+        'No Telegram, abra o @BotFather, mande /newbot e crie um bot novo só para o Mini Mundo (o da Novera não serve).',
+        'Copie o token que ele manda e cole em Ajustes → Telegram. Toque em "Ligar".',
+        'Crie um grupo no Telegram. No painel, toque em "Ligar num grupo", escolha o grupo e confirme. O bot avisa no grupo que ligou.',
+        'Toque em "Ligar meu Telegram" e depois em "Começar". Aparecem os botões Hoje, Mês, A receber, Pedidos, Vendedores, Estoque e Ranking.',
+        'Escreva qualquer coisa no chat com o bot para buscar: nome de produto, de cliente, de vendedor ou #12 para o pedido 12.',
+        'Em "O que avisar no grupo" você liga e desliga cada aviso e escolhe a hora do bom dia e do fechamento.'
+    ] },
     // ---------- Sistema ----------
     { id: 'registros', grupo: 'Sistema', icone: 'historico', titulo: 'Ver tudo o que foi feito (Registros)', desc: 'Quem fez o quê e quando.', tour: [
         { alvo: '#rg-filtros', titulo: 'Registros', texto: 'Tudo o que é feito no sistema fica anotado: vendas, estoque, acertos, acessos. Filtre por assunto aqui.', antes: () => window.switchTab('registros') },
@@ -327,6 +335,13 @@ window.renderizarRegistros = function() {
 // 🎁 NOVIDADES (o que mudou em cada versão)
 // ==========================================
 const NOVIDADES = [
+    { v: 'v7.6', data: '16/11/2026', titulo: 'Telegram: avisos num grupo e consultas pelo chat', itens: [
+        'Igual à Novera: os avisos caem sozinhos num grupo do Telegram. São vendas, pagamentos, vendas canceladas, pedidos do site, vendas dos vendedores, acertos, malas, encomendas e despesas.',
+        'Todo dia chegam o bom dia, com a agenda (pedidos para confirmar e para entregar, encomendas, o que falta receber), e o fechamento do dia, com vendas, caixa, despesas e saldo. Você escolhe os horários.',
+        'No chat com o bot você consulta sem abrir o app: Hoje, Mês, A receber, Pedidos, Vendedores, Estoque e Ranking. São botões prontos. Ou escreva o nome de um produto, de um cliente, de um vendedor ou o número do pedido.',
+        'Dá para lançar despesa pelo Telegram: /gasto 15,50 filamento.',
+        'Para ligar: Ajustes → Telegram. Cole o token do bot e toque em "Ligar num grupo" e em "Ligar meu Telegram". Cada aviso pode ser desligado ali.'
+    ] },
     { v: 'v7.5', data: '04/11/2026', titulo: 'Vender mais fácil, vendas dos vendedores, site novo e música', itens: [
         'Vendedores: a tela "Vender" tem fotos grandes (toque na foto para ver em tela cheia) e carrinho. Dá para pôr várias peças, mudar a quantidade e o preço, tirar o que não vai e lançar tudo de uma vez.',
         'Na venda, o vendedor(a) coloca o cliente e diz se ele já pagou ou vai pagar depois. Em "Minhas vendas" aparecem quem falta pagar (com botão para cobrar no WhatsApp), o lucro do mês e quanto ele(a) deve para você.',
